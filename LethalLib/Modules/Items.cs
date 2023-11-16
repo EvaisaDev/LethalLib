@@ -43,7 +43,7 @@ namespace LethalLib.Modules
                 var buyNode2 = ScriptableObject.CreateInstance<TerminalNode>();
 
                 buyNode2.name = $"{itemName.Replace(" ", "-")}BuyNode2";
-                buyNode2.displayText = $"Ordered [variableAmount] {itemNamePlural}. Your new balance is [playerCredits].\n\nOur contractors enjoy fast, free shipping while on the job! Any purchased items will arrive hourly at your approximate location.";
+                buyNode2.displayText = $"Ordered [variableAmount] {itemNamePlural}. Your new balance is [playerCredits].\n\nOur contractors enjoy fast, free shipping while on the job! Any purchased items will arrive hourly at your approximate location.\r\n\r\n";
                 buyNode2.clearPreviousText = true;
                 buyNode2.maxCharactersToType = 15;
                 buyNode2.buyItemIndex = itemList.Count - 1;
