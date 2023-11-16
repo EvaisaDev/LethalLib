@@ -1,0 +1,11 @@
+{
+    "name": "LethalLib",
+    "author": "Evaisa",
+    "version_number": "0.1.2",
+    "website_url": "https://github.com/EvaisaDev/LethalLib",
+    "description": "My personal modding tools for Lethal Company",
+    "dependencies": [
+		"UnofficialLCCommunity-BepInExPack-5.4.2113",
+        "Evaisa-HookGenPatcher-0.0.4"
+    ]
+}

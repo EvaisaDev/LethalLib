@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using static LethalLib.Modules.Items;
-using static LethalThings.Plugin;
+using static LethalLib.Plugin;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -10,7 +10,7 @@ namespace LethalLib.Modules
 {
     public class NetworkPrefabs
     {
-        private static List<GameObject> _networkPrefabs;
+        private static List<GameObject> _networkPrefabs = new List<GameObject>();
         internal static void Init()
         {
             On.GameNetworkManager.Start += GameNetworkManager_Start;

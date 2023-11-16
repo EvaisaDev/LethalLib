@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using LethalThings;
+using LethalLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +13,25 @@ namespace LethalLib.Modules
         public static void Init()
         {
             On.StartOfRound.Awake += RegisterLevelEnemies;
-            On.HUDManager.Start += HUDManager_Start;
+            On.Terminal.Start += Terminal_Start;
+        }
+
+        private static void Terminal_Start(On.Terminal.orig_Start orig, Terminal self)
+        {
+            foreach (SpawnableEnemy spawnableEnemy in spawnableEnemies)
+            {
+                if (spawnableEnemy.terminalKeyword != null && spawnableEnemy.terminalNode != null)
+                {
+                    self.terminalNodes.terminalNodes.Add(spawnableEnemy.terminalNode);
+                    self.terminalNodes.allKeywords.AddItem(spawnableEnemy.terminalKeyword);
+                }
+            }
+            orig(self);
         }
 
         private static void RegisterLevelEnemies(On.StartOfRound.orig_Awake orig, StartOfRound self)
         {
+            orig(self);
 
             foreach (SelectableLevel level in self.levels)
             {
@@ -74,21 +88,6 @@ namespace LethalLib.Modules
                             }
                         }
                     }
-                }
-            }
-        }
-
-        private static void HUDManager_Start(On.HUDManager.orig_Start orig, HUDManager self)
-        {
-            orig(self);
-            var terminal = UnityEngine.Object.FindObjectOfType<Terminal>();
-
-            foreach (SpawnableEnemy spawnableEnemy in spawnableEnemies)
-            {
-                if (spawnableEnemy.terminalKeyword != null && spawnableEnemy.terminalNode != null)
-                {
-                    terminal.terminalNodes.terminalNodes.Add(spawnableEnemy.terminalNode);
-                    terminal.terminalNodes.allKeywords.AddItem(spawnableEnemy.terminalKeyword);
                 }
             }
         }

@@ -12,13 +12,13 @@ using Unity.Netcode;
 using UnityEngine;
 using static LethalLib.Modules.Enemies;
 
-namespace LethalThings
+namespace LethalLib
 {
     [BepInPlugin(ModGUID, ModName, ModVersion)]
     public class Plugin : BaseUnityPlugin
     {
-        public const string ModGUID = "evaisa.lethalthings";
-        public const string ModName = "LethalThings";
+        public const string ModGUID = "evaisa.lethallib";
+        public const string ModName = "LethalLib";
         public const string ModVersion = "0.1.0";
 
         public static AssetBundle MainAssets;
