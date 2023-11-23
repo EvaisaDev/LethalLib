@@ -3,9 +3,11 @@
   
 Currently includes: 
 - Custom Scrap Item API
+- Custom Shop Item API
 - Custom Enemy API (Untested)
 - Network Prefab API
 
 # Latest Changes  
    
-- Fixed of the hooks, forgot to call the original functions causing the game to lock up.
+- Added API for shop items.  
+- Fixed some of the hooks which were preventing the player from loading into the game.  

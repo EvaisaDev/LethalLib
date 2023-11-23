@@ -19,7 +19,7 @@ namespace LethalLib
     {
         public const string ModGUID = "evaisa.lethallib";
         public const string ModName = "LethalLib";
-        public const string ModVersion = "0.1.2";
+        public const string ModVersion = "0.1.3";
 
         public static AssetBundle MainAssets;
 
@@ -30,13 +30,14 @@ namespace LethalLib
         {
             logger = Logger;
 
-            Logger.LogInfo($"Lethal things loaded!!");
+            Logger.LogInfo($"LethalLib loaded!!");
 
             new ILHook(typeof(StackTrace).GetMethod("AddFrames", BindingFlags.Instance | BindingFlags.NonPublic), IlHook);
 
             Enemies.Init();
             Items.Init();
             LethalLib.Modules.NetworkPrefabs.Init();
+
         }
 
 
@@ -47,7 +48,6 @@ namespace LethalLib
             cursor.GotoNext(
                 x => x.MatchCallvirt(typeof(StackFrame).GetMethod("GetFileLineNumber", BindingFlags.Instance | BindingFlags.Public))
             );
-
             cursor.RemoveRange(2);
             cursor.EmitDelegate<Func<StackFrame, string>>(GetLineOrIL);
         }
