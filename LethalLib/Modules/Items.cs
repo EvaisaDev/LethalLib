@@ -114,6 +114,10 @@ namespace LethalLib.Modules
 
                 var itemInfoKeyword = TerminalUtils.CreateTerminalKeyword(itemName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: infoKeyword);
 
+                allKeywords = self.terminalNodes.allKeywords.ToList();
+                allKeywords.Add(itemInfoKeyword);
+                self.terminalNodes.allKeywords = allKeywords.ToArray();
+
                 var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
                 itemInfoNouns.Add(new CompatibleNoun()
                 {
