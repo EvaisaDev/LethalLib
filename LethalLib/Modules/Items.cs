@@ -35,6 +35,16 @@ namespace LethalLib.Modules
             Plugin.logger.LogInfo($"Adding {shopItems.Count} items to terminal");
             foreach (ShopItem item in shopItems)
             {
+
+                if (item.price == -1)
+                {
+                    item.price = item.item.creditsWorth;
+                }
+                else
+                {
+                    item.item.creditsWorth = item.price;
+                }
+
                 itemList.Add(item.item);
 
                 var itemName = item.item.itemName;
@@ -233,12 +243,12 @@ namespace LethalLib.Modules
             scrapItems.Add(scrapItem);
         }
 
-        public static void RegisterShopItem(Item shopItem, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = 0)
+        public static void RegisterShopItem(Item shopItem, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = -1)
         {
             shopItems.Add(new ShopItem(shopItem, buyNode1, buyNode2, itemInfo, price));
         }
 
-        public static void RegisterShopItem(Item shopItem, int price)
+        public static void RegisterShopItem(Item shopItem, int price = -1)
         {
             shopItems.Add(new ShopItem(shopItem, null, null, null, price));
         }
