@@ -117,21 +117,17 @@ namespace LethalLib.Modules
                 {
                     itemInfo = ScriptableObject.CreateInstance<TerminalNode>();
                     itemInfo.name = $"{itemName.Replace(" ", "-")}InfoNode";
-                    itemInfo.displayText = $"No information about this object was found.\n\n";
+                    itemInfo.displayText = $"[No information about this object was found.]\n\n";
                     itemInfo.clearPreviousText = true;
                     itemInfo.maxCharactersToType = 25;
                 }
 
-                var itemInfoKeyword = TerminalUtils.CreateTerminalKeyword(itemName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: infoKeyword);
-
-                allKeywords = self.terminalNodes.allKeywords.ToList();
-                allKeywords.Add(itemInfoKeyword);
                 self.terminalNodes.allKeywords = allKeywords.ToArray();
 
                 var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
                 itemInfoNouns.Add(new CompatibleNoun()
                 {
-                    noun = itemInfoKeyword,
+                    noun = keyword,
                     result = itemInfo
                 });
                 infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
