@@ -24,6 +24,7 @@ namespace LethalLib.Modules
         */
         public static TerminalKeyword CreateTerminalKeyword(string word, bool isVerb = false, CompatibleNoun[] compatibleNouns = null, TerminalNode specialKeywordResult = null, TerminalKeyword defaultVerb = null, bool accessTerminalObjects = false)
         {
+            
             TerminalKeyword keyword = ScriptableObject.CreateInstance<TerminalKeyword>();
             keyword.name = word;
             keyword.word = word;

@@ -67,6 +67,7 @@ namespace LethalLib.Modules
                 buyNode2.buyItemIndex = itemList.Count - 1;
                 buyNode2.isConfirmationNode = false;
                 buyNode2.itemCost = item.price;
+                buyNode2.playSyncedClip = 0;
 
                 var buyNode1 = item.buyNode1;
                 if (buyNode1 == null)
