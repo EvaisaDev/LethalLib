@@ -11,6 +11,9 @@ using System.Diagnostics;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
+using BepInEx.Bootstrap;
+using static LethalLib.Modules.Items;
+using System.Collections;
 
 namespace LethalLib.Modules
 {
@@ -149,6 +152,7 @@ namespace LethalLib.Modules
         {
             orig(self);
 
+     
             foreach (SelectableLevel level in self.levels)
             {
                 var name = level.name;
@@ -167,12 +171,14 @@ namespace LethalLib.Modules
                             };
 
                             // make sure spawnableScrap does not already contain item
-                            Plugin.logger.LogInfo($"Checking if {scrapItem.item.name} is already in {name}");
+                            //Plugin.logger.LogInfo($"Checking if {scrapItem.item.name} is already in {name}");
 
                             if (!level.spawnableScrap.Any(x => x.spawnableItem == scrapItem.item))
                             {
                                 level.spawnableScrap.Add(spawnableÍtemWithRarity);
-                                Plugin.logger.LogInfo($"Added {scrapItem.item.name} to {name}");
+                                //Plugin.logger.LogInfo($"Added {scrapItem.item.name} to {name}");
+
+           
                             }
                         }
                     }
@@ -186,7 +192,8 @@ namespace LethalLib.Modules
             {
                 if (!self.allItemsList.itemsList.Contains(scrapItem.item))
                 {
-                    Plugin.logger.LogInfo($"Item registered: {scrapItem.item.name}");
+                    Plugin.logger.LogInfo($"{scrapItem.modName} registered item: {scrapItem.item.itemName}");
+                    
                     self.allItemsList.itemsList.Add(scrapItem.item);
                 }
             }
@@ -198,6 +205,7 @@ namespace LethalLib.Modules
             public Item item;
             public int rarity;
             public Levels.LevelTypes spawnLevels;
+            public string modName;
 
             public ScrapItem(Item item, int rarity, Levels.LevelTypes spawnLevels)
             {
@@ -214,6 +222,7 @@ namespace LethalLib.Modules
             public TerminalNode buyNode2;
             public TerminalNode itemInfo;
             public int price;
+            public string modName;
             public ShopItem(Item item, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = 0)
             {
                 this.item = item;
@@ -237,17 +246,32 @@ namespace LethalLib.Modules
         {
             var scrapItem = new ScrapItem(spawnableItem, rarity, levelFlags);
 
+            var callingAssembly = Assembly.GetCallingAssembly();
+            var modDLL = callingAssembly.GetName().Name;
+            scrapItem.modName = modDLL;
+
+
             scrapItems.Add(scrapItem);
         }
 
         public static void RegisterShopItem(Item shopItem, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = -1)
         {
-            shopItems.Add(new ShopItem(shopItem, buyNode1, buyNode2, itemInfo, price));
+            var item = new ShopItem(shopItem, buyNode1, buyNode2, itemInfo, price);
+            var callingAssembly = Assembly.GetCallingAssembly();
+            var modDLL = callingAssembly.GetName().Name;
+            item.modName = modDLL;
+
+            shopItems.Add(item);
         }
 
         public static void RegisterShopItem(Item shopItem, int price = -1)
         {
-            shopItems.Add(new ShopItem(shopItem, null, null, null, price));
+            var item = new ShopItem(shopItem, null, null, null, price);
+            var callingAssembly = Assembly.GetCallingAssembly();
+            var modDLL = callingAssembly.GetName().Name;
+            item.modName = modDLL;
+
+            shopItems.Add(item);
         }
     }
 }
