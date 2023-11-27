@@ -136,8 +136,7 @@ namespace LethalLib.Modules
                 });
                 infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
 
-
-                Plugin.logger.LogInfo($"Added {item.item.name} to terminal");
+                Plugin.logger.LogInfo($"{item.modName} registered item: {item.item.itemName}");
             }
 
             terminal.buyableItemsList = itemList.ToArray();
