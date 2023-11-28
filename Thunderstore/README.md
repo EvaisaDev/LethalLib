@@ -9,6 +9,5 @@ Currently includes:
 
 # Recent Changes 
    
-- Added custom info command support for shop items.
-- Fixed item price system.
-- Fixed buy sound on custom items.
+- Changed up some function calls (Breaking change)
+- Better logging

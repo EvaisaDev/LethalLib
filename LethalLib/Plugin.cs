@@ -19,7 +19,7 @@ namespace LethalLib
     {
         public const string ModGUID = "evaisa.lethallib";
         public const string ModName = "LethalLib";
-        public const string ModVersion = "0.1.5";
+        public const string ModVersion = "0.3.0";
 
         public static AssetBundle MainAssets;
 

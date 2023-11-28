@@ -1,7 +1,7 @@
 {
     "name": "LethalLib",
     "author": "Evaisa",
-    "version_number": "0.2.1",
+    "version_number": "0.3.0",
     "website_url": "https://github.com/EvaisaDev/LethalLib",
     "description": "My personal modding tools for Lethal Company",
     "dependencies": [
