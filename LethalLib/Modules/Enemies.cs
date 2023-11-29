@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using UnityEngine;
 using static LethalLib.Modules.Items;
 
 namespace LethalLib.Modules
@@ -24,21 +25,36 @@ namespace LethalLib.Modules
             var infoKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "info");
             foreach (SpawnableEnemy spawnableEnemy in spawnableEnemies)
             {
-                if (spawnableEnemy.terminalNode != null)
-                {
-                    var keyword = TerminalUtils.CreateTerminalKeyword(spawnableEnemy.enemy.enemyName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: infoKeyword);
-                    var allKeywords = self.terminalNodes.allKeywords.ToList();
-                    allKeywords.Add(keyword);
-                    self.terminalNodes.allKeywords = allKeywords.ToArray();
+                // if terminal node is null, create one
+                
 
-                    var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
-                    itemInfoNouns.Add(new CompatibleNoun()
-                    {
-                        noun = keyword,
-                        result = spawnableEnemy.terminalNode
-                    });
-                    infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
+                if (spawnableEnemy.terminalNode == null)
+                {
+                    spawnableEnemy.terminalNode = ScriptableObject.CreateInstance<TerminalNode>();
+                    spawnableEnemy.terminalNode.displayText = $"{spawnableEnemy.enemy.enemyName}\n\nDanger level: Unknown\n\n[No information about this creature was found.]\n\n";
+                    spawnableEnemy.terminalNode.clearPreviousText = true;
+                    spawnableEnemy.terminalNode.maxCharactersToType = 35;
+                    spawnableEnemy.terminalNode.creatureName = spawnableEnemy.enemy.enemyName;
                 }
+
+                var keyword = TerminalUtils.CreateTerminalKeyword(spawnableEnemy.terminalNode.creatureName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: infoKeyword);
+                var allKeywords = self.terminalNodes.allKeywords.ToList();
+                allKeywords.Add(keyword);
+                self.terminalNodes.allKeywords = allKeywords.ToArray();
+
+                var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
+                itemInfoNouns.Add(new CompatibleNoun()
+                {
+                    noun = keyword,
+                    result = spawnableEnemy.terminalNode
+                });
+                infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
+
+                spawnableEnemy.terminalNode.creatureFileID = self.enemyFiles.Count;
+
+                self.enemyFiles.Add(spawnableEnemy.terminalNode);
+
+                spawnableEnemy.enemy.enemyPrefab.GetComponentInChildren<ScanNodeProperties>().creatureScanID = spawnableEnemy.terminalNode.creatureFileID;
             }
             orig(self);
         }
