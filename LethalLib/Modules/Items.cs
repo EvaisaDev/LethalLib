@@ -28,8 +28,7 @@ namespace LethalLib.Modules
 
         private static void Terminal_Awake(On.Terminal.orig_Awake orig, Terminal self)
         {
-            var terminal = UnityEngine.Object.FindObjectOfType<Terminal>();
-            var itemList = terminal.buyableItemsList.ToList();
+            var itemList = self.buyableItemsList.ToList();
 
             var buyKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
             var cancelPurchaseNode = buyKeyword.compatibleNouns[0].result.terminalOptions[1].result;
@@ -139,7 +138,7 @@ namespace LethalLib.Modules
                 Plugin.logger.LogInfo($"{item.modName} registered item: {item.item.itemName}");
             }
 
-            terminal.buyableItemsList = itemList.ToArray();
+            self.buyableItemsList = itemList.ToArray();
 
             orig(self);
         }

@@ -23,10 +23,15 @@ namespace LethalLib.Modules
         private static void Terminal_Start(On.Terminal.orig_Start orig, Terminal self)
         {
             var infoKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "info");
+            var addedEnemies = new List<string>();
             foreach (SpawnableEnemy spawnableEnemy in spawnableEnemies)
             {
                 // if terminal node is null, create one
-                
+                if(addedEnemies.Contains(spawnableEnemy.enemy.enemyName))
+                {
+                    Plugin.logger.LogInfo($"Skipping {spawnableEnemy.enemy.enemyName} because it was already added");
+                    continue;
+                }
 
                 if (spawnableEnemy.terminalNode == null)
                 {

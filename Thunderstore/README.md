@@ -4,10 +4,11 @@
 Currently includes: 
 - Custom Scrap Item API
 - Custom Shop Item API
-- Custom Enemy API (Untested)
+- Custom Enemy API
 - Network Prefab API
 
 # Recent Changes 
    
-- Changed up some function calls (Breaking change)
-- Better logging
+- Fixed issues with enemy API  
+	- Bestiary now works  
+	- Log entries are now correctly received after scanning.  
