@@ -10,15 +10,14 @@ using static LethalLib.Extras.UnlockableItemDef;
 
 namespace LethalLib.Modules
 {
+    public enum StoreType
+    {
+        None,
+        ShipUpgrade,
+        Decor
+    }
     public class Unlockables
     {
-        public enum StoreType
-        {
-            None,
-            ShipUpgrade,
-            Decor
-        }
-
         public class RegisteredUnlockable
         {
             public UnlockableItem unlockable;

@@ -43,6 +43,9 @@ namespace LethalLib.Modules
                 }
 
                 var keyword = spawnableEnemy.infoKeyword != null ? spawnableEnemy.infoKeyword : TerminalUtils.CreateTerminalKeyword(spawnableEnemy.terminalNode.creatureName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: infoKeyword);
+
+                keyword.defaultVerb = infoKeyword;
+
                 var allKeywords = self.terminalNodes.allKeywords.ToList();
                 allKeywords.Add(keyword);
                 self.terminalNodes.allKeywords = allKeywords.ToArray();
