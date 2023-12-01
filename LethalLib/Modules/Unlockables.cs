@@ -7,6 +7,7 @@ using UnityEngine;
 using System.Reflection;
 using LethalLib.Extras;
 using static LethalLib.Extras.UnlockableItemDef;
+using static LethalLib.Modules.Unlockables;
 
 namespace LethalLib.Modules
 {
@@ -57,14 +58,16 @@ namespace LethalLib.Modules
                 // example: "* Loud horn    //    Price: $150"
                 foreach (var unlockable in registeredUnlockables)
                 {
-                    // insert new line
+                    if (unlockable.StoreType == StoreType.ShipUpgrade)
+                    {
 
-                    var unlockableName = unlockable.unlockable.unlockableName;
-                    var unlockablePrice = unlockable.price;
+                        var unlockableName = unlockable.unlockable.unlockableName;
+                        var unlockablePrice = unlockable.price;
 
-                    var newLine = $"\n* {unlockableName}    //    Price: ${unlockablePrice}";
+                        var newLine = $"\n* {unlockableName}    //    Price: ${unlockablePrice}";
 
-                    modifiedDisplayText = modifiedDisplayText.Insert(index + 1, newLine);
+                        modifiedDisplayText = modifiedDisplayText.Insert(index + 1, newLine);
+                    }
                 }
 
             }
@@ -85,6 +88,16 @@ namespace LethalLib.Modules
             Plugin.logger.LogInfo($"Adding {shopItems.Count} items to terminal");
             foreach (var item in shopItems)
             {
+                string itemName = item.unlockable.unlockableName;
+
+                var keyword = TerminalUtils.CreateTerminalKeyword(itemName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: buyKeyword);
+
+
+                if (self.terminalNodes.allKeywords.Any((TerminalKeyword kw) => kw.word == keyword.word))
+                {
+                    Plugin.logger.LogInfo((object)("Keyword " + keyword.word + " already registed, skipping."));
+                    continue;
+                }
 
                 var itemIndex = StartOfRound.Instance.unlockablesList.unlockables.FindIndex(unlockable => unlockable.unlockableName == item.unlockable.unlockableName);
 
@@ -93,7 +106,6 @@ namespace LethalLib.Modules
                     item.price = item.buyNode1.itemCost;
                 }
 
-                var itemName = item.unlockable.unlockableName;
                 var lastChar = itemName[itemName.Length - 1];
                 var itemNamePlural = itemName;
 
@@ -157,8 +169,6 @@ namespace LethalLib.Modules
                     item.unlockable.shopSelectionNode = null;
                 }
 
-                var keyword = TerminalUtils.CreateTerminalKeyword(itemName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: buyKeyword);
-
                 //self.terminalNodes.allKeywords.AddItem(keyword);
                 var allKeywords = self.terminalNodes.allKeywords.ToList();
                 allKeywords.Add(keyword);
@@ -206,7 +216,13 @@ namespace LethalLib.Modules
             Plugin.logger.LogInfo($"Adding {registeredUnlockables.Count} unlockables to unlockables list");
             foreach(var unlockable in registeredUnlockables)
             {
-                if(unlockable.unlockable.prefabObject != null)
+                if (self.unlockablesList.unlockables.Any((UnlockableItem x) => x.unlockableName == unlockable.unlockable.unlockableName))
+                {
+                    Plugin.logger.LogInfo((object)("Unlockable " + unlockable.unlockable.unlockableName + " already exists in unlockables list, skipping"));
+                    continue;
+                }
+
+                if (unlockable.unlockable.prefabObject != null)
                 {
                     var placeable = unlockable.unlockable.prefabObject.GetComponentInChildren<PlaceableShipObject>();
                     if(placeable != null)
