@@ -21,7 +21,7 @@ namespace LethalLib.Modules
     {
         public static void Init()
         {
-            On.StartOfRound.Awake += RegisterLevelScrap;
+            On.StartOfRound.Awake += StartOfRound_Awake;
             On.Terminal.Awake += Terminal_Awake;
         }
 
@@ -37,6 +37,11 @@ namespace LethalLib.Modules
             Plugin.logger.LogInfo($"Adding {shopItems.Count} items to terminal");
             foreach (ShopItem item in shopItems)
             {
+                if (itemList.Any((Item x) => x.itemName == item.item.itemName))
+                {
+                    Plugin.logger.LogInfo((object)("Item " + item.item.itemName + " already exists in terminal, skipping"));
+                    continue;
+                }
 
                 if (item.price == -1)
                 {
@@ -146,7 +151,7 @@ namespace LethalLib.Modules
         public static List<ScrapItem> scrapItems = new List<ScrapItem>();
         public static List<ShopItem> shopItems = new List<ShopItem>();
 
-        private static void RegisterLevelScrap(On.StartOfRound.orig_Awake orig, StartOfRound self)
+        private static void StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
         {
             orig(self);
 
@@ -196,6 +201,14 @@ namespace LethalLib.Modules
                 }
             }
 
+            foreach (ShopItem shopItem in shopItems)
+            {
+                if (!self.allItemsList.itemsList.Contains(shopItem.item))
+                {
+                    Plugin.logger.LogInfo((object)(shopItem.modName + " registered item: " + shopItem.item.itemName));
+                    self.allItemsList.itemsList.Add(shopItem.item);
+                }
+            }
         }
 
         public class ScrapItem
