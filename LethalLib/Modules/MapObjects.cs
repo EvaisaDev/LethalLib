@@ -32,8 +32,8 @@ namespace LethalLib.Modules
                 }
             }
 
-            //orig(self);
-
+            orig(self);
+            /*
             if (self.currentLevel.spawnableMapObjects.Length == 0)
             {
                 return;
@@ -81,7 +81,7 @@ namespace LethalLib.Modules
             for (int l = 0; l < array.Length; l++)
             {
                 UnityEngine.Object.Destroy(array[l].gameObject);
-            }
+            }*/
         }
 
         private static void StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
