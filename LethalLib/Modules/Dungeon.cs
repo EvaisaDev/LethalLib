@@ -120,10 +120,7 @@ namespace LethalLib.Modules
 
         public static void AddLine(DungeonGraphLineDef line, Levels.LevelTypes levelFlags)
         {
-            var customLine = new CustomGraphLine();
-            customLine.graphLine = line.graphLine;
-            customLine.LevelTypes = levelFlags;
-            customGraphLines.Add(customLine);
+            AddLine(line.graphLine, levelFlags);
         }
 
         public static void AddTileSet(TileSet set, string archetypeName)
@@ -138,7 +135,7 @@ namespace LethalLib.Modules
 
         public static void AddRoom(GameObjectChanceDef room, string tileSetName)
         {
-            extraRooms.Add(tileSetName, room.gameObjectChance);
+            AddRoom(room.gameObjectChance, tileSetName);
         }
 
     }
