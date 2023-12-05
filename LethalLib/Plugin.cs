@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using GameNetcodeStuff;
 using HarmonyLib;
 using LethalLib.Modules;
 using MonoMod.Cil;
@@ -19,7 +20,7 @@ namespace LethalLib
     {
         public const string ModGUID = "evaisa.lethallib";
         public const string ModName = "LethalLib";
-        public const string ModVersion = "0.4.5";
+        public const string ModVersion = "0.5.0";
 
         public static AssetBundle MainAssets;
 
@@ -37,10 +38,9 @@ namespace LethalLib
             Enemies.Init();
             Items.Init();
             Unlockables.Init();
+            MapObjects.Init();
             LethalLib.Modules.NetworkPrefabs.Init();
-
         }
-
 
 
         private void IlHook(ILContext il)
