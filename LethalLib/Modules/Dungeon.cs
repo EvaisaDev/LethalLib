@@ -3,9 +3,11 @@ using DunGen.Graph;
 using LethalLib.Extras;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
+using UnityEngine;
 
 namespace LethalLib.Modules
 {
@@ -14,6 +16,53 @@ namespace LethalLib.Modules
         public static void Init()
         {
             On.RoundManager.GenerateNewFloor += RoundManager_GenerateNewFloor;
+            On.RoundManager.Awake += RoundManager_Awake;
+        }
+
+        private static void RoundManager_Awake(On.RoundManager.orig_Awake orig, RoundManager self)
+        {
+            foreach(var dungeon in customDungeons)
+            {
+                if (!self.dungeonFlowTypes.Contains(dungeon.dungeonFlow))
+                {
+                    var flowTypes = self.dungeonFlowTypes.ToList();
+                    flowTypes.Add(dungeon.dungeonFlow);
+                    self.dungeonFlowTypes = flowTypes.ToArray();
+
+                    var newDungeonIndex = self.dungeonFlowTypes.Length - 1;
+                    dungeon.dungeonIndex = newDungeonIndex;
+
+                    var firstTimeDungeonAudios = self.firstTimeDungeonAudios.ToList();
+                    // check if the indexes match
+                    if (firstTimeDungeonAudios.Count != self.dungeonFlowTypes.Length - 1)
+                    {
+                        // add nulls until they do
+                        while (firstTimeDungeonAudios.Count < self.dungeonFlowTypes.Length - 1)
+                        {
+                            firstTimeDungeonAudios.Add(null);
+                        }
+                    }
+                    firstTimeDungeonAudios.Add(dungeon.firstTimeDungeonAudio);
+                    self.firstTimeDungeonAudios = firstTimeDungeonAudios.ToArray();
+                }
+                foreach (var level in StartOfRound.Instance.levels)
+                {
+                    var name = level.name;
+                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name))
+                    {
+                        var levelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                        if (dungeon.LevelTypes.HasFlag(levelEnum) && !level.dungeonFlowTypes.Any(rarityInt => rarityInt.id == dungeon.dungeonIndex))
+                        {
+                            var flowTypes = level.dungeonFlowTypes.ToList();
+                            flowTypes.Add(new IntWithRarity { id = dungeon.dungeonIndex, rarity = dungeon.rarity });
+                            level.dungeonFlowTypes = flowTypes.ToArray();
+                        }
+                    }
+                }
+            }
+
+
+            orig(self);
         }
 
         public class CustomDungeonArchetype
@@ -29,10 +78,20 @@ namespace LethalLib.Modules
             public Levels.LevelTypes LevelTypes;
         }
 
+        public class CustomDungeon
+        {
+            public int rarity;
+            public DungeonFlow dungeonFlow;
+            public Levels.LevelTypes LevelTypes;
+            public int dungeonIndex = -1;
+            public AudioClip firstTimeDungeonAudio;
+        }
+
         public static List<CustomDungeonArchetype> customDungeonArchetypes = new List<CustomDungeonArchetype>();
         public static List<CustomGraphLine> customGraphLines = new List<CustomGraphLine>();
         public static Dictionary<string, TileSet> extraTileSets = new Dictionary<string, TileSet>();
         public static Dictionary<string, GameObjectChance> extraRooms = new Dictionary<string, GameObjectChance>();
+        public static List<CustomDungeon> customDungeons = new List<CustomDungeon>();
 
         private static void RoundManager_GenerateNewFloor(On.RoundManager.orig_GenerateNewFloor orig, RoundManager self)
         {
@@ -138,5 +197,20 @@ namespace LethalLib.Modules
             AddRoom(room.gameObjectChance, tileSetName);
         }
 
+        public static void AddDungeon(DungeonDef dungeon, Levels.LevelTypes levelFlags)
+        {
+            AddDungeon(dungeon.dungeonFlow, dungeon.rarity, levelFlags, dungeon.firstTimeDungeonAudio); 
+        }
+
+        public static void AddDungeon(DungeonFlow dungeon, int rarity, Levels.LevelTypes levelFlags, AudioClip firstTimeDungeonAudio = null)
+        {
+            customDungeons.Add(new CustomDungeon
+            {
+                dungeonFlow = dungeon,
+                rarity = rarity,
+                LevelTypes = levelFlags,
+                firstTimeDungeonAudio = firstTimeDungeonAudio
+            });
+        }
     }
 }

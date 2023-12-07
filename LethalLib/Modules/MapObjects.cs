@@ -25,9 +25,12 @@ namespace LethalLib.Modules
             {
                 foreach (RegisteredMapObject mapObject in mapObjects)
                 {
-                    if (!randomMapObject.spawnablePrefabs.Any((prefab) => prefab == mapObject.mapObject.prefabToSpawn))
+                    if (mapObject.mapObject != null)
                     {
-                        randomMapObject.spawnablePrefabs.Add(mapObject.mapObject.prefabToSpawn);
+                        if (!randomMapObject.spawnablePrefabs.Any((prefab) => prefab == mapObject.mapObject.prefabToSpawn))
+                        {
+                            randomMapObject.spawnablePrefabs.Add(mapObject.mapObject.prefabToSpawn);
+                        }
                     }
                 }
             }
@@ -100,21 +103,45 @@ namespace LethalLib.Modules
                     {
                         if (mapObject.levels.HasFlag(levelEnum))
                         {
-                            if (!level.spawnableMapObjects.Any(x => x == mapObject.mapObject)) {
-                                SpawnableMapObject spawnableMapObject = mapObject.mapObject;
-                                if(mapObject.spawnRateFunction != null)
+                            if (mapObject.mapObject != null)
+                            {
+                                if (!level.spawnableMapObjects.Any(x => x.prefabToSpawn == mapObject.mapObject.prefabToSpawn))
                                 {
-                                    spawnableMapObject = new SpawnableMapObject
-                                    {
-                                        prefabToSpawn = mapObject.mapObject.prefabToSpawn,
-                                        spawnFacingAwayFromWall = mapObject.mapObject.spawnFacingAwayFromWall,
-                                        numberToSpawn = mapObject.spawnRateFunction(level)
-                                    };
+                                    // remove the object from the list
+                                    var list = level.spawnableMapObjects.ToList();
+                                    list.RemoveAll(x => x.prefabToSpawn == mapObject.mapObject.prefabToSpawn);
+                                    level.spawnableMapObjects = list.ToArray();
+                                }
+
+                                SpawnableMapObject spawnableMapObject = mapObject.mapObject;
+                                if (mapObject.spawnRateFunction != null)
+                                {
+                                    spawnableMapObject.numberToSpawn = mapObject.spawnRateFunction(level);
                                 }
                                 var mapObjectsList = level.spawnableMapObjects.ToList();
                                 mapObjectsList.Add(spawnableMapObject);
                                 level.spawnableMapObjects = mapObjectsList.ToArray();
                                 Plugin.logger.LogInfo($"Added {spawnableMapObject.prefabToSpawn.name} to {name}");
+                            }
+                            else if (mapObject.outsideObject != null)
+                            {
+                                if (!level.spawnableOutsideObjects.Any(x => x.spawnableObject.prefabToSpawn == mapObject.outsideObject.spawnableObject.prefabToSpawn))
+                                {
+                                    // remove the object from the list
+                                    var list = level.spawnableOutsideObjects.ToList();
+                                    list.RemoveAll(x => x.spawnableObject.prefabToSpawn == mapObject.outsideObject.spawnableObject.prefabToSpawn);
+                                    level.spawnableOutsideObjects = list.ToArray();
+                                }
+
+                                SpawnableOutsideObjectWithRarity spawnableOutsideObject = mapObject.outsideObject;
+                                if (mapObject.spawnRateFunction != null)
+                                {
+                                    spawnableOutsideObject.randomAmount = mapObject.spawnRateFunction(level);
+                                }   
+                                var mapObjectsList = level.spawnableOutsideObjects.ToList();
+                                mapObjectsList.Add(spawnableOutsideObject);
+                                level.spawnableOutsideObjects = mapObjectsList.ToArray();
+                                Plugin.logger.LogInfo($"Added {spawnableOutsideObject.spawnableObject.prefabToSpawn.name} to {name}");
                             }
                         }
                     }
@@ -125,6 +152,7 @@ namespace LethalLib.Modules
         public class RegisteredMapObject
         {
             public SpawnableMapObject mapObject;
+            public SpawnableOutsideObjectWithRarity outsideObject;
             public Levels.LevelTypes levels;
             public Func<SelectableLevel, AnimationCurve> spawnRateFunction;
         }
@@ -133,12 +161,7 @@ namespace LethalLib.Modules
 
         public static void RegisterMapObject(SpawnableMapObjectDef mapObject, Levels.LevelTypes levels, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
         {
-            mapObjects.Add(new RegisteredMapObject
-            {
-                mapObject = mapObject.spawnableMapObject,
-                levels = levels,
-                spawnRateFunction = spawnRateFunction
-            });
+            RegisterMapObject(mapObject.spawnableMapObject, levels, spawnRateFunction);
         }
 
         public static void RegisterMapObject(SpawnableMapObject mapObject, Levels.LevelTypes levels, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
@@ -146,6 +169,21 @@ namespace LethalLib.Modules
             mapObjects.Add(new RegisteredMapObject
             {
                 mapObject = mapObject,
+                levels = levels,
+                spawnRateFunction = spawnRateFunction
+            });
+        }
+
+        public static void RegisterOutsideObject(SpawnableOutsideObjectDef mapObject, Levels.LevelTypes levels, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
+        {
+            RegisterOutsideObject(mapObject.spawnableMapObject, levels, spawnRateFunction);
+        }
+
+        public static void RegisterOutsideObject(SpawnableOutsideObjectWithRarity mapObject, Levels.LevelTypes levels, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
+        {
+            mapObjects.Add(new RegisteredMapObject
+            {
+                outsideObject = mapObject,
                 levels = levels,
                 spawnRateFunction = spawnRateFunction
             });
