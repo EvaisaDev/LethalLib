@@ -16,13 +16,13 @@ namespace LethalLib.Modules
         public static void Init()
         {
             On.RoundManager.GenerateNewFloor += RoundManager_GenerateNewFloor;
-            On.RoundManager.Awake += RoundManager_Awake;
-            On.StartOfRound.Awake += StartOfRound_Awake;
+            On.RoundManager.Start += RoundManager_Start;
+            On.StartOfRound.Start += StartOfRound_Start;
         }
 
-        private static void StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
+        private static void StartOfRound_Start(On.StartOfRound.orig_Start orig, StartOfRound self)
         {
-            orig(self);
+
 
             foreach (var dungeon in customDungeons)
             {
@@ -41,9 +41,12 @@ namespace LethalLib.Modules
                     }
                 }
             }
+
+            Plugin.logger.LogInfo("Added custom dungeons to levels");
+            orig(self);
         }
 
-        private static void RoundManager_Awake(On.RoundManager.orig_Awake orig, RoundManager self)
+        private static void RoundManager_Start(On.RoundManager.orig_Start orig, RoundManager self)
         {
             foreach(var dungeon in customDungeons)
             {
@@ -168,6 +171,50 @@ namespace LethalLib.Modules
             }
             
             orig(self);
+
+            // debug copy of GenerateNewFloor
+            /*
+            if (!self.hasInitializedLevelRandomSeed)
+            {
+                self.hasInitializedLevelRandomSeed = true;
+                self.InitializeRandomNumberGenerators();
+            }
+            if (self.currentLevel.dungeonFlowTypes != null && self.currentLevel.dungeonFlowTypes.Length != 0)
+            {
+                List<int> list = new List<int>();
+                for (int i = 0; i < self.currentLevel.dungeonFlowTypes.Length; i++)
+                {
+                    list.Add(self.currentLevel.dungeonFlowTypes[i].rarity);
+                }
+                int id = self.currentLevel.dungeonFlowTypes[self.GetRandomWeightedIndex(list.ToArray(), self.LevelRandom)].id;
+
+                Plugin.logger.LogInfo($"Dungeon flow id: {id}");
+                Plugin.logger.LogInfo($"Dungeon flow count: {self.dungeonFlowTypes.Length}");
+                Plugin.logger.LogInfo($"Dungeon flow name: {self.dungeonFlowTypes[id].name}");
+
+                self.dungeonGenerator.Generator.DungeonFlow = self.dungeonFlowTypes[id];
+                if (id < self.firstTimeDungeonAudios.Length && self.firstTimeDungeonAudios[id] != null)
+                {
+                    EntranceTeleport[] array = UnityEngine.Object.FindObjectsOfType<EntranceTeleport>();
+                    if (array != null && array.Length != 0)
+                    {
+                        for (int j = 0; j < array.Length; j++)
+                        {
+                            if (array[j].isEntranceToBuilding)
+                            {
+                                array[j].firstTimeAudio = self.firstTimeDungeonAudios[id];
+                                array[j].dungeonFlowId = id;
+                            }
+                        }
+                    }
+                }
+            }
+            self.dungeonGenerator.Generator.ShouldRandomizeSeed = false;
+            self.dungeonGenerator.Generator.Seed = self.LevelRandom.Next();
+            Debug.Log($"GenerateNewFloor(). Map generator's random seed: {self.dungeonGenerator.Generator.Seed}");
+            self.dungeonGenerator.Generator.LengthMultiplier = self.currentLevel.factorySizeMultiplier * self.mapSizeMultiplier;
+            self.dungeonGenerator.Generate();
+            */
         }
 
         public static void AddArchetype(DungeonArchetype archetype, Levels.LevelTypes levelFlags, int lineIndex = -1)
