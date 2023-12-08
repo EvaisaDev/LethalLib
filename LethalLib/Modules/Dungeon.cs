@@ -17,6 +17,30 @@ namespace LethalLib.Modules
         {
             On.RoundManager.GenerateNewFloor += RoundManager_GenerateNewFloor;
             On.RoundManager.Awake += RoundManager_Awake;
+            On.StartOfRound.Awake += StartOfRound_Awake;
+        }
+
+        private static void StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
+        {
+            orig(self);
+
+            foreach (var dungeon in customDungeons)
+            {
+                foreach (var level in self.levels)
+                {
+                    var name = level.name;
+                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name))
+                    {
+                        var levelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                        if (dungeon.LevelTypes.HasFlag(levelEnum) && !level.dungeonFlowTypes.Any(rarityInt => rarityInt.id == dungeon.dungeonIndex))
+                        {
+                            var flowTypes = level.dungeonFlowTypes.ToList();
+                            flowTypes.Add(new IntWithRarity { id = dungeon.dungeonIndex, rarity = dungeon.rarity });
+                            level.dungeonFlowTypes = flowTypes.ToArray();
+                        }
+                    }
+                }
+            }
         }
 
         private static void RoundManager_Awake(On.RoundManager.orig_Awake orig, RoundManager self)
@@ -44,20 +68,6 @@ namespace LethalLib.Modules
                     }
                     firstTimeDungeonAudios.Add(dungeon.firstTimeDungeonAudio);
                     self.firstTimeDungeonAudios = firstTimeDungeonAudios.ToArray();
-                }
-                foreach (var level in StartOfRound.Instance.levels)
-                {
-                    var name = level.name;
-                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name))
-                    {
-                        var levelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
-                        if (dungeon.LevelTypes.HasFlag(levelEnum) && !level.dungeonFlowTypes.Any(rarityInt => rarityInt.id == dungeon.dungeonIndex))
-                        {
-                            var flowTypes = level.dungeonFlowTypes.ToList();
-                            flowTypes.Add(new IntWithRarity { id = dungeon.dungeonIndex, rarity = dungeon.rarity });
-                            level.dungeonFlowTypes = flowTypes.ToArray();
-                        }
-                    }
                 }
             }
 
