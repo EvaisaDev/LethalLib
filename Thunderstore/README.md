@@ -6,13 +6,11 @@ Currently includes:
 - Custom Shop Item API  
 - Unlockables API  
 - Map hazards API
-- Dungeon API (Untested)
+- Dungeon API
 - Custom Enemy API  
 - Network Prefab API  
 
 # Recent Changes 
   
-- Added map hazards API
-- Started work on dungeon API
-- Fixed issue with map hazards.
-- Added outside objects for map hazards API
+- Added full custom dungeon support for Dungeon API  
+	- Requires scriptable objects / prefabs which are set-up correct.  
