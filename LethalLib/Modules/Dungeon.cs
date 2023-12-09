@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace LethalLib.Modules
@@ -172,50 +173,74 @@ namespace LethalLib.Modules
             
             orig(self);
 
-            // debug copy of GenerateNewFloor
-            /*
-            if (!self.hasInitializedLevelRandomSeed)
-            {
-                self.hasInitializedLevelRandomSeed = true;
-                self.InitializeRandomNumberGenerators();
-            }
-            if (self.currentLevel.dungeonFlowTypes != null && self.currentLevel.dungeonFlowTypes.Length != 0)
-            {
-                List<int> list = new List<int>();
-                for (int i = 0; i < self.currentLevel.dungeonFlowTypes.Length; i++)
-                {
-                    list.Add(self.currentLevel.dungeonFlowTypes[i].rarity);
-                }
-                int id = self.currentLevel.dungeonFlowTypes[self.GetRandomWeightedIndex(list.ToArray(), self.LevelRandom)].id;
+            // register prefabs
 
-                Plugin.logger.LogInfo($"Dungeon flow id: {id}");
-                Plugin.logger.LogInfo($"Dungeon flow count: {self.dungeonFlowTypes.Length}");
-                Plugin.logger.LogInfo($"Dungeon flow name: {self.dungeonFlowTypes[id].name}");
+            var networkManager = UnityEngine.Object.FindObjectOfType<NetworkManager>();
 
-                self.dungeonGenerator.Generator.DungeonFlow = self.dungeonFlowTypes[id];
-                if (id < self.firstTimeDungeonAudios.Length && self.firstTimeDungeonAudios[id] != null)
+            RandomMapObject[] array = UnityEngine.Object.FindObjectsOfType<RandomMapObject>();
+
+            foreach (RandomMapObject randomMapObject in array)
+            {
+                // loop through
+                for(int i = 0; i < randomMapObject.spawnablePrefabs.Count; i++)
                 {
-                    EntranceTeleport[] array = UnityEngine.Object.FindObjectsOfType<EntranceTeleport>();
-                    if (array != null && array.Length != 0)
+                    // get prefab name
+                    var prefabName = randomMapObject.spawnablePrefabs[i].name;
+
+                    var prefab = networkManager.NetworkConfig.Prefabs.m_Prefabs.First(x => x.Prefab.name == prefabName);
+
+                    if (prefab != null)
                     {
-                        for (int j = 0; j < array.Length; j++)
+                        randomMapObject.spawnablePrefabs[i] = prefab.Prefab;
+                    }
+                }
+            }
+
+
+                // debug copy of GenerateNewFloor
+                /*
+                if (!self.hasInitializedLevelRandomSeed)
+                {
+                    self.hasInitializedLevelRandomSeed = true;
+                    self.InitializeRandomNumberGenerators();
+                }
+                if (self.currentLevel.dungeonFlowTypes != null && self.currentLevel.dungeonFlowTypes.Length != 0)
+                {
+                    List<int> list = new List<int>();
+                    for (int i = 0; i < self.currentLevel.dungeonFlowTypes.Length; i++)
+                    {
+                        list.Add(self.currentLevel.dungeonFlowTypes[i].rarity);
+                    }
+                    int id = self.currentLevel.dungeonFlowTypes[self.GetRandomWeightedIndex(list.ToArray(), self.LevelRandom)].id;
+
+                    Plugin.logger.LogInfo($"Dungeon flow id: {id}");
+                    Plugin.logger.LogInfo($"Dungeon flow count: {self.dungeonFlowTypes.Length}");
+                    Plugin.logger.LogInfo($"Dungeon flow name: {self.dungeonFlowTypes[id].name}");
+
+                    self.dungeonGenerator.Generator.DungeonFlow = self.dungeonFlowTypes[id];
+                    if (id < self.firstTimeDungeonAudios.Length && self.firstTimeDungeonAudios[id] != null)
+                    {
+                        EntranceTeleport[] array = UnityEngine.Object.FindObjectsOfType<EntranceTeleport>();
+                        if (array != null && array.Length != 0)
                         {
-                            if (array[j].isEntranceToBuilding)
+                            for (int j = 0; j < array.Length; j++)
                             {
-                                array[j].firstTimeAudio = self.firstTimeDungeonAudios[id];
-                                array[j].dungeonFlowId = id;
+                                if (array[j].isEntranceToBuilding)
+                                {
+                                    array[j].firstTimeAudio = self.firstTimeDungeonAudios[id];
+                                    array[j].dungeonFlowId = id;
+                                }
                             }
                         }
                     }
                 }
+                self.dungeonGenerator.Generator.ShouldRandomizeSeed = false;
+                self.dungeonGenerator.Generator.Seed = self.LevelRandom.Next();
+                Debug.Log($"GenerateNewFloor(). Map generator's random seed: {self.dungeonGenerator.Generator.Seed}");
+                self.dungeonGenerator.Generator.LengthMultiplier = self.currentLevel.factorySizeMultiplier * self.mapSizeMultiplier;
+                self.dungeonGenerator.Generate();
+                */
             }
-            self.dungeonGenerator.Generator.ShouldRandomizeSeed = false;
-            self.dungeonGenerator.Generator.Seed = self.LevelRandom.Next();
-            Debug.Log($"GenerateNewFloor(). Map generator's random seed: {self.dungeonGenerator.Generator.Seed}");
-            self.dungeonGenerator.Generator.LengthMultiplier = self.currentLevel.factorySizeMultiplier * self.mapSizeMultiplier;
-            self.dungeonGenerator.Generate();
-            */
-        }
 
         public static void AddArchetype(DungeonArchetype archetype, Levels.LevelTypes levelFlags, int lineIndex = -1)
         {

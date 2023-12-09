@@ -9,10 +9,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Security.Permissions;
 using Unity.Netcode;
 using UnityEngine;
 using static LethalLib.Modules.Enemies;
 
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 namespace LethalLib
 {
     [BepInPlugin(ModGUID, ModName, ModVersion)]
