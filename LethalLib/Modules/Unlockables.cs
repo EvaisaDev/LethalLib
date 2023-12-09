@@ -44,7 +44,7 @@ namespace LethalLib.Modules
         public static void Init()
         {
             On.StartOfRound.Awake += StartOfRound_Awake;
-            On.Terminal.Awake += Terminal_Awake;
+            On.Terminal.Start += Terminal_Start;
             On.Terminal.TextPostProcess += Terminal_TextPostProcess;
         }
 
@@ -76,9 +76,9 @@ namespace LethalLib.Modules
             return orig(self, modifiedDisplayText, node);
         }
 
-        private static void Terminal_Awake(On.Terminal.orig_Awake orig, Terminal self)
+        private static void Terminal_Start(On.Terminal.orig_Start orig, Terminal self)
         {
-            orig(self);
+
             var buyKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
             var cancelPurchaseNode = buyKeyword.compatibleNouns[0].result.terminalOptions[1].result;
             var infoKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "info");
@@ -99,109 +99,120 @@ namespace LethalLib.Modules
                     continue;
                 }
 
+
+
                 var itemIndex = StartOfRound.Instance.unlockablesList.unlockables.FindIndex(unlockable => unlockable.unlockableName == item.unlockable.unlockableName);
 
-                if (item.price == -1 && item.buyNode1 != null)
+                var wah = StartOfRound.Instance;
+
+                if(wah == null)
                 {
-                    item.price = item.buyNode1.itemCost;
+                    Debug.Log("STARTOFROUND INSTANCE NOT FOUND");
                 }
 
-                var lastChar = itemName[itemName.Length - 1];
-                var itemNamePlural = itemName;
 
-                var buyNode2 = item.buyNode2;
+                
+               if (item.price == -1 && item.buyNode1 != null)
+               {
+                   item.price = item.buyNode1.itemCost;
+               }
 
-                if (buyNode2 == null)
-                {
-                    buyNode2 = ScriptableObject.CreateInstance<TerminalNode>();
+               var lastChar = itemName[itemName.Length - 1];
+               var itemNamePlural = itemName;
 
-                    buyNode2.name = $"{itemName.Replace(" ", "-")}BuyNode2";
-                    buyNode2.displayText = $"Ordered [variableAmount] {itemNamePlural}. Your new balance is [playerCredits].\n\nOur contractors enjoy fast, free shipping while on the job! Any purchased items will arrive hourly at your approximate location.\r\n\r\n";
-                    buyNode2.clearPreviousText = true;
-                    buyNode2.maxCharactersToType = 15;
+              var buyNode2 = item.buyNode2;
 
+              if (buyNode2 == null)
+              {
+                  buyNode2 = ScriptableObject.CreateInstance<TerminalNode>();
 
-                }
-                buyNode2.buyItemIndex = -1;
-                buyNode2.shipUnlockableID = itemIndex;
-                buyNode2.buyUnlockable = true;
-                buyNode2.creatureName = itemName;
-                buyNode2.isConfirmationNode = false;
-                buyNode2.itemCost = item.price;
-                buyNode2.playSyncedClip = 0;
-
-                var buyNode1 = item.buyNode1;
-                if (buyNode1 == null)
-                {
-                    buyNode1 = ScriptableObject.CreateInstance<TerminalNode>();
-                    buyNode1.name = $"{itemName.Replace(" ", "-")}BuyNode1";
-                    buyNode1.displayText = $"You have requested to order {itemNamePlural}. Amount: [variableAmount].\nTotal cost of items: [totalCost].\n\nPlease CONFIRM or DENY.\r\n\r\n";
-                    buyNode1.clearPreviousText = true;
-                    buyNode1.maxCharactersToType = 35;
-                }
-
-                buyNode1.buyItemIndex = -1;
-                buyNode1.shipUnlockableID = itemIndex;
-                buyNode1.creatureName = itemName;
-                buyNode1.isConfirmationNode = true;
-                buyNode1.overrideOptions = true;
-                buyNode1.itemCost = item.price;
-                buyNode1.terminalOptions = new CompatibleNoun[2]
-                {
-                    new CompatibleNoun()
-                    {
-                        noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "confirm"),
-                        result = buyNode2
-                    },
-                    new CompatibleNoun()
-                    {
-                        noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "deny"),
-                        result = cancelPurchaseNode
-                    }
-                };
-
-                if (item.StoreType == StoreType.Decor)
-                {
-                    item.unlockable.shopSelectionNode = buyNode1;
-                }
-                else
-                {
-                    item.unlockable.shopSelectionNode = null;
-                }
-
-                //self.terminalNodes.allKeywords.AddItem(keyword);
-                var allKeywords = self.terminalNodes.allKeywords.ToList();
-                allKeywords.Add(keyword);
-                self.terminalNodes.allKeywords = allKeywords.ToArray();
-
-                var nouns = buyKeyword.compatibleNouns.ToList();
-                nouns.Add(new CompatibleNoun()
-                {
-                    noun = keyword,
-                    result = buyNode1
-                });
-                buyKeyword.compatibleNouns = nouns.ToArray();
+                  buyNode2.name = $"{itemName.Replace(" ", "-")}BuyNode2";
+                  buyNode2.displayText = $"Ordered [variableAmount] {itemNamePlural}. Your new balance is [playerCredits].\n\nOur contractors enjoy fast, free shipping while on the job! Any purchased items will arrive hourly at your approximate location.\r\n\r\n";
+                  buyNode2.clearPreviousText = true;
+                  buyNode2.maxCharactersToType = 15;
 
 
-                var itemInfo = item.itemInfo;
-                if (itemInfo == null)
-                {
-                    itemInfo = ScriptableObject.CreateInstance<TerminalNode>();
-                    itemInfo.name = $"{itemName.Replace(" ", "-")}InfoNode";
-                    itemInfo.displayText = $"[No information about this object was found.]\n\n";
-                    itemInfo.clearPreviousText = true;
-                    itemInfo.maxCharactersToType = 25;
-                }
+              }
+              buyNode2.buyItemIndex = -1;
+              buyNode2.shipUnlockableID = itemIndex;
+              buyNode2.buyUnlockable = true;
+              buyNode2.creatureName = itemName;
+              buyNode2.isConfirmationNode = false;
+              buyNode2.itemCost = item.price;
+              buyNode2.playSyncedClip = 0;
 
-                self.terminalNodes.allKeywords = allKeywords.ToArray();
+              var buyNode1 = item.buyNode1;
+              if (buyNode1 == null)
+              {
+                  buyNode1 = ScriptableObject.CreateInstance<TerminalNode>();
+                  buyNode1.name = $"{itemName.Replace(" ", "-")}BuyNode1";
+                  buyNode1.displayText = $"You have requested to order {itemNamePlural}. Amount: [variableAmount].\nTotal cost of items: [totalCost].\n\nPlease CONFIRM or DENY.\r\n\r\n";
+                  buyNode1.clearPreviousText = true;
+                  buyNode1.maxCharactersToType = 35;
+              }
 
-                var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
-                itemInfoNouns.Add(new CompatibleNoun()
-                {
-                    noun = keyword,
-                    result = itemInfo
-                });
-                infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
+              buyNode1.buyItemIndex = -1;
+              buyNode1.shipUnlockableID = itemIndex;
+              buyNode1.creatureName = itemName;
+              buyNode1.isConfirmationNode = true;
+              buyNode1.overrideOptions = true;
+              buyNode1.itemCost = item.price;
+              buyNode1.terminalOptions = new CompatibleNoun[2]
+              {
+                  new CompatibleNoun()
+                  {
+                      noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "confirm"),
+                      result = buyNode2
+                  },
+                  new CompatibleNoun()
+                  {
+                      noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "deny"),
+                      result = cancelPurchaseNode
+                  }
+              };
+
+              if (item.StoreType == StoreType.Decor)
+              {
+                  item.unlockable.shopSelectionNode = buyNode1;
+              }
+              else
+              {
+                  item.unlockable.shopSelectionNode = null;
+              }
+
+              //self.terminalNodes.allKeywords.AddItem(keyword);
+              var allKeywords = self.terminalNodes.allKeywords.ToList();
+              allKeywords.Add(keyword);
+              self.terminalNodes.allKeywords = allKeywords.ToArray();
+
+              var nouns = buyKeyword.compatibleNouns.ToList();
+              nouns.Add(new CompatibleNoun()
+              {
+                  noun = keyword,
+                  result = buyNode1
+              });
+              buyKeyword.compatibleNouns = nouns.ToArray();
+
+
+              var itemInfo = item.itemInfo;
+              if (itemInfo == null)
+              {
+                  itemInfo = ScriptableObject.CreateInstance<TerminalNode>();
+                  itemInfo.name = $"{itemName.Replace(" ", "-")}InfoNode";
+                  itemInfo.displayText = $"[No information about this object was found.]\n\n";
+                  itemInfo.clearPreviousText = true;
+                  itemInfo.maxCharactersToType = 25;
+              }
+
+              self.terminalNodes.allKeywords = allKeywords.ToArray();
+
+              var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
+              itemInfoNouns.Add(new CompatibleNoun()
+              {
+                  noun = keyword,
+                  result = itemInfo
+              });
+              infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
 
                 Plugin.logger.LogInfo($"{item.modName} registered item: {item.unlockable.unlockableName}");
             }

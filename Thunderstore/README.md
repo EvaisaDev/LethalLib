@@ -12,5 +12,4 @@ Currently includes:
 
 # Recent Changes 
   
-- Added full custom dungeon support for Dungeon API  
-	- Requires scriptable objects / prefabs which are set-up correct.  
+- Fix for Lethal Company v45

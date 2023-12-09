@@ -18,7 +18,7 @@
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\core\0Harmony.dll</HintPath>
       </Reference>
       <Reference Include="Assembly-CSharp">
-        <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Assembly-CSharp.dll</HintPath>
+        <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Modding\Deps\Assembly-CSharp-nstrip.dll</HintPath>
       </Reference>
       <Reference Include="BepInEx">
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\core\BepInEx.dll</HintPath>
