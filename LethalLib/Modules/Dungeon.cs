@@ -189,7 +189,7 @@ namespace LethalLib.Modules
 
                     var prefab = networkManager.NetworkConfig.Prefabs.m_Prefabs.First(x => x.Prefab.name == prefabName);
 
-                    if (prefab != null)
+                    if (prefab != null && prefab.Prefab != randomMapObject.spawnablePrefabs[i])
                     {
                         randomMapObject.spawnablePrefabs[i] = prefab.Prefab;
                     }
