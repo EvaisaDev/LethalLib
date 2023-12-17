@@ -12,4 +12,4 @@ Currently includes:
 
 # Recent Changes 
   
-- Fix for Lethal Company v45
+- Fixed issue with custom monster logs showing up multiple times.

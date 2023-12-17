@@ -42,21 +42,36 @@ namespace LethalLib.Modules
                     spawnableEnemy.terminalNode.creatureName = spawnableEnemy.enemy.enemyName;
                 }
 
+                // if spawnableEnemy terminalnode is already in enemyfiles, skip
+                if (self.enemyFiles.Any(x => x.creatureName == spawnableEnemy.terminalNode.creatureName))
+                {
+                    Plugin.logger.LogInfo($"Skipping {spawnableEnemy.enemy.enemyName} because it was already added");
+                    continue;
+                }
+
                 var keyword = spawnableEnemy.infoKeyword != null ? spawnableEnemy.infoKeyword : TerminalUtils.CreateTerminalKeyword(spawnableEnemy.terminalNode.creatureName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: infoKeyword);
 
                 keyword.defaultVerb = infoKeyword;
 
                 var allKeywords = self.terminalNodes.allKeywords.ToList();
-                allKeywords.Add(keyword);
-                self.terminalNodes.allKeywords = allKeywords.ToArray();
 
+                // if doesn't contain keyword, add it
+                if (!allKeywords.Any(x => x.word == keyword.word))
+                {
+                    allKeywords.Add(keyword);
+                    self.terminalNodes.allKeywords = allKeywords.ToArray();
+                }
 
                 var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
-                itemInfoNouns.Add(new CompatibleNoun()
+                // if doesn't contain noun, add it
+                if (!itemInfoNouns.Any(x => x.noun.word == keyword.word))
                 {
-                    noun = keyword,
-                    result = spawnableEnemy.terminalNode
-                });
+                    itemInfoNouns.Add(new CompatibleNoun()
+                    {
+                        noun = keyword,
+                        result = spawnableEnemy.terminalNode
+                    });
+                }
                 infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
      
 
