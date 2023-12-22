@@ -150,6 +150,7 @@ namespace LethalLib.Modules
 
         public static List<ScrapItem> scrapItems = new List<ScrapItem>();
         public static List<ShopItem> shopItems = new List<ShopItem>();
+        public static List<PlainItem> plainItems = new List<PlainItem>();
 
         private static void StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
         {
@@ -209,6 +210,15 @@ namespace LethalLib.Modules
                     self.allItemsList.itemsList.Add(shopItem.item);
                 }
             }
+
+            foreach (PlainItem plainItem in plainItems)
+            {
+                if (!self.allItemsList.itemsList.Contains(plainItem.item))
+                {
+                    Plugin.logger.LogInfo((object)(plainItem.modName + " registered item: " + plainItem.item.itemName));
+                    self.allItemsList.itemsList.Add(plainItem.item);
+                }
+            }
         }
 
         public class ScrapItem
@@ -223,6 +233,17 @@ namespace LethalLib.Modules
                 this.item = item;
                 this.rarity = rarity;
                 this.spawnLevels = spawnLevels;
+            }
+        }
+
+        public class PlainItem
+        {
+            public Item item;
+            public string modName;
+
+            public PlainItem(Item item)
+            {
+                this.item = item;
             }
         }
 
@@ -253,6 +274,9 @@ namespace LethalLib.Modules
             }
         }
 
+        ///<summary>
+        ///This method registers a scrap item to the game, making it obtainable in the specified levels.
+        ///</summary>
         public static void RegisterScrap(Item spawnableItem, int rarity, Levels.LevelTypes levelFlags)
         {
             var scrapItem = new ScrapItem(spawnableItem, rarity, levelFlags);
@@ -265,6 +289,9 @@ namespace LethalLib.Modules
             scrapItems.Add(scrapItem);
         }
 
+        ///<summary>
+        ///This method registers a shop item to the game.
+        ///</summary>
         public static void RegisterShopItem(Item shopItem, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = -1)
         {
             var item = new ShopItem(shopItem, buyNode1, buyNode2, itemInfo, price);
@@ -275,6 +302,9 @@ namespace LethalLib.Modules
             shopItems.Add(item);
         }
 
+        ///<summary>
+        ///This method registers a shop item to the game.
+        ///</summary>
         public static void RegisterShopItem(Item shopItem, int price = -1)
         {
             var item = new ShopItem(shopItem, null, null, null, price);
@@ -284,5 +314,19 @@ namespace LethalLib.Modules
 
             shopItems.Add(item);
         }
+
+        ///<summary>
+        ///This method registers an item to the game, without making it obtainable in any way.
+        ///</summary>
+        public static void RegisterItem(Item plainItem)
+        {
+            var item = new PlainItem(plainItem);
+            var callingAssembly = Assembly.GetCallingAssembly();
+            var modDLL = callingAssembly.GetName().Name;
+            item.modName = modDLL;
+
+            plainItems.Add(item);
+        }
+
     }
 }

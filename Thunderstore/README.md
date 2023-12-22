@@ -12,4 +12,4 @@ Currently includes:
 
 # Recent Changes 
   
-- Fixed issue with custom monster logs showing up multiple times.
+- Added function for registering an item without making it obtainable in any way.

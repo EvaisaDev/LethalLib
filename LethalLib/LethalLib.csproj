@@ -41,11 +41,17 @@
       <Reference Include="MonoMod.Utils">
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\core\MonoMod.Utils.dll</HintPath>
       </Reference>
+      <Reference Include="Newtonsoft.Json">
+        <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Newtonsoft.Json.dll</HintPath>
+      </Reference>
       <Reference Include="Unity.AI.Navigation">
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Unity.AI.Navigation.dll</HintPath>
       </Reference>
       <Reference Include="Unity.Animation.Rigging">
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Unity.Animation.Rigging.dll</HintPath>
+      </Reference>
+      <Reference Include="Unity.InputSystem">
+        <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Unity.InputSystem.dll</HintPath>
       </Reference>
       <Reference Include="Unity.Netcode.Components">
         <HintPath>..\..\..\NetcodePatcher\deps\Unity.Netcode.Components.dll</HintPath>
