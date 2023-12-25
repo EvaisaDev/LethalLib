@@ -22,7 +22,7 @@ namespace LethalLib
     {
         public const string ModGUID = "evaisa.lethallib";
         public const string ModName = "LethalLib";
-        public const string ModVersion = "0.7.0";
+        public const string ModVersion = "0.7.1";
 
         public static AssetBundle MainAssets;
 
@@ -41,8 +41,9 @@ namespace LethalLib
             Unlockables.Init();
             MapObjects.Init();  
             Dungeon.Init();
+            Weathers.Init();
             LethalLib.Modules.NetworkPrefabs.Init();
-
+           
         }
 
 
