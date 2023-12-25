@@ -9,7 +9,8 @@ Currently includes:
 - Dungeon API
 - Custom Enemy API  
 - Network Prefab API  
+- Weather API  
 
 # Recent Changes 
   
-- Fixed version string, idk what the hell happened.
+- Added weather api, mostly untested.

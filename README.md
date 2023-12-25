@@ -3,12 +3,16 @@
 
 https://thunderstore.io/c/lethal-company/p/Evaisa/LethalLib/
 
-Currently includes: 
-- Custom Scrap Item API
-- Custom Shop Item API
-- Custom Enemy API (Untested)
-- Network Prefab API
+Currently includes:   
+- Custom Scrap Item API  
+- Custom Shop Item API  
+- Unlockables API  
+- Map hazards API
+- Dungeon API
+- Custom Enemy API  
+- Network Prefab API  
+- Weather API  
 
-# Latest Changes  
-   
-- Ability to add Custom Terminal Nodes for items.
+# Recent Changes 
+  
+- Added weather api, mostly untested.
