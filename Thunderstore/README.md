@@ -12,4 +12,4 @@ Currently includes:
 
 # Recent Changes 
   
-- Added function for registering an item without making it obtainable in any way.
+- Fixed version string, idk what the hell happened.
