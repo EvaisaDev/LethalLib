@@ -460,7 +460,7 @@ namespace LethalLib.Modules
         ///Removes a scrap from the given levels.
         ///This needs to be called after StartOfRound.Awake.
         /// </summary>
-        public static void RemoveScrapFromLevel(Item scrapItem, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
+        public static void RemoveScrapFromLevels(Item scrapItem, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
         {
             if (StartOfRound.Instance != null)
             {

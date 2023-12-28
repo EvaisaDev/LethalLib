@@ -274,7 +274,7 @@ namespace LethalLib.Modules
         ///This needs to be called after StartOfRound.Awake, can be used for config sync.
         ///Only works for enemies added by LethalLib.
         /// </summary>
-        public static void RemoveEnemyFromLevel(EnemyType enemyType, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
+        public static void RemoveEnemyFromLevels(EnemyType enemyType, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
         {
             if (StartOfRound.Instance != null)
             {
