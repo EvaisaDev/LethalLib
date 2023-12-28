@@ -394,6 +394,11 @@ namespace LethalLib.Modules
             public Levels.LevelTypes LevelTypes = Levels.LevelTypes.None;
             public string[] levelOverrides = null;
 
+            public void RemoveFromLevels(Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
+            {
+                MapObjects.RemoveMapObject(Hazard, levelFlags, levelOverrides);
+            }
+
             public MapHazard(string id, string contentPath, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null, Action<SpawnableMapObjectDef> registryCallback = null) : base(id)
             {
                 this.contentPath = contentPath;
@@ -420,6 +425,11 @@ namespace LethalLib.Modules
 
             public Levels.LevelTypes LevelTypes = Levels.LevelTypes.None;
             public string[] levelOverrides = null;
+
+            public void RemoveFromLevels(Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
+            {
+                MapObjects.RemoveOutsideObject(MapObject, levelFlags, levelOverrides);
+            }
 
             public OutsideObject(string id, string contentPath, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null, Action<SpawnableOutsideObjectDef> registryCallback = null) : base(id)
             {
