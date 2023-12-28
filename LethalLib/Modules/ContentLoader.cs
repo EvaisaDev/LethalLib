@@ -40,14 +40,21 @@ namespace LethalLib.Modules
             get { return modInfo.Metadata.GUID; }
         }
 
-        public ContentLoader(PluginInfo modInfo, AssetBundle modBundle)
+        public Action<CustomContent, GameObject> prefabCallback = (content, prefab) => { };
+
+        public ContentLoader(PluginInfo modInfo, AssetBundle modBundle, Action<CustomContent, GameObject> prefabCallback = null)
         {
             this.modInfo = modInfo;
             this.modBundle = modBundle;
+           
+            if(prefabCallback != null)
+            {
+                this.prefabCallback = prefabCallback;
+            }
         }
-        public ContentLoader Create(PluginInfo modInfo, AssetBundle modBundle)
+        public ContentLoader Create(PluginInfo modInfo, AssetBundle modBundle, Action<CustomContent, GameObject> prefabCallback = null)
         {
-            return new ContentLoader(modInfo, modBundle);
+            return new ContentLoader(modInfo, modBundle, prefabCallback);
         }
 
         /// <summary>
@@ -60,6 +67,7 @@ namespace LethalLib.Modules
             {
                 var itemAsset = modBundle.LoadAsset<Item>(item.contentPath);
                 NetworkPrefabs.RegisterNetworkPrefab(itemAsset.spawnPrefab);
+                prefabCallback(content, itemAsset.spawnPrefab);
                 item.registryCallback(itemAsset);
 
                 if(content is ShopItem shopItem)
@@ -99,6 +107,7 @@ namespace LethalLib.Modules
                 if(unlockableAsset.unlockable.prefabObject != null)
                 {
                     NetworkPrefabs.RegisterNetworkPrefab(unlockableAsset.unlockable.prefabObject);
+                    prefabCallback(content, unlockableAsset.unlockable.prefabObject);
                 }
                 unlockable.registryCallback(unlockableAsset.unlockable);
 
@@ -127,6 +136,7 @@ namespace LethalLib.Modules
             {
                 var enemyAsset = modBundle.LoadAsset<EnemyType>(enemy.contentPath);
                 NetworkPrefabs.RegisterNetworkPrefab(enemyAsset.enemyPrefab);
+                prefabCallback(content, enemyAsset.enemyPrefab);
                 enemy.registryCallback(enemyAsset);
 
                 TerminalNode infoNode = null;
@@ -140,7 +150,14 @@ namespace LethalLib.Modules
                     infoKeyword = modBundle.LoadAsset<TerminalKeyword>(enemy.infoKeywordPath);
                 }
 
-                Enemies.RegisterEnemy(enemyAsset, enemy.rarity, enemy.LevelTypes, enemy.levelOverrides, infoNode, infoKeyword);
+                if ((int)(enemy.spawnType) == -1)
+                {
+                    Enemies.RegisterEnemy(enemyAsset, enemy.rarity, enemy.LevelTypes, enemy.levelOverrides, infoNode, infoKeyword);
+                }
+                else
+                {
+                    Enemies.RegisterEnemy(enemyAsset, enemy.rarity, enemy.LevelTypes, enemy.spawnType, enemy.levelOverrides, infoNode, infoKeyword);
+                }
 
                 loadedContent.Add(enemy.ID, enemy);
             }
@@ -148,6 +165,7 @@ namespace LethalLib.Modules
             {
                 var mapObjectAsset = modBundle.LoadAsset<SpawnableMapObjectDef>(mapObject.contentPath);
                 NetworkPrefabs.RegisterNetworkPrefab(mapObjectAsset.spawnableMapObject.prefabToSpawn);
+                prefabCallback(content, mapObjectAsset.spawnableMapObject.prefabToSpawn);
                 mapObject.registryCallback(mapObjectAsset);
 
                  MapObjects.RegisterMapObject(mapObjectAsset, mapObject.LevelTypes, mapObject.levelOverrides, mapObject.spawnRateFunction);
@@ -159,6 +177,7 @@ namespace LethalLib.Modules
             {
                 var mapObjectAsset = modBundle.LoadAsset<SpawnableOutsideObjectDef>(outsideObject.contentPath);
                 NetworkPrefabs.RegisterNetworkPrefab(mapObjectAsset.spawnableMapObject.spawnableObject.prefabToSpawn);
+                prefabCallback(content, mapObjectAsset.spawnableMapObject.spawnableObject.prefabToSpawn);
                 outsideObject.registryCallback(mapObjectAsset);
 
                 MapObjects.RegisterOutsideObject(mapObjectAsset, outsideObject.LevelTypes, outsideObject.levelOverrides, outsideObject.spawnRateFunction);
@@ -342,7 +361,9 @@ namespace LethalLib.Modules
             public Levels.LevelTypes LevelTypes = Levels.LevelTypes.None;
             public string[] levelOverrides = null;
 
-            public CustomEnemy(string id, string contentPath, int rarity = 0, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null, string infoNodePath = null, string infoKeywordPath = null, Action<EnemyType> registryCallback = null) : base(id)
+            public Enemies.SpawnType spawnType = (Enemies.SpawnType)(-1);
+
+            public CustomEnemy(string id, string contentPath, int rarity = 0, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, Enemies.SpawnType spawnType = (Enemies.SpawnType)(-1), string[] levelOverrides = null, string infoNodePath = null, string infoKeywordPath = null, Action<EnemyType> registryCallback = null) : base(id)
             {
                 this.contentPath = contentPath;
                 if(registryCallback != null)
@@ -354,6 +375,7 @@ namespace LethalLib.Modules
                 this.rarity = rarity;
                 this.LevelTypes = levelFlags;
                 this.levelOverrides = levelOverrides;
+                this.spawnType = spawnType;
             }
         }
 
