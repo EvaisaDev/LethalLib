@@ -17,14 +17,16 @@ namespace LethalLib.Modules
             public int weatherVariable2;
             public WeatherEffect weatherEffect;
             public Levels.LevelTypes levels;
+            public string[] spawnLevelOverrides;
 
-            public CustomWeather(string name, WeatherEffect weatherEffect, Levels.LevelTypes levels = Levels.LevelTypes.None, int weatherVariable1 = 0, int weatherVariable2 = 0 )
+            public CustomWeather(string name, WeatherEffect weatherEffect, Levels.LevelTypes levels = Levels.LevelTypes.None, string[] spawnLevelOverrides = null, int weatherVariable1 = 0, int weatherVariable2 = 0 )
             {
                 this.name = name;
                 this.weatherVariable1 = weatherVariable1;
                 this.weatherVariable2 = weatherVariable2;
                 this.weatherEffect = weatherEffect;
                 this.levels = levels;
+                this.spawnLevelOverrides = spawnLevelOverrides;
             }
         }
 
@@ -60,20 +62,22 @@ namespace LethalLib.Modules
 
         private static void StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
         {
-
-            foreach (SelectableLevel level in self.levels)
+            foreach (KeyValuePair<int, CustomWeather> entry in customWeathers)
             {
-                var name = level.name;
-
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name))
+                foreach (SelectableLevel level in self.levels)
                 {
-                    var levelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
-                    var weathers = level.randomWeathers.ToList();
-                    // loop through custom weathers
-                    foreach (KeyValuePair<int, CustomWeather> entry in customWeathers)
+                    var name = level.name;
+
+                    var alwaysValid = entry.Value.levels.HasFlag(Levels.LevelTypes.All) || (entry.Value.spawnLevelOverrides != null && entry.Value.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+
+                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                     {
+                        var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                        var weathers = level.randomWeathers.ToList();
+                        // loop through custom weathers
+        
                         // if the custom weather has the level
-                        if (entry.Value.levels.HasFlag(levelEnum))
+                        if (alwaysValid || entry.Value.levels.HasFlag(levelEnum))
                         {
                             // add it to the level
                             weathers.Add(new RandomWeatherWithVariables()
@@ -85,12 +89,13 @@ namespace LethalLib.Modules
                             
                             Plugin.logger.LogInfo($"Added weather {entry.Value.name} to level {level.name} at weather index: {entry.Key}");
                         }
+                    
+                        level.randomWeathers = weathers.ToArray();
+
                     }
-
-                    level.randomWeathers = weathers.ToArray();
-
                 }
             }
+
 
             orig(self);
         }
@@ -163,11 +168,17 @@ namespace LethalLib.Modules
         }
 
 
+        ///<summary>
+        ///Register a weather with the game.
+        ///</summary>
         public static void RegisterWeather(WeatherDef weather)
         {
-            RegisterWeather(weather.weatherName, weather.weatherEffect, weather.levels, weather.weatherVariable1, weather.weatherVariable2);
+            RegisterWeather(weather.weatherName, weather.weatherEffect, weather.levels, weather.levelOverrides, weather.weatherVariable1, weather.weatherVariable2);
         }
 
+        ///<summary>
+        ///Register a weather with the game, which are able to show up on the specified levels.
+        ///</summary>
         public static void RegisterWeather(string name, WeatherEffect weatherEffect, Levels.LevelTypes levels = Levels.LevelTypes.None, int weatherVariable1 = 0, int weatherVariable2 = 0)
         {
             var origValues = Enum.GetValues(typeof(LevelWeatherType));
@@ -181,9 +192,62 @@ namespace LethalLib.Modules
             Plugin.logger.LogInfo($"Registering weather {name} at index {num - 1}");
 
             // add to dictionary at next value
-            customWeathers.Add(num, new CustomWeather(name, weatherEffect, levels, weatherVariable1, weatherVariable2));
+            customWeathers.Add(num, new CustomWeather(name, weatherEffect, levels, null, weatherVariable1, weatherVariable2));
         }
 
+        ///<summary>
+        ///Register a weather with the game, which are able to show up on the specified levels.
+        ///</summary>
+        public static void RegisterWeather(string name, WeatherEffect weatherEffect, Levels.LevelTypes levels = Levels.LevelTypes.None, string[] spawnLevelOverrides = null, int weatherVariable1 = 0, int weatherVariable2 = 0)
+        {
+            var origValues = Enum.GetValues(typeof(LevelWeatherType));
+            int num = origValues.Length - 1;
+
+            num += numCustomWeathers;
+
+            // add our numcustomweathers
+            numCustomWeathers++;
+
+            Plugin.logger.LogInfo($"Registering weather {name} at index {num - 1}");
+
+            // add to dictionary at next value
+            customWeathers.Add(num, new CustomWeather(name, weatherEffect, levels, spawnLevelOverrides, weatherVariable1, weatherVariable2));
+        }
+
+        ///<summary>
+        ///Removes a weather from the specified levels.
+        ///This needs to be called after StartOfRound.Awake.
+        ///Only works for weathers registered by LethalLib.
+        ///</summary>
+        public static void RemoveWeather(string levelName, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
+        {
+            foreach (KeyValuePair<int, CustomWeather> entry in customWeathers)
+            {
+                if (entry.Value.name == levelName && StartOfRound.Instance != null)
+                {
+
+                    foreach (SelectableLevel level in StartOfRound.Instance.levels)
+                    {
+                        var name = level.name;
+
+                        var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+
+                        if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+                        {
+                            var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                            if (alwaysValid || levelFlags.HasFlag(levelEnum))
+                            {
+                                var weathers = level.randomWeathers.ToList();
+
+                                weathers.RemoveAll(item => item.weatherType == (LevelWeatherType)entry.Key);
+
+                                level.randomWeathers = weathers.ToArray();
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
     }
 

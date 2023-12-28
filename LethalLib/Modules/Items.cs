@@ -14,6 +14,9 @@ using UnityEngine;
 using BepInEx.Bootstrap;
 using static LethalLib.Modules.Items;
 using System.Collections;
+using System.Reflection.Emit;
+using UnityEngine.InputSystem;
+using Object = UnityEngine.Object;
 
 namespace LethalLib.Modules
 {
@@ -22,17 +25,104 @@ namespace LethalLib.Modules
         public static void Init()
         {
             On.StartOfRound.Awake += StartOfRound_Awake;
+            On.StartOfRound.Start += StartOfRound_Start;
             On.Terminal.Awake += Terminal_Awake;
         }
 
+        public struct ItemSaveOrderData
+        {
+            public int itemId;
+            public string itemName;
+            public string assetName;
+        }
+
+        public struct BuyableItemAssetInfo
+        {
+            public Item itemAsset;
+            public TerminalKeyword keyword;
+        }
+
+        public static List<Item> LethalLibItemList = new List<Item>();
+        public static List<BuyableItemAssetInfo> buyableItemAssetInfos = new List<BuyableItemAssetInfo>();
+        public static Terminal terminal;
+
+        private static void StartOfRound_Start(On.StartOfRound.orig_Start orig, StartOfRound self)
+        {
+            List<ItemSaveOrderData> itemList = new List<ItemSaveOrderData>();
+
+            StartOfRound.Instance.allItemsList.itemsList.ForEach(item =>
+            {
+                itemList.Add(new ItemSaveOrderData()
+                {
+                    itemId = item.itemId,
+                    itemName = item.itemName,
+                    assetName = item.name
+                });
+            });
+
+
+
+            // load itemlist from es3
+            if (ES3.KeyExists("LethalLibAllItemsList", GameNetworkManager.Instance.currentSaveFileName))
+            {
+                // load itemsList
+                itemList = ES3.Load<List<ItemSaveOrderData>>("LethalLibAllItemsList", GameNetworkManager.Instance.currentSaveFileName);
+            }
+
+            // sort so that items are in the same order as they were when the game was saved
+            // if item is not in list, add it at the end
+            List<Item> list = StartOfRound.Instance.allItemsList.itemsList;
+           
+            List<Item> newList = new List<Item>();
+
+            foreach (ItemSaveOrderData item in itemList)
+            {
+                var itemInList = list.FirstOrDefault(x => x.itemId == item.itemId && x.itemName == item.itemName && item.assetName == x.name);
+
+                // add in correct place, if there is a gap, we want to add an empty Item scriptable object
+                if (itemInList != null)
+                {
+                    newList.Add(itemInList);
+                }
+                else
+                {
+                    newList.Add(ScriptableObject.CreateInstance<Item>());
+                }
+            }
+
+            foreach (Item item in list)
+            {
+                if (!newList.Contains(item))
+                {
+                    newList.Add(item);
+                }
+            }
+
+            StartOfRound.Instance.allItemsList.itemsList = newList;
+
+            // save itemlist to es3
+            ES3.Save<List<ItemSaveOrderData>>("LethalLibAllItemsList", itemList, GameNetworkManager.Instance.currentSaveFileName);
+   
+            // loop and print
+            for (int i = 0; i < StartOfRound.Instance.allItemsList.itemsList.Count; i++)
+            {
+                var item = StartOfRound.Instance.allItemsList.itemsList[i];
+                Plugin.logger.LogInfo($"Item {i}: Name: {item.itemName} - ItemID: {item.itemId} - AssetName: {item.name}");
+            }
+
+            orig(self);
+        }
 
         private static void Terminal_Awake(On.Terminal.orig_Awake orig, Terminal self)
         {
+            terminal = self;
             var itemList = self.buyableItemsList.ToList();
 
             var buyKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
             var cancelPurchaseNode = buyKeyword.compatibleNouns[0].result.terminalOptions[1].result;
             var infoKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "info");
+
+
 
             Plugin.logger.LogInfo($"Adding {shopItems.Count} items to terminal");
             foreach (ShopItem item in shopItems)
@@ -140,6 +230,14 @@ namespace LethalLib.Modules
                 });
                 infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
 
+                BuyableItemAssetInfo buyableItemAssetInfo = new BuyableItemAssetInfo()
+                {
+                    itemAsset = item.item,
+                    keyword = keyword
+                };
+
+                buyableItemAssetInfos.Add(buyableItemAssetInfo);
+
                 Plugin.logger.LogInfo($"{item.modName} registered item: {item.item.itemName}");
             }
 
@@ -152,21 +250,26 @@ namespace LethalLib.Modules
         public static List<ShopItem> shopItems = new List<ShopItem>();
         public static List<PlainItem> plainItems = new List<PlainItem>();
 
+
+
         private static void StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
         {
             orig(self);
 
-     
-            foreach (SelectableLevel level in self.levels)
+            foreach (ScrapItem scrapItem in scrapItems)
             {
-                var name = level.name;
 
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name))
+                foreach (SelectableLevel level in self.levels)
                 {
-                    var levelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
-                    foreach (ScrapItem scrapItem in scrapItems)
+                    var name = level.name;
+
+                    var alwaysValid = scrapItem.spawnLevels.HasFlag(Levels.LevelTypes.All) || (scrapItem.spawnLevelOverrides != null && scrapItem.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+
+                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                     {
-                        if (scrapItem.spawnLevels.HasFlag(levelEnum))
+                        var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+
+                        if (alwaysValid || scrapItem.spawnLevels.HasFlag(levelEnum))
                         {
                             var spawnableÍtemWithRarity = new SpawnableItemWithRarity()
                             {
@@ -182,22 +285,23 @@ namespace LethalLib.Modules
                                 level.spawnableScrap.Add(spawnableÍtemWithRarity);
                                 //Plugin.logger.LogInfo($"Added {scrapItem.item.name} to {name}");
 
-           
+
                             }
                         }
                     }
-
                 }
             }
 
-
+           // self.allItemsList.itemsList.RemoveAll(x => LethalLibItemList.Contains(x));
 
             foreach (ScrapItem scrapItem in scrapItems)
             {
                 if (!self.allItemsList.itemsList.Contains(scrapItem.item))
                 {
                     Plugin.logger.LogInfo($"{scrapItem.modName} registered item: {scrapItem.item.itemName}");
-                    
+
+                    LethalLibItemList.Add(scrapItem.item);
+
                     self.allItemsList.itemsList.Add(scrapItem.item);
                 }
             }
@@ -207,6 +311,9 @@ namespace LethalLib.Modules
                 if (!self.allItemsList.itemsList.Contains(shopItem.item))
                 {
                     Plugin.logger.LogInfo((object)(shopItem.modName + " registered item: " + shopItem.item.itemName));
+
+                    LethalLibItemList.Add(shopItem.item);
+
                     self.allItemsList.itemsList.Add(shopItem.item);
                 }
             }
@@ -216,6 +323,9 @@ namespace LethalLib.Modules
                 if (!self.allItemsList.itemsList.Contains(plainItem.item))
                 {
                     Plugin.logger.LogInfo((object)(plainItem.modName + " registered item: " + plainItem.item.itemName));
+
+                    LethalLibItemList.Add(plainItem.item);
+
                     self.allItemsList.itemsList.Add(plainItem.item);
                 }
             }
@@ -226,13 +336,15 @@ namespace LethalLib.Modules
             public Item item;
             public int rarity;
             public Levels.LevelTypes spawnLevels;
+            public string[] spawnLevelOverrides;
             public string modName;
 
-            public ScrapItem(Item item, int rarity, Levels.LevelTypes spawnLevels)
+            public ScrapItem(Item item, int rarity, Levels.LevelTypes spawnLevels = Levels.LevelTypes.None, string[] spawnLevelOverrides = null)
             {
                 this.item = item;
                 this.rarity = rarity;
                 this.spawnLevels = spawnLevels;
+                this.spawnLevelOverrides = spawnLevelOverrides;
             }
         }
 
@@ -289,6 +401,22 @@ namespace LethalLib.Modules
             scrapItems.Add(scrapItem);
         }
 
+
+        ///<summary>
+        ///This method registers a scrap item to the game, making it obtainable in the specified levels. With the option to add custom levels to the list.
+        ///</summary>
+        public static void RegisterScrap(Item spawnableItem, int rarity, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
+        {
+            var scrapItem = new ScrapItem(spawnableItem, rarity, levelFlags, levelOverrides);
+
+            var callingAssembly = Assembly.GetCallingAssembly();
+            var modDLL = callingAssembly.GetName().Name;
+            scrapItem.modName = modDLL;
+
+
+            scrapItems.Add(scrapItem);
+        }
+
         ///<summary>
         ///This method registers a shop item to the game.
         ///</summary>
@@ -326,6 +454,113 @@ namespace LethalLib.Modules
             item.modName = modDLL;
 
             plainItems.Add(item);
+        }
+
+        ///<summary>
+        ///Removes a scrap from the given levels.
+        ///This needs to be called after StartOfRound.Awake.
+        /// </summary>
+        public static void RemoveScrapFromLevel(Item scrapItem, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
+        {
+            if (StartOfRound.Instance != null)
+            {
+                foreach (SelectableLevel level in StartOfRound.Instance.levels)
+                {
+                    var name = level.name;
+
+                    var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+
+                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+                    {
+                        var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                        if (alwaysValid || levelFlags.HasFlag(levelEnum))
+                        {
+
+                            var spawnableItemWithRarity = level.spawnableScrap.FirstOrDefault(x => x.spawnableItem == scrapItem);
+
+                            if (spawnableItemWithRarity != null)
+                            {
+                                level.spawnableScrap.Remove(spawnableItemWithRarity);
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+        ///<summary>
+        ///Removes a shop item from the game.
+        ///This needs to be called after StartOfRound.Awake.
+        ///Only works for items registered by LethalLib.
+        ///</summary>
+        public static void RemoveShopItem(Item shopItem)
+        {
+            if (StartOfRound.Instance != null)
+            {
+
+                var itemList = terminal.buyableItemsList.ToList();
+                itemList.RemoveAll(x => x == shopItem);
+                terminal.buyableItemsList = itemList.ToArray();
+
+                var allKeywords = terminal.terminalNodes.allKeywords.ToList();
+                var infoKeyword = terminal.terminalNodes.allKeywords.First(keyword => keyword.word == "info");
+                var buyKeyword = terminal.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
+               
+
+                var nouns = buyKeyword.compatibleNouns.ToList();
+                var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
+                if (buyableItemAssetInfos.Any(x => x.itemAsset == shopItem))
+                {
+                    var asset = buyableItemAssetInfos.First(x => x.itemAsset == shopItem);
+                    allKeywords.Remove(asset.keyword);
+
+                    nouns.RemoveAll(noun => noun.noun == asset.keyword);
+                    itemInfoNouns.RemoveAll(noun => noun.noun == asset.keyword);
+                }
+                terminal.terminalNodes.allKeywords = allKeywords.ToArray();
+                buyKeyword.compatibleNouns = nouns.ToArray();
+                infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
+            }
+        }
+
+        ///<summary>
+        ///Updates the price of an already registered shop item.
+        ///This needs to be called after StartOfRound.Awake.
+        ///Only works for items registered by LethalLib.
+        ///</summary>
+        public static void UpdateShopItemPrice(Item shopItem, int price)
+        {
+            if (StartOfRound.Instance != null)
+            {
+                shopItem.creditsWorth = price;
+                var buyKeyword = terminal.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
+                var cancelPurchaseNode = buyKeyword.compatibleNouns[0].result.terminalOptions[1].result;
+                var nouns = buyKeyword.compatibleNouns.ToList();
+                if (buyableItemAssetInfos.Any(x => x.itemAsset == shopItem))
+                {
+                    var asset = buyableItemAssetInfos.First(x => x.itemAsset == shopItem);
+
+                    // correct noun
+                    if (nouns.Any(noun => noun.noun == asset.keyword))
+                    {
+                        var noun = nouns.First(noun => noun.noun == asset.keyword);
+                        var node = noun.result;
+                        node.itemCost = price;
+                        // get buynode 2
+                        if (node.terminalOptions.Length > 0)
+                        {
+                            // loop through terminal options
+                            foreach (var option in node.terminalOptions) { 
+                                if(option.result != null && option.result.buyItemIndex != -1)
+                                {
+                                    option.result.itemCost = price;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
     }

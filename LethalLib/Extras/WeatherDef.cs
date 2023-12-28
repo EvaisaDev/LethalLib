@@ -11,6 +11,7 @@ namespace LethalLib.Extras
     {
         public string weatherName;
         public Levels.LevelTypes levels = Levels.LevelTypes.None;
+        public string[] levelOverrides;
         public int weatherVariable1;
         public int weatherVariable2;
         public WeatherEffect weatherEffect;

@@ -16,6 +16,9 @@ namespace LethalLib.Modules
             On.GameNetworkManager.Start += GameNetworkManager_Start;
         }
 
+        /// <summary>
+        /// Registers a prefab to be added to the network manager.
+        /// </summary>
         public static void RegisterNetworkPrefab(GameObject prefab)
         {
             _networkPrefabs.Add(prefab);
