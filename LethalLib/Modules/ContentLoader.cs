@@ -315,7 +315,7 @@ namespace LethalLib.Modules
             public string itemInfoPath = null;
             public StoreType storeType = StoreType.None;
 
-            public void RemoveFromStore()
+            public void RemoveFromShop()
             {
                 Unlockables.DisableUnlockable(UnlockableItem);
             }
