@@ -237,8 +237,6 @@ namespace LethalLib.Modules
                 };
 
                 buyableItemAssetInfos.Add(buyableItemAssetInfo);
-
-                Plugin.logger.LogInfo($"{item.modName} registered item: {item.item.itemName}");
             }
 
             self.buyableItemsList = itemList.ToArray();
@@ -298,7 +296,14 @@ namespace LethalLib.Modules
             {
                 if (!self.allItemsList.itemsList.Contains(scrapItem.item))
                 {
-                    Plugin.logger.LogInfo($"{scrapItem.modName} registered item: {scrapItem.item.itemName}");
+                    if (scrapItem.modName != "LethalLib")
+                    {
+                        Plugin.logger.LogInfo($"{scrapItem.modName} registered item: {scrapItem.item.itemName}");
+                    }
+                    else
+                    {
+                        Plugin.logger.LogInfo($"Registered item: {scrapItem.item.itemName}");
+                    }
 
                     LethalLibItemList.Add(scrapItem.item);
 
@@ -310,7 +315,14 @@ namespace LethalLib.Modules
             {
                 if (!self.allItemsList.itemsList.Contains(shopItem.item))
                 {
-                    Plugin.logger.LogInfo((object)(shopItem.modName + " registered item: " + shopItem.item.itemName));
+                    if (shopItem.modName != "LethalLib")
+                    {
+                        Plugin.logger.LogInfo($"{shopItem.modName} registered item: {shopItem.item.itemName}");
+                    }
+                    else
+                    {
+                        Plugin.logger.LogInfo($"Registered item: {shopItem.item.itemName}");
+                    }
 
                     LethalLibItemList.Add(shopItem.item);
 
@@ -322,7 +334,14 @@ namespace LethalLib.Modules
             {
                 if (!self.allItemsList.itemsList.Contains(plainItem.item))
                 {
-                    Plugin.logger.LogInfo((object)(plainItem.modName + " registered item: " + plainItem.item.itemName));
+                    if (plainItem.modName != "LethalLib")
+                    {
+                        Plugin.logger.LogInfo($"{plainItem.modName} registered item: {plainItem.item.itemName}");
+                    }
+                    else
+                    {
+                        Plugin.logger.LogInfo($"Registered item: {plainItem.item.itemName}");
+                    }
 
                     LethalLibItemList.Add(plainItem.item);
 

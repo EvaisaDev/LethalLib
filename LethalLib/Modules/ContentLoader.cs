@@ -63,6 +63,12 @@ namespace LethalLib.Modules
         /// </summary>
         public void Register(CustomContent content)
         {
+            if(loadedContent.ContainsKey(content.ID))
+            {
+                Debug.LogError($"[LethalLib] {modName} tried to register content with ID {content.ID} but it already exists!");
+                return;
+            }
+
             if(content is CustomItem item)
             {
                 var itemAsset = modBundle.LoadAsset<Item>(item.contentPath);
@@ -99,7 +105,7 @@ namespace LethalLib.Modules
                     Items.RegisterItem(itemAsset);
                 }
 
-                loadedContent.Add(item.ID, item);
+                
             }
             else if (content is Unlockable unlockable)
             {
@@ -129,8 +135,7 @@ namespace LethalLib.Modules
                 }
 
                 Unlockables.RegisterUnlockable(unlockableAsset, unlockable.storeType, buyNode1, buyNode2, itemInfo, unlockable.initPrice);
-     
-                loadedContent.Add(unlockable.ID, unlockable);
+
             }
             else if (content is CustomEnemy enemy)
             {
@@ -159,7 +164,6 @@ namespace LethalLib.Modules
                     Enemies.RegisterEnemy(enemyAsset, enemy.rarity, enemy.LevelTypes, enemy.spawnType, enemy.levelOverrides, infoNode, infoKeyword);
                 }
 
-                loadedContent.Add(enemy.ID, enemy);
             }
             else if (content is MapHazard mapObject)
             {
@@ -169,9 +173,7 @@ namespace LethalLib.Modules
                 mapObject.registryCallback(mapObjectAsset);
 
                  MapObjects.RegisterMapObject(mapObjectAsset, mapObject.LevelTypes, mapObject.levelOverrides, mapObject.spawnRateFunction);
-          
 
-                loadedContent.Add(mapObject.ID, mapObject);
             }
             else if (content is OutsideObject outsideObject)
             {
@@ -182,13 +184,9 @@ namespace LethalLib.Modules
 
                 MapObjects.RegisterOutsideObject(mapObjectAsset, outsideObject.LevelTypes, outsideObject.levelOverrides, outsideObject.spawnRateFunction);
 
+            }
 
-                loadedContent.Add(outsideObject.ID, outsideObject);
-            }
-            else
-            {
-                loadedContent.Add(content.ID, content);
-            }
+            loadedContent.Add(content.ID, content);
         }
 
         /// <summary>
@@ -197,6 +195,7 @@ namespace LethalLib.Modules
         /// </summary>
         public void RegisterAll(CustomContent[] content)
         {
+            Plugin.logger.LogInfo($"[LethalLib] {modName} is registering {content.Length} content items!");
             foreach(CustomContent c in content)
             {
                 Register(c);
@@ -209,7 +208,8 @@ namespace LethalLib.Modules
         /// </summary>
         public void RegisterAll(List<CustomContent> content)
         {
-            foreach(CustomContent c in content)
+            Plugin.logger.LogInfo($"[LethalLib] {modName} is registering {content.Count} content items!");
+            foreach (CustomContent c in content)
             {
                 Register(c);
             }
