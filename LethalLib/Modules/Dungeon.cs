@@ -3,6 +3,7 @@ using DunGen.Graph;
 using LethalLib.Extras;
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -23,24 +24,39 @@ namespace LethalLib.Modules
 
         private static void StartOfRound_Start(On.StartOfRound.orig_Start orig, StartOfRound self)
         {
-
-
-            foreach (var dungeon in customDungeons)
+            foreach (var level in self.levels)
             {
-                foreach (var level in self.levels)
+                var newFlowTypes = new List<IntWithRarity>();
+                foreach (var dungeon in customDungeons)
                 {
-                    var name = level.name;
-                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name))
+                    CustomDungeonLevel customLevel = dungeon.levels.GetLevel(level.name);
+                    if (customLevel != null)
                     {
-                        var levelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
-                        if (dungeon.LevelTypes.HasFlag(levelEnum) && !level.dungeonFlowTypes.Any(rarityInt => rarityInt.id == dungeon.dungeonIndex))
+                        newFlowTypes.Add(new IntWithRarity { id = dungeon.dungeonIndex, rarity = customLevel.rarity ?? dungeon.rarity });
+                        continue;
+                    }
+
+                    // Compatibility
+                    if (Enum.IsDefined(typeof(Levels.LevelTypes), level.name))
+                    {
+                        var levelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), level.name);
+                        if (dungeon.LevelTypes.HasFlag(levelEnum))
                         {
-                            var flowTypes = level.dungeonFlowTypes.ToList();
-                            flowTypes.Add(new IntWithRarity { id = dungeon.dungeonIndex, rarity = dungeon.rarity });
-                            level.dungeonFlowTypes = flowTypes.ToArray();
+                            newFlowTypes.Add(new IntWithRarity { id = dungeon.dungeonIndex, rarity = dungeon.rarity });
+                            continue;
                         }
                     }
                 }
+
+                if (newFlowTypes.Count == 0)
+                {
+                    continue;
+                }
+
+                var flowTypes = level.dungeonFlowTypes.ToList();
+                flowTypes.AddRange(newFlowTypes);
+
+                level.dungeonFlowTypes = flowTypes.ToArray();
             }
 
             Plugin.logger.LogInfo("Added custom dungeons to levels");
@@ -92,11 +108,100 @@ namespace LethalLib.Modules
             public Levels.LevelTypes LevelTypes;
         }
 
+        public class CustomDungeonLevel
+        {
+            public string name;
+            public int? rarity;
+        }
+
+        public class CustomDungeonLevels : IEnumerable<CustomDungeonLevel>
+        {
+            public List<CustomDungeonLevel> levels = new List<CustomDungeonLevel>();
+
+            public void AddLevel(string levelName, int? rarity=null)
+            {
+                CustomDungeonLevel level = new CustomDungeonLevel { name = levelName, rarity = rarity };
+
+                int index = levels.FindIndex(level => level.name == levelName);
+                if (index == -1)
+                {
+                    levels.Add(level);
+                }
+                else
+                {
+                    levels[index] = level;
+                }
+            }
+
+            public void AddLevel(Levels.LevelTypes levelTypes, int? rarity=null)
+            {
+                foreach (var levelType in levelTypes.ToList())
+                {
+                    AddLevel(levelType.ToString(), rarity);
+                }
+            }
+
+            public bool HasLevel(string levelName)
+            {
+                return levels.Any(level => level.name == levelName);
+            }
+
+            public CustomDungeonLevel GetLevel(string levelName)
+            {
+                return levels.Find(level => level.name == levelName);
+            }
+
+            public CustomDungeonLevel GetLevel(Levels.LevelTypes levelTypes)
+            {
+                if (!levelTypes.IsSingleLevel())
+                {
+                    return null;
+                }
+
+                return GetLevel(levelTypes.ToString());
+            }
+
+            public bool RemoveLevel(string levelName)
+            {
+                int index = levels.FindIndex(level => level.name == levelName);
+                if (index == -1)
+                {
+                    return false;
+                }
+
+                levels.RemoveAt(index);
+                return true;
+            }
+
+            public bool RemoveLevel(Levels.LevelTypes levelTypes)
+            {
+                int removedCount = 0;
+                foreach (var levelType in levelTypes.ToList())
+                {
+                    removedCount += (RemoveLevel(levelType.ToString()) ? 1 : 0);
+                }
+
+                return removedCount > 0;
+            }
+
+            public IEnumerator<CustomDungeonLevel> GetEnumerator()
+            {
+                return levels.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return levels.GetEnumerator();
+            }
+        }
+
         public class CustomDungeon
         {
             public int rarity;
             public DungeonFlow dungeonFlow;
+            // Kept for compatibility
             public Levels.LevelTypes LevelTypes;
+            public CustomDungeonLevels levels = new CustomDungeonLevels();
             public int dungeonIndex = -1;
             public AudioClip firstTimeDungeonAudio;
         }
