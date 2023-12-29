@@ -25,6 +25,7 @@ namespace LethalLib.Modules
         public static void Init()
         {
             On.StartOfRound.Awake += StartOfRound_Awake;
+            
             On.StartOfRound.Start += StartOfRound_Start;
             On.Terminal.Awake += Terminal_Awake;
         }
@@ -48,66 +49,72 @@ namespace LethalLib.Modules
 
         private static void StartOfRound_Start(On.StartOfRound.orig_Start orig, StartOfRound self)
         {
-            List<ItemSaveOrderData> itemList = new List<ItemSaveOrderData>();
-
-            StartOfRound.Instance.allItemsList.itemsList.ForEach(item =>
+            // Savedata fix, not sure if this works properly because my savegames have been randomly getting corrupted.
+            if (self.IsHost)
             {
-                itemList.Add(new ItemSaveOrderData()
+                Plugin.logger.LogInfo($"Fixing Item savedata!!");
+
+                List<ItemSaveOrderData> itemList = new List<ItemSaveOrderData>();
+
+                StartOfRound.Instance.allItemsList.itemsList.ForEach(item =>
                 {
-                    itemId = item.itemId,
-                    itemName = item.itemName,
-                    assetName = item.name
+                    itemList.Add(new ItemSaveOrderData()
+                    {
+                        itemId = item.itemId,
+                        itemName = item.itemName,
+                        assetName = item.name
+                    });
                 });
-            });
 
 
 
-            // load itemlist from es3
-            if (ES3.KeyExists("LethalLibAllItemsList", GameNetworkManager.Instance.currentSaveFileName))
-            {
-                // load itemsList
-                itemList = ES3.Load<List<ItemSaveOrderData>>("LethalLibAllItemsList", GameNetworkManager.Instance.currentSaveFileName);
-            }
-
-            // sort so that items are in the same order as they were when the game was saved
-            // if item is not in list, add it at the end
-            List<Item> list = StartOfRound.Instance.allItemsList.itemsList;
-           
-            List<Item> newList = new List<Item>();
-
-            foreach (ItemSaveOrderData item in itemList)
-            {
-                var itemInList = list.FirstOrDefault(x => x.itemId == item.itemId && x.itemName == item.itemName && item.assetName == x.name);
-
-                // add in correct place, if there is a gap, we want to add an empty Item scriptable object
-                if (itemInList != null)
+                // load itemlist from es3
+                if (ES3.KeyExists("LethalLibAllItemsList", GameNetworkManager.Instance.currentSaveFileName))
                 {
-                    newList.Add(itemInList);
+                    // load itemsList
+                    itemList = ES3.Load<List<ItemSaveOrderData>>("LethalLibAllItemsList", GameNetworkManager.Instance.currentSaveFileName);
                 }
-                else
+
+                // sort so that items are in the same order as they were when the game was saved
+                // if item is not in list, add it at the end
+                List<Item> list = StartOfRound.Instance.allItemsList.itemsList;
+
+                List<Item> newList = new List<Item>();
+
+                foreach (ItemSaveOrderData item in itemList)
                 {
-                    newList.Add(ScriptableObject.CreateInstance<Item>());
-                }
-            }
+                    var itemInList = list.FirstOrDefault(x => x.itemId == item.itemId && x.itemName == item.itemName && item.assetName == x.name);
 
-            foreach (Item item in list)
-            {
-                if (!newList.Contains(item))
+                    // add in correct place, if there is a gap, we want to add an empty Item scriptable object
+                    if (itemInList != null)
+                    {
+                        newList.Add(itemInList);
+                    }
+                    else
+                    {
+                        newList.Add(ScriptableObject.CreateInstance<Item>());
+                    }
+                }
+
+                foreach (Item item in list)
                 {
-                    newList.Add(item);
+                    if (!newList.Contains(item))
+                    {
+                        newList.Add(item);
+                    }
                 }
-            }
 
-            StartOfRound.Instance.allItemsList.itemsList = newList;
+                StartOfRound.Instance.allItemsList.itemsList = newList;
 
-            // save itemlist to es3
-            ES3.Save<List<ItemSaveOrderData>>("LethalLibAllItemsList", itemList, GameNetworkManager.Instance.currentSaveFileName);
-   
-            // loop and print
-            for (int i = 0; i < StartOfRound.Instance.allItemsList.itemsList.Count; i++)
-            {
-                var item = StartOfRound.Instance.allItemsList.itemsList[i];
-                Plugin.logger.LogInfo($"Item {i}: Name: {item.itemName} - ItemID: {item.itemId} - AssetName: {item.name}");
+                // save itemlist to es3
+                ES3.Save<List<ItemSaveOrderData>>("LethalLibAllItemsList", itemList, GameNetworkManager.Instance.currentSaveFileName);
+
+                // loop and print
+                /*for (int i = 0; i < StartOfRound.Instance.allItemsList.itemsList.Count; i++)
+                {
+                    var item = StartOfRound.Instance.allItemsList.itemsList[i];
+                    Plugin.logger.LogInfo($"Item {i}: Name: {item.itemName} - ItemID: {item.itemId} - AssetName: {item.name}");
+                }*/
             }
 
             orig(self);

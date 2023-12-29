@@ -72,6 +72,7 @@ namespace LethalLib.Modules
             if(content is CustomItem item)
             {
                 var itemAsset = modBundle.LoadAsset<Item>(item.contentPath);
+                item.item = itemAsset;
                 NetworkPrefabs.RegisterNetworkPrefab(itemAsset.spawnPrefab);
                 prefabCallback(content, itemAsset.spawnPrefab);
                 item.registryCallback(itemAsset);
@@ -115,6 +116,7 @@ namespace LethalLib.Modules
                     NetworkPrefabs.RegisterNetworkPrefab(unlockableAsset.unlockable.prefabObject);
                     prefabCallback(content, unlockableAsset.unlockable.prefabObject);
                 }
+                unlockable.unlockable = unlockableAsset.unlockable;
                 unlockable.registryCallback(unlockableAsset.unlockable);
 
         
@@ -141,6 +143,7 @@ namespace LethalLib.Modules
             {
                 var enemyAsset = modBundle.LoadAsset<EnemyType>(enemy.contentPath);
                 NetworkPrefabs.RegisterNetworkPrefab(enemyAsset.enemyPrefab);
+                enemy.enemy = enemyAsset;
                 prefabCallback(content, enemyAsset.enemyPrefab);
                 enemy.registryCallback(enemyAsset);
 
@@ -168,6 +171,7 @@ namespace LethalLib.Modules
             else if (content is MapHazard mapObject)
             {
                 var mapObjectAsset = modBundle.LoadAsset<SpawnableMapObjectDef>(mapObject.contentPath);
+                mapObject.hazard = mapObjectAsset;
                 NetworkPrefabs.RegisterNetworkPrefab(mapObjectAsset.spawnableMapObject.prefabToSpawn);
                 prefabCallback(content, mapObjectAsset.spawnableMapObject.prefabToSpawn);
                 mapObject.registryCallback(mapObjectAsset);
@@ -178,6 +182,7 @@ namespace LethalLib.Modules
             else if (content is OutsideObject outsideObject)
             {
                 var mapObjectAsset = modBundle.LoadAsset<SpawnableOutsideObjectDef>(outsideObject.contentPath);
+                outsideObject.mapObject = mapObjectAsset;
                 NetworkPrefabs.RegisterNetworkPrefab(mapObjectAsset.spawnableMapObject.spawnableObject.prefabToSpawn);
                 prefabCallback(content, mapObjectAsset.spawnableMapObject.spawnableObject.prefabToSpawn);
                 outsideObject.registryCallback(mapObjectAsset);
@@ -234,7 +239,7 @@ namespace LethalLib.Modules
         {
             public Action<Item> registryCallback = (item) => { };
             public string contentPath = "";
-            private Item item;
+            internal Item item;
             public Item Item
             {
                 get { return item; }
@@ -303,7 +308,7 @@ namespace LethalLib.Modules
         public class Unlockable : CustomContent
         {
             public Action<UnlockableItem> registryCallback = (unlockable) => { };
-            private UnlockableItem unlockable;
+            internal UnlockableItem unlockable;
             public UnlockableItem UnlockableItem
             {
                 get { return unlockable; }
@@ -344,7 +349,7 @@ namespace LethalLib.Modules
         {
             public Action<EnemyType> registryCallback = (enemy) => { };
             public string contentPath = "";
-            private EnemyType enemy;
+            internal EnemyType enemy;
             public EnemyType Enemy
             {
                 get { return enemy; }
@@ -384,7 +389,7 @@ namespace LethalLib.Modules
         {
             public Action<SpawnableMapObjectDef> registryCallback = (hazard) => { };
             public string contentPath = "";
-            private SpawnableMapObjectDef hazard;
+            internal SpawnableMapObjectDef hazard;
             public SpawnableMapObjectDef Hazard
             {
                 get { return hazard; }
@@ -416,7 +421,7 @@ namespace LethalLib.Modules
         {
             public Action<SpawnableOutsideObjectDef> registryCallback = (hazard) => { };
             public string contentPath = "";
-            private SpawnableOutsideObjectDef mapObject;
+            internal SpawnableOutsideObjectDef mapObject;
             public SpawnableOutsideObjectDef MapObject
             {
                 get { return mapObject; }
