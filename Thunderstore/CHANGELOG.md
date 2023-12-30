@@ -12,7 +12,11 @@
 - Added method: MapObjects.RemoveMapObject()
 - Added method: MapObjects.RemoveOutsideObject()
 - Added Module: ContentLoader
-	- This acts as an alternative way to register content, abstracting some extra stuff away such as network registry and asset loading.
+	- This acts as an alternative way to register content, abstracting some extra stuff away such as network registry and asset loading.  
+- Added Module: Player  
+	- Added method: RegisterPlayerRagdoll()  
+	- Added method: GetRagdollIndex()  
+	- Added method: GetRagdoll()  
 	
 # LethalLib 0.9.0  
 - "All" levels enum now includes modded maps.  

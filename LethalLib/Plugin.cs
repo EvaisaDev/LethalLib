@@ -42,6 +42,7 @@ namespace LethalLib
             MapObjects.Init();  
             Dungeon.Init();
             Weathers.Init();
+            Player.Init();
             LethalLib.Modules.NetworkPrefabs.Init();
            
         }
