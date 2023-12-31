@@ -41,9 +41,9 @@ namespace LethalLib.Modules
         }
 
         // custom player ragdolls for special deaths.
-        public static void RegisterPlayerRagdoll(string id, GameObject ragdoll, bool doNetworkRegistry = false)
+        public static void RegisterPlayerRagdoll(string id, GameObject ragdoll)
         {
-            NetworkPrefabs.RegisterNetworkPrefab(ragdoll);
+            Plugin.logger.LogInfo($"Registering player ragdoll {id}");
             ragdollRefs.Add(id, ragdoll);
         }
     }
