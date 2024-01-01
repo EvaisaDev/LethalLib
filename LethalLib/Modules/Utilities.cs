@@ -12,16 +12,81 @@ namespace LethalLib.Modules
         public static List<GameObject> fixedPrefabs = new List<GameObject>();
         public static void Init()
         {
-            On.SoundManager.Awake += SoundManager_Awake;
-            On.MenuManager.Awake += MenuManager_Awake;
+            // log to check if this do be runnin or not
+            Plugin.logger.LogInfo("Utilities.Init()");
+            On.StartOfRound.Start += StartOfRound_Start;
+            On.MenuManager.Start += MenuManager_Start;
         }
 
-        private static void MenuManager_Awake(On.MenuManager.orig_Awake orig, MenuManager self)
+        private static void StartOfRound_Start(On.StartOfRound.orig_Start orig, StartOfRound self)
+        {
+            AudioMixer audioMixer = SoundManager.Instance.diageticMixer;
+
+            // log 
+            Plugin.logger.LogInfo($"Diagetic mixer is {audioMixer.name}");
+
+            Plugin.logger.LogInfo($"Found {prefabsToFix.Count} prefabs to fix");
+
+            List<GameObject> prefabsToRemove = new List<GameObject>();
+
+            for (int i = prefabsToFix.Count - 1; i >= 0; i--)
+            {
+                GameObject prefab = prefabsToFix[i];
+                // get audio sources and then use string matching to find the correct mixer group
+                AudioSource[] audioSources = prefab.GetComponentsInChildren<AudioSource>();
+                foreach (AudioSource audioSource in audioSources)
+                {
+                    // check if any mixer group is assigned
+                    if (audioSource.outputAudioMixerGroup == null)
+                    {
+                        //Plugin.logger.LogInfo($"No mixer group for {audioSource.name} in {prefab.name}");
+                        continue;
+                    }
+
+                    // log mixer group name
+                    //Plugin.logger.LogInfo($"Mixer group for {audioSource.name} in {prefab.name} is {audioSource.outputAudioMixerGroup.audioMixer.name}");
+
+                    if (audioSource.outputAudioMixerGroup.audioMixer.name == "Diagetic")
+                    {
+
+                        var mixerGroup = audioMixer.FindMatchingGroups(audioSource.outputAudioMixerGroup.name)[0];
+
+                        // check if group was found
+                        if (mixerGroup != null)
+                        {
+                            audioSource.outputAudioMixerGroup = mixerGroup;
+                            // log
+                            Plugin.logger.LogInfo($"Set mixer group for {audioSource.name} in {prefab.name} to Diagetic:{mixerGroup.name}");
+
+                            // remove from list
+                            prefabsToRemove.Add(prefab);
+                        }
+                    }
+                }
+
+            }
+
+            // remove fixed prefabs from list
+            foreach (GameObject prefab in prefabsToRemove)
+            {
+                prefabsToFix.Remove(prefab);
+            }
+
+            orig(self);
+        }
+
+        private static void MenuManager_Start(On.MenuManager.orig_Start orig, MenuManager self)
         {
             orig(self);
-            // non diagetic mixer
-            AudioMixer audioMixer = self.MenuAudio.outputAudioMixerGroup.audioMixer;
 
+            if(self.GetComponent<AudioSource>() == null)
+            {
+                return;
+            }
+            // non diagetic mixer
+            AudioMixer audioMixer = self.GetComponent<AudioSource>().outputAudioMixerGroup.audioMixer;
+
+            List<GameObject> prefabsToRemove = new List<GameObject>();
             // reverse loop so we can remove items
             for (int i = prefabsToFix.Count - 1; i >= 0; i--)
             {
@@ -37,7 +102,7 @@ namespace LethalLib.Modules
                     }
 
                     // log mixer group name
-                    Plugin.logger.LogInfo($"Mixer group for {audioSource.name} in {prefab.name} is {audioSource.outputAudioMixerGroup.audioMixer.name}");
+                    //Plugin.logger.LogInfo($"Mixer group for {audioSource.name} in {prefab.name} is {audioSource.outputAudioMixerGroup.audioMixer.name}");
 
                     if (audioSource.outputAudioMixerGroup.audioMixer.name == "NonDiagetic")
                     {
@@ -49,55 +114,19 @@ namespace LethalLib.Modules
                         {
                             audioSource.outputAudioMixerGroup = mixerGroup;
                             // log
-                            Plugin.logger.LogInfo($"Fixed mixer group for {audioSource.name} in {prefab.name}");
-                            // remove
-                            prefabsToFix.RemoveAt(i);
+                            Plugin.logger.LogInfo($"Set mixer group for {audioSource.name} in {prefab.name} to NonDiagetic:{mixerGroup.name}");
+
+                            // remove from list
+                            prefabsToRemove.Add(prefab);
                         }
                     }
                 }
             }
-        }
 
-        private static void SoundManager_Awake(On.SoundManager.orig_Awake orig, SoundManager self)
-        {
-            orig(self);
-            
-            AudioMixer audioMixer = self.diageticMixer;
-
-            for (int i = prefabsToFix.Count - 1; i >= 0; i--)
+            // remove fixed prefabs from list
+            foreach (GameObject prefab in prefabsToRemove)
             {
-                GameObject prefab = prefabsToFix[i];
-                // get audio sources and then use string matching to find the correct mixer group
-                AudioSource[] audioSources = prefab.GetComponentsInChildren<AudioSource>();
-                foreach(AudioSource audioSource in audioSources)
-                {
-                    // check if any mixer group is assigned
-                    if (audioSource.outputAudioMixerGroup == null)
-                    {
-                        Plugin.logger.LogInfo($"No mixer group for {audioSource.name} in {prefab.name}");
-                        continue;
-                    }
-
-                    // log mixer group name
-                    Plugin.logger.LogInfo($"Mixer group for {audioSource.name} in {prefab.name} is {audioSource.outputAudioMixerGroup.audioMixer.name}");
-
-                    if (audioSource.outputAudioMixerGroup.audioMixer.name == "Diagetic")
-                    {
-
-                        var mixerGroup = audioMixer.FindMatchingGroups(audioSource.outputAudioMixerGroup.name)[0];
-
-                        // check if group was found
-                        if (mixerGroup != null)
-                        {
-                            audioSource.outputAudioMixerGroup = mixerGroup;
-                            // log
-                            Plugin.logger.LogInfo($"Fixed mixer group for {audioSource.name} in {prefab.name}");
-                            // remove
-                            prefabsToFix.RemoveAt(i);
-                        }
-                    }
-                }
-
+                prefabsToFix.Remove(prefab);
             }
         }
 
@@ -108,7 +137,7 @@ namespace LethalLib.Modules
                 return;
             }
 
-            Plugin.logger.LogInfo($"Fixing mixer groups for {prefab.name}");
+            //Plugin.logger.LogInfo($"Fixing mixer groups for {prefab.name}");
 
             fixedPrefabs.Add(prefab);
 
