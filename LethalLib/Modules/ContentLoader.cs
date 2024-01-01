@@ -74,6 +74,7 @@ namespace LethalLib.Modules
                 var itemAsset = modBundle.LoadAsset<Item>(item.contentPath);
                 item.item = itemAsset;
                 NetworkPrefabs.RegisterNetworkPrefab(itemAsset.spawnPrefab);
+                Utilities.FixMixerGroups(itemAsset.spawnPrefab);
                 prefabCallback(content, itemAsset.spawnPrefab);
                 item.registryCallback(itemAsset);
 
@@ -115,6 +116,7 @@ namespace LethalLib.Modules
                 {
                     NetworkPrefabs.RegisterNetworkPrefab(unlockableAsset.unlockable.prefabObject);
                     prefabCallback(content, unlockableAsset.unlockable.prefabObject);
+                    Utilities.FixMixerGroups(unlockableAsset.unlockable.prefabObject);
                 }
                 unlockable.unlockable = unlockableAsset.unlockable;
                 unlockable.registryCallback(unlockableAsset.unlockable);
@@ -143,6 +145,7 @@ namespace LethalLib.Modules
             {
                 var enemyAsset = modBundle.LoadAsset<EnemyType>(enemy.contentPath);
                 NetworkPrefabs.RegisterNetworkPrefab(enemyAsset.enemyPrefab);
+                Utilities.FixMixerGroups(enemyAsset.enemyPrefab);
                 enemy.enemy = enemyAsset;
                 prefabCallback(content, enemyAsset.enemyPrefab);
                 enemy.registryCallback(enemyAsset);
@@ -173,6 +176,7 @@ namespace LethalLib.Modules
                 var mapObjectAsset = modBundle.LoadAsset<SpawnableMapObjectDef>(mapObject.contentPath);
                 mapObject.hazard = mapObjectAsset;
                 NetworkPrefabs.RegisterNetworkPrefab(mapObjectAsset.spawnableMapObject.prefabToSpawn);
+                Utilities.FixMixerGroups(mapObjectAsset.spawnableMapObject.prefabToSpawn);
                 prefabCallback(content, mapObjectAsset.spawnableMapObject.prefabToSpawn);
                 mapObject.registryCallback(mapObjectAsset);
 
@@ -184,6 +188,7 @@ namespace LethalLib.Modules
                 var mapObjectAsset = modBundle.LoadAsset<SpawnableOutsideObjectDef>(outsideObject.contentPath);
                 outsideObject.mapObject = mapObjectAsset;
                 NetworkPrefabs.RegisterNetworkPrefab(mapObjectAsset.spawnableMapObject.spawnableObject.prefabToSpawn);
+                Utilities.FixMixerGroups(mapObjectAsset.spawnableMapObject.spawnableObject.prefabToSpawn);
                 prefabCallback(content, mapObjectAsset.spawnableMapObject.spawnableObject.prefabToSpawn);
                 outsideObject.registryCallback(mapObjectAsset);
 
