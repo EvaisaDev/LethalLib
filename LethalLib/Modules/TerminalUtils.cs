@@ -7,21 +7,9 @@ namespace LethalLib.Modules
 {
     public class TerminalUtils
     {
-        /*     
-        public string word;
-
-        public bool isVerb;
-
-        public CompatibleNoun[] compatibleNouns;
-
-        public TerminalNode specialKeywordResult;
-
-        [Space(5f)]
-        public TerminalKeyword defaultVerb;
-
-        [Space(3f)]
-        public bool accessTerminalObjects;
-        */
+        /// <summary>
+        /// This is only for creating terminal keywords, does not handle adding it to the actual terminal.
+        /// </summary>
         public static TerminalKeyword CreateTerminalKeyword(string word, bool isVerb = false, CompatibleNoun[] compatibleNouns = null, TerminalNode specialKeywordResult = null, TerminalKeyword defaultVerb = null, bool accessTerminalObjects = false)
         {
             

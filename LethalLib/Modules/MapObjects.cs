@@ -90,18 +90,19 @@ namespace LethalLib.Modules
         private static void StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
         {
             orig(self);
-
-            foreach (SelectableLevel level in self.levels)
+            foreach (RegisteredMapObject mapObject in mapObjects)
             {
-                var name = level.name;
-
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name))
+                foreach (SelectableLevel level in self.levels)
                 {
-                    var levelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                    var name = level.name;
+                    var alwaysValid = mapObject.levels.HasFlag(Levels.LevelTypes.All) || (mapObject.spawnLevelOverrides != null && mapObject.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
 
-                    foreach (RegisteredMapObject mapObject in mapObjects)
+                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                     {
-                        if (mapObject.levels.HasFlag(levelEnum))
+                        var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+
+
+                        if (alwaysValid || mapObject.levels.HasFlag(levelEnum))
                         {
                             if (mapObject.mapObject != null)
                             {
@@ -137,13 +138,14 @@ namespace LethalLib.Modules
                                 if (mapObject.spawnRateFunction != null)
                                 {
                                     spawnableOutsideObject.randomAmount = mapObject.spawnRateFunction(level);
-                                }   
+                                }
                                 var mapObjectsList = level.spawnableOutsideObjects.ToList();
                                 mapObjectsList.Add(spawnableOutsideObject);
                                 level.spawnableOutsideObjects = mapObjectsList.ToArray();
                                 Plugin.logger.LogInfo($"Added {spawnableOutsideObject.spawnableObject.prefabToSpawn.name} to {name}");
                             }
                         }
+
                     }
                 }
             }
@@ -154,16 +156,31 @@ namespace LethalLib.Modules
             public SpawnableMapObject mapObject;
             public SpawnableOutsideObjectWithRarity outsideObject;
             public Levels.LevelTypes levels;
+            public string[] spawnLevelOverrides;
             public Func<SelectableLevel, AnimationCurve> spawnRateFunction;
         }
 
         public static List<RegisteredMapObject> mapObjects = new List<RegisteredMapObject>();
 
+        /// <summary>
+        /// Register an inside map object to spawn in a level, these are things like turrets and mines
+        /// </summary>
         public static void RegisterMapObject(SpawnableMapObjectDef mapObject, Levels.LevelTypes levels, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
         {
             RegisterMapObject(mapObject.spawnableMapObject, levels, spawnRateFunction);
         }
 
+        /// <summary>
+        /// Register an inside map object to spawn in a level, these are things like turrets and mines
+        /// </summary>
+        public static void RegisterMapObject(SpawnableMapObjectDef mapObject, Levels.LevelTypes levels = Levels.LevelTypes.None, string[] levelOverrides = null, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
+        {
+            RegisterMapObject(mapObject.spawnableMapObject, levels, levelOverrides, spawnRateFunction);
+        }
+
+        /// <summary>
+        /// Register an inside map object to spawn in a level, these are things like turrets and mines
+        /// </summary>
         public static void RegisterMapObject(SpawnableMapObject mapObject, Levels.LevelTypes levels, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
         {
             mapObjects.Add(new RegisteredMapObject
@@ -174,11 +191,39 @@ namespace LethalLib.Modules
             });
         }
 
+        /// <summary>
+        /// Register an inside map object to spawn in a level, these are things like turrets and mines
+        /// </summary>
+        public static void RegisterMapObject(SpawnableMapObject mapObject, Levels.LevelTypes levels = Levels.LevelTypes.None, string[] levelOverrides = null, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
+        {
+            mapObjects.Add(new RegisteredMapObject
+            {
+                mapObject = mapObject,
+                levels = levels,
+                spawnRateFunction = spawnRateFunction,
+                spawnLevelOverrides = levelOverrides
+            });
+        }
+
+        /// <summary>
+        /// Register an outside map object to spawn in a level, these are things like pumpkins and rocks.
+        /// </summary>
         public static void RegisterOutsideObject(SpawnableOutsideObjectDef mapObject, Levels.LevelTypes levels, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
         {
             RegisterOutsideObject(mapObject.spawnableMapObject, levels, spawnRateFunction);
         }
 
+        /// <summary>
+        /// Register an outside map object to spawn in a level, these are things like pumpkins and rocks.
+        /// </summary>
+        public static void RegisterOutsideObject(SpawnableOutsideObjectDef mapObject, Levels.LevelTypes levels = Levels.LevelTypes.None, string[] levelOverrides = null, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
+        {
+            RegisterOutsideObject(mapObject.spawnableMapObject, levels, levelOverrides, spawnRateFunction);
+        }
+
+        /// <summary>
+        /// Register an outside map object to spawn in a level, these are things like pumpkins and rocks.
+        /// </summary>
         public static void RegisterOutsideObject(SpawnableOutsideObjectWithRarity mapObject, Levels.LevelTypes levels, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
         {
             mapObjects.Add(new RegisteredMapObject
@@ -187,6 +232,88 @@ namespace LethalLib.Modules
                 levels = levels,
                 spawnRateFunction = spawnRateFunction
             });
+        }
+
+        /// <summary>
+        /// Register an outside map object to spawn in a level, these are things like pumpkins and rocks.
+        /// </summary>
+        public static void RegisterOutsideObject(SpawnableOutsideObjectWithRarity mapObject, Levels.LevelTypes levels = Levels.LevelTypes.None, string[] levelOverrides = null, Func<SelectableLevel, AnimationCurve> spawnRateFunction = null)
+        {
+            mapObjects.Add(new RegisteredMapObject
+            {
+                outsideObject = mapObject,
+                levels = levels,
+                spawnRateFunction = spawnRateFunction,
+                spawnLevelOverrides = levelOverrides
+            });
+        }
+
+        /// <summary>
+        /// Remove a inside map object from a level
+        /// </summary>
+        public static void RemoveMapObject(SpawnableMapObjectDef mapObject, Levels.LevelTypes levelFlags, string[] levelOverrides = null)
+        {
+            RemoveMapObject(mapObject.spawnableMapObject, levelFlags, levelOverrides);
+        }
+
+        /// <summary>
+        /// Remove a inside map object from a level
+        /// </summary>
+        public static void RemoveMapObject(SpawnableMapObject mapObject, Levels.LevelTypes levelFlags, string[] levelOverrides = null)
+        {
+            if (StartOfRound.Instance != null)
+            {
+                foreach (SelectableLevel level in StartOfRound.Instance.levels)
+                {
+                    var name = level.name;
+
+                    var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+
+                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+                    {
+                        var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                        if (alwaysValid || levelFlags.HasFlag(levelEnum))
+                        {
+
+                            level.spawnableMapObjects = level.spawnableMapObjects.Where(x => x.prefabToSpawn != mapObject.prefabToSpawn).ToArray();
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Remove a outside map object from a level
+        /// </summary>
+        public static void RemoveOutsideObject(SpawnableOutsideObjectDef mapObject, Levels.LevelTypes levelFlags, string[] levelOverrides = null)
+        {
+            RemoveOutsideObject(mapObject.spawnableMapObject, levelFlags, levelOverrides);
+        }
+
+        /// <summary>
+        /// Remove a outside map object from a level
+        /// </summary>
+        public static void RemoveOutsideObject(SpawnableOutsideObjectWithRarity mapObject, Levels.LevelTypes levelFlags, string[] levelOverrides = null)
+        {
+            if (StartOfRound.Instance != null)
+            {
+                foreach (SelectableLevel level in StartOfRound.Instance.levels)
+                {
+                    var name = level.name;
+
+                    var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+
+                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+                    {
+                        var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                        if (alwaysValid || levelFlags.HasFlag(levelEnum))
+                        {
+
+                            level.spawnableOutsideObjects = level.spawnableOutsideObjects.Where(x => x.spawnableObject.prefabToSpawn != mapObject.spawnableObject.prefabToSpawn).ToArray();
+                        }
+                    }
+                }
+            }
         }
 
     }

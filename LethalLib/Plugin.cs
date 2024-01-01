@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using GameNetcodeStuff;
 using HarmonyLib;
 using LethalLib.Modules;
@@ -22,15 +23,16 @@ namespace LethalLib
     {
         public const string ModGUID = "evaisa.lethallib";
         public const string ModName = "LethalLib";
-        public const string ModVersion = "0.8.0";
+        public const string ModVersion = "0.10.0";
 
         public static AssetBundle MainAssets;
 
         public static BepInEx.Logging.ManualLogSource logger;
-
+        public static ConfigFile config;
 
         private void Awake()
         {
+            config = Config;
             logger = Logger;
 
             Logger.LogInfo($"LethalLib loaded!!");
@@ -42,6 +44,8 @@ namespace LethalLib
             MapObjects.Init();  
             Dungeon.Init();
             Weathers.Init();
+            Player.Init();
+            Utilities.Init();
             LethalLib.Modules.NetworkPrefabs.Init();
            
         }

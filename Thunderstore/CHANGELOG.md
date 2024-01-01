@@ -1,22 +1,6 @@
-# LethalLib  
-**A library for adding new content to Lethal Company, mainly for personal use.**
-  
-https://thunderstore.io/c/lethal-company/p/Evaisa/LethalLib/
-  
-Currently includes:   
-- Custom Scrap Item API  
-- Custom Shop Item API  
-- Unlockables API  
-- Map Objects API
-- Dungeon API
-- Custom Enemy API  
-- Network Prefab API  
-- Weather API  
-
-# LethalLib 0.10.0
 # LethalLib 0.10.0
 - [**BREAKING CHANGE**] Added save system patch which attempts to keep the items array in the same order, so that items don't change when you load an old save after mods have updated.  
-	- This will likely break all existing saves.
+	- This is experimental and currently locked behind a config setting, may break old saves.
 - Added Intellisense comments to all API functions.
 - Added method: Enemies.RemoveEnemyFromLevels()
 - Added method: Items.RemoveScrapFromLevels()
@@ -33,3 +17,9 @@ Currently includes:
 	- Added method: RegisterPlayerRagdoll()  
 	- Added method: GetRagdollIndex()  
 	- Added method: GetRagdoll()  
+	
+# LethalLib 0.9.0  
+- "All" levels enum now includes modded maps.  
+- Added "Vanilla" levels enum.  
+- Added overflow for levelOverrides to Dungeon API, Enemies API, Items API, Map Objects API, and Weathers API  
+	- which can be used to add to specific levels by name rather than enum.  

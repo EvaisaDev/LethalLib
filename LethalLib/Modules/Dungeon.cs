@@ -9,6 +9,7 @@ using System.Text;
 using System.Xml.Linq;
 using Unity.Netcode;
 using UnityEngine;
+using static LethalLib.Modules.Items;
 
 namespace LethalLib.Modules
 {
@@ -30,10 +31,13 @@ namespace LethalLib.Modules
                 foreach (var level in self.levels)
                 {
                     var name = level.name;
-                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name))
+                    var alwaysValid = dungeon.LevelTypes.HasFlag(Levels.LevelTypes.All) || (dungeon.levelOverrides != null && dungeon.levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+
+                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                     {
-                        var levelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
-                        if (dungeon.LevelTypes.HasFlag(levelEnum) && !level.dungeonFlowTypes.Any(rarityInt => rarityInt.id == dungeon.dungeonIndex))
+                        var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+
+                        if ((alwaysValid || dungeon.LevelTypes.HasFlag(levelEnum)) && !level.dungeonFlowTypes.Any(rarityInt => rarityInt.id == dungeon.dungeonIndex))
                         {
                             var flowTypes = level.dungeonFlowTypes.ToList();
                             flowTypes.Add(new IntWithRarity { id = dungeon.dungeonIndex, rarity = dungeon.rarity });
@@ -97,6 +101,7 @@ namespace LethalLib.Modules
             public int rarity;
             public DungeonFlow dungeonFlow;
             public Levels.LevelTypes LevelTypes;
+            public string[] levelOverrides;
             public int dungeonIndex = -1;
             public AudioClip firstTimeDungeonAudio;
         }
@@ -134,6 +139,7 @@ namespace LethalLib.Modules
                         if (extraTileSets.ContainsKey(archetypeName))
                         {
                             var tileSet = extraTileSets[archetypeName];
+
                             if (!archetype.TileSets.Contains(tileSet))
                             {
                                 archetype.TileSets.Add(tileSet);
@@ -162,7 +168,7 @@ namespace LethalLib.Modules
                 {
                     if (graphLine.LevelTypes.HasFlag(levelEnum))
                     {
-                        if(!self.dungeonGenerator.Generator.DungeonFlow.Lines.Contains(graphLine.graphLine))
+                        if (!self.dungeonGenerator.Generator.DungeonFlow.Lines.Contains(graphLine.graphLine))
                         {
                             self.dungeonGenerator.Generator.DungeonFlow.Lines.Add(graphLine.graphLine);
                            // Plugin.logger.LogInfo($"Added {graphLine.graphLine.name} to {name}");
@@ -240,8 +246,11 @@ namespace LethalLib.Modules
                 self.dungeonGenerator.Generator.LengthMultiplier = self.currentLevel.factorySizeMultiplier * self.mapSizeMultiplier;
                 self.dungeonGenerator.Generate();
                 */
-            }
+        }
 
+        /// <summary>
+        /// Registers a custom archetype to a level.
+        /// </summary>
         public static void AddArchetype(DungeonArchetype archetype, Levels.LevelTypes levelFlags, int lineIndex = -1)
         {
             var customArchetype = new CustomDungeonArchetype();
@@ -251,6 +260,9 @@ namespace LethalLib.Modules
             customDungeonArchetypes.Add(customArchetype);
         }
 
+        /// <summary>
+        /// Registers a dungeon graphline to a level.
+        /// </summary>
         public static void AddLine(GraphLine line, Levels.LevelTypes levelFlags)
         {
             var customLine = new CustomGraphLine();
@@ -259,31 +271,57 @@ namespace LethalLib.Modules
             customGraphLines.Add(customLine);
         }
 
+        /// <summary>
+        /// Registers a dungeon graphline to a level.
+        /// </summary>
         public static void AddLine(DungeonGraphLineDef line, Levels.LevelTypes levelFlags)
         {
             AddLine(line.graphLine, levelFlags);
         }
 
+        /// <summary>
+        /// Adds a tileset to a dungeon archetype
+        /// </summary>
         public static void AddTileSet(TileSet set, string archetypeName)
         {
             extraTileSets.Add(archetypeName, set);
         }
 
+        /// <summary>
+        /// Adds a room to a tileset with the given name.
+        /// </summary>
         public static void AddRoom(GameObjectChance room, string tileSetName)
         {
             extraRooms.Add(tileSetName, room);
         }
 
+        /// <summary>
+        /// Adds a room to a tileset with the given name.
+        /// </summary>
         public static void AddRoom(GameObjectChanceDef room, string tileSetName)
         {
             AddRoom(room.gameObjectChance, tileSetName);
         }
 
+        /// <summary>
+        /// Adds a dungeon to the given levels.
+        /// </summary>
         public static void AddDungeon(DungeonDef dungeon, Levels.LevelTypes levelFlags)
         {
             AddDungeon(dungeon.dungeonFlow, dungeon.rarity, levelFlags, dungeon.firstTimeDungeonAudio); 
         }
 
+        /// <summary>
+        /// Adds a dungeon to the given levels.
+        /// </summary>
+        public static void AddDungeon(DungeonDef dungeon, Levels.LevelTypes levelFlags, string[] levelOverrides)
+        {
+            AddDungeon(dungeon.dungeonFlow, dungeon.rarity, levelFlags, levelOverrides, dungeon.firstTimeDungeonAudio);
+        }
+
+        /// <summary>
+        /// Adds a dungeon to the given levels.
+        /// </summary>
         public static void AddDungeon(DungeonFlow dungeon, int rarity, Levels.LevelTypes levelFlags, AudioClip firstTimeDungeonAudio = null)
         {
             customDungeons.Add(new CustomDungeon
@@ -294,5 +332,22 @@ namespace LethalLib.Modules
                 firstTimeDungeonAudio = firstTimeDungeonAudio
             });
         }
+
+        /// <summary>
+        /// Adds a dungeon to the given levels.
+        /// </summary>
+        public static void AddDungeon(DungeonFlow dungeon, int rarity, Levels.LevelTypes levelFlags, string[] levelOverrides = null, AudioClip firstTimeDungeonAudio = null)
+        {
+            customDungeons.Add(new CustomDungeon
+            {
+                dungeonFlow = dungeon,
+                rarity = rarity,
+                LevelTypes = levelFlags,
+                firstTimeDungeonAudio = firstTimeDungeonAudio,
+                levelOverrides = levelOverrides
+            });
+        }
+
+        // TODO: Allow runtime removal to let people have synced configs (I do not want to implement this because it is a hassle.)
     }
 }

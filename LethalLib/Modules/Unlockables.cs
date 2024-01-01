@@ -28,6 +28,7 @@ namespace LethalLib.Modules
             public TerminalNode itemInfo;
             public int price;
             public string modName;
+            public bool disabled = false;
 
             public RegisteredUnlockable(UnlockableItem unlockable, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = -1)
             {
@@ -58,7 +59,7 @@ namespace LethalLib.Modules
                 // example: "* Loud horn    //    Price: $150"
                 foreach (var unlockable in registeredUnlockables)
                 {
-                    if (unlockable.StoreType == StoreType.ShipUpgrade)
+                    if (unlockable.StoreType == StoreType.ShipUpgrade && !unlockable.disabled)
                     {
 
                         var unlockableName = unlockable.unlockable.unlockableName;
@@ -68,6 +69,7 @@ namespace LethalLib.Modules
 
                         modifiedDisplayText = modifiedDisplayText.Insert(index + 1, newLine);
                     }
+                    
                 }
 
             }
@@ -75,6 +77,14 @@ namespace LethalLib.Modules
 
             return orig(self, modifiedDisplayText, node);
         }
+
+        public struct BuyableUnlockableAssetInfo
+        {
+            public UnlockableItem itemAsset;
+            public TerminalKeyword keyword;
+        }
+
+        public static List<BuyableUnlockableAssetInfo> buyableUnlockableAssetInfos = new List<BuyableUnlockableAssetInfo>();
 
         private static void Terminal_Start(On.Terminal.orig_Start orig, Terminal self)
         {
@@ -214,6 +224,14 @@ namespace LethalLib.Modules
               });
               infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
 
+                var buyableItemAssetInfo = new BuyableUnlockableAssetInfo()
+                {
+                    itemAsset = item.unlockable,
+                    keyword = keyword
+                };
+
+                buyableUnlockableAssetInfos.Add(buyableItemAssetInfo);
+
                 Plugin.logger.LogInfo($"{item.modName} registered item: {item.unlockable.unlockableName}");
             }
 
@@ -227,11 +245,13 @@ namespace LethalLib.Modules
             Plugin.logger.LogInfo($"Adding {registeredUnlockables.Count} unlockables to unlockables list");
             foreach(var unlockable in registeredUnlockables)
             {
+                unlockable.disabled = false;
                 if (self.unlockablesList.unlockables.Any((UnlockableItem x) => x.unlockableName == unlockable.unlockable.unlockableName))
                 {
                     Plugin.logger.LogInfo((object)("Unlockable " + unlockable.unlockable.unlockableName + " already exists in unlockables list, skipping"));
                     continue;
                 }
+
 
                 if (unlockable.unlockable.prefabObject != null)
                 {
@@ -245,21 +265,33 @@ namespace LethalLib.Modules
             }
         }
 
+        ///<summary>
+        ///Registers a unlockable.
+        /// </summary>
         public static void RegisterUnlockable(UnlockableItemDef unlockable, int price = -1, StoreType storeType = StoreType.None)
         {
             RegisterUnlockable(unlockable.unlockable, storeType, null, null, null, price);
         }
 
+        ///<summary>
+        ///Registers a unlockable.
+        /// </summary>
         public static void RegisterUnlockable(UnlockableItem unlockable, int price = -1, StoreType storeType = StoreType.None)
         {
             RegisterUnlockable(unlockable, storeType, null, null, null, price);
         }
 
+        ///<summary>
+        ///Registers a unlockable.
+        /// </summary>
         public static void RegisterUnlockable(UnlockableItemDef unlockable, StoreType storeType = StoreType.None, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = -1)
         {
             RegisterUnlockable(unlockable.unlockable, storeType, buyNode1, buyNode2, itemInfo, price);
         }
 
+        ///<summary>
+        ///Registers a unlockable.
+        /// </summary>
         public static void RegisterUnlockable(UnlockableItem unlockable, StoreType storeType = StoreType.None, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = -1)
         {
             var unlock = new RegisteredUnlockable(unlockable, buyNode1, buyNode2, itemInfo, price);
@@ -269,6 +301,82 @@ namespace LethalLib.Modules
             unlock.StoreType = storeType;
 
             registeredUnlockables.Add(unlock);
+        }
+
+        ///<summary>
+        ///Removes a unlockable.
+        ///This needs to be called after StartOfRound.Awake, can be used for config sync.
+        ///This is prone to breaking saves.
+        ///Does not currently handle removing the terminal keywords.
+        /// </summary>
+        public static void DisableUnlockable(UnlockableItemDef unlockable)
+        {
+            DisableUnlockable(unlockable.unlockable);
+        }
+
+        ///<summary>
+        ///Removes a unlockable.
+        ///This needs to be called after StartOfRound.Awake, can be used for config sync.
+        ///This is prone to breaking saves.
+        ///Does not currently handle removing the terminal keywords.
+        /// </summary>
+        public static void DisableUnlockable(UnlockableItem unlockable)
+        {
+            var registeredUnlockable = registeredUnlockables.Find(unlock => unlock.unlockable == unlockable);
+            if(registeredUnlockable != null)
+            {
+                registeredUnlockable.disabled = true;
+                if(StartOfRound.Instance != null)
+                {
+                    StartOfRound.Instance.unlockablesList.unlockables.Remove(registeredUnlockable.unlockable);
+                }
+            }
+        }
+
+        ///<summary>
+        ///Updates the price of an already registered unlockable
+        ///This needs to be called after StartOfRound.Awake.
+        ///Only works for items registered by LethalLib.
+        ///</summary>
+        public static void UpdateUnlockablePrice(UnlockableItem shopItem, int price)
+        {
+            if (StartOfRound.Instance != null)
+            {
+                var buyKeyword = terminal.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
+                var cancelPurchaseNode = buyKeyword.compatibleNouns[0].result.terminalOptions[1].result;
+                var nouns = buyKeyword.compatibleNouns.ToList();
+                RegisteredUnlockable registeredUnlockable = registeredUnlockables.Find(unlock => unlock.unlockable == shopItem);
+
+                if(registeredUnlockable != null && registeredUnlockable.price != -1)
+                {
+                    registeredUnlockable.price = price;
+                }
+
+                if (buyableUnlockableAssetInfos.Any(x => x.itemAsset == shopItem))
+                {
+                    var asset = buyableUnlockableAssetInfos.First(x => x.itemAsset == shopItem);
+
+                    // correct noun
+                    if (nouns.Any(noun => noun.noun == asset.keyword))
+                    {
+                        var noun = nouns.First(noun => noun.noun == asset.keyword);
+                        var node = noun.result;
+                        node.itemCost = price;
+                        // get buynode 2
+                        if (node.terminalOptions.Length > 0)
+                        {
+                            // loop through terminal options
+                            foreach (var option in node.terminalOptions)
+                            {
+                                if (option.result != null && option.result.buyItemIndex != -1)
+                                {
+                                    option.result.itemCost = price;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
