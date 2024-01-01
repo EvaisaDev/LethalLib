@@ -17,13 +17,17 @@ using System.Collections;
 using System.Reflection.Emit;
 using UnityEngine.InputSystem;
 using Object = UnityEngine.Object;
+using BepInEx.Configuration;
 
 namespace LethalLib.Modules
 {
     public class Items
     {
+        public static ConfigEntry<bool> useSavedataFix;
         public static void Init()
         {
+            Plugin.config.Bind<bool>("Items", "EnableItemSaveFix", false, "Allow for LethalLib to store/reorder the item list, which should fix issues where items get reshuffled when loading an old save. This is experimental and may cause save corruptions occasionally.");
+
             On.StartOfRound.Awake += StartOfRound_Awake;
             
             On.StartOfRound.Start += StartOfRound_Start;
@@ -50,7 +54,7 @@ namespace LethalLib.Modules
         private static void StartOfRound_Start(On.StartOfRound.orig_Start orig, StartOfRound self)
         {
             // Savedata fix, not sure if this works properly because my savegames have been randomly getting corrupted.
-            if (self.IsHost)
+            if (useSavedataFix.Value && self.IsHost)
             {
                 Plugin.logger.LogInfo($"Fixing Item savedata!!");
 

@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using GameNetcodeStuff;
 using HarmonyLib;
 using LethalLib.Modules;
@@ -27,10 +28,11 @@ namespace LethalLib
         public static AssetBundle MainAssets;
 
         public static BepInEx.Logging.ManualLogSource logger;
-
+        public static ConfigFile config;
 
         private void Awake()
         {
+            config = Config;
             logger = Logger;
 
             Logger.LogInfo($"LethalLib loaded!!");

@@ -1,6 +1,6 @@
 # LethalLib 0.10.0
 - [**BREAKING CHANGE**] Added save system patch which attempts to keep the items array in the same order, so that items don't change when you load an old save after mods have updated.  
-	- This will likely break all existing saves.
+	- This is experimental and currently locked behind a config setting, may break old saves.
 - Added Intellisense comments to all API functions.
 - Added method: Enemies.RemoveEnemyFromLevels()
 - Added method: Items.RemoveScrapFromLevels()
