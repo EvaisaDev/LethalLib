@@ -86,6 +86,6 @@
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="cd O:\NetcodePatcher&#xD;&#xA;NetcodePatcher.dll $(TargetDir) deps/&#xD;&#xA;xcopy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\plugins\LethalLib&quot; /Y&#xD;&#xA;xcopy &quot;$(TargetPath)&quot; &quot;C:\Users\mail\Documents\GitHub\LethalCompanyModding\Assets\Plugins&quot; /Y&#xD;&#xA;xcopy &quot;$(TargetDir)LethalLib.pdb&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\plugins\LethalLib&quot; /Y" />
+      <Exec Command="cd O:\NetcodePatcher3&#xD;&#xA;NetcodePatcher.Cli.exe $(TargetPath) deps/&#xD;&#xA;xcopy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\plugins\LethalLib&quot; /Y&#xD;&#xA;xcopy &quot;$(TargetPath)&quot; &quot;C:\Users\mail\Documents\GitHub\LethalCompanyModding\Assets\Plugins&quot; /Y&#xD;&#xA;xcopy &quot;$(TargetDir)LethalLib.pdb&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\plugins\LethalLib&quot; /Y" />
     </Target>
 </Project>

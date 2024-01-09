@@ -19,11 +19,12 @@ using static LethalLib.Modules.Enemies;
 namespace LethalLib
 {
     [BepInPlugin(ModGUID, ModName, ModVersion)]
+    [BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string ModGUID = "evaisa.lethallib";
         public const string ModName = "LethalLib";
-        public const string ModVersion = "0.10.0";
+        public const string ModVersion = "0.10.2";
 
         public static AssetBundle MainAssets;
 

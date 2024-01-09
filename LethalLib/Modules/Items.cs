@@ -26,7 +26,7 @@ namespace LethalLib.Modules
         public static ConfigEntry<bool> useSavedataFix;
         public static void Init()
         {
-            Plugin.config.Bind<bool>("Items", "EnableItemSaveFix", false, "Allow for LethalLib to store/reorder the item list, which should fix issues where items get reshuffled when loading an old save. This is experimental and may cause save corruptions occasionally.");
+            useSavedataFix = Plugin.config.Bind<bool>("Items", "EnableItemSaveFix", false, "Allow for LethalLib to store/reorder the item list, which should fix issues where items get reshuffled when loading an old save. This is experimental and may cause save corruptions occasionally.");
 
             On.StartOfRound.Awake += StartOfRound_Awake;
             
