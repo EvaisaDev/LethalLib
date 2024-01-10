@@ -18,15 +18,21 @@ using System.Reflection.Emit;
 using UnityEngine.InputSystem;
 using Object = UnityEngine.Object;
 using BepInEx.Configuration;
+using LethalLib.Extras;
+using static LethalLib.Modules.ContentLoader;
 
 namespace LethalLib.Modules
 {
     public class Items
     {
         public static ConfigEntry<bool> useSavedataFix;
+        public static GameObject scanNodePrefab;
+
         public static void Init()
         {
             useSavedataFix = Plugin.config.Bind<bool>("Items", "EnableItemSaveFix", false, "Allow for LethalLib to store/reorder the item list, which should fix issues where items get reshuffled when loading an old save. This is experimental and may cause save corruptions occasionally.");
+
+            scanNodePrefab = Plugin.MainAssets.LoadAsset<GameObject>("Assets/Custom/ItemScanNode.prefab");
 
             On.StartOfRound.Awake += StartOfRound_Awake;
             
@@ -364,6 +370,7 @@ namespace LethalLib.Modules
         public class ScrapItem
         {
             public Item item;
+            public Item origItem;
             public int rarity;
             public Levels.LevelTypes spawnLevels;
             public string[] spawnLevelOverrides;
@@ -371,6 +378,45 @@ namespace LethalLib.Modules
 
             public ScrapItem(Item item, int rarity, Levels.LevelTypes spawnLevels = Levels.LevelTypes.None, string[] spawnLevelOverrides = null)
             {
+                origItem = item;
+                if (item.isScrap == false)
+                {
+    
+                    item = item.Clone();
+                    item.isScrap = true;
+                    if(item.maxValue == 0 && item.minValue == 0)
+                    {
+                        item.minValue = 40;
+                        item.maxValue = 100;
+                    }
+                    else if(item.maxValue == 0)
+                    {
+                        item.maxValue = item.minValue * 2;
+                    }
+                    else if(item.minValue == 0)
+                    {
+                        item.minValue = item.maxValue / 2;
+                    }
+
+                    var newPrefab = NetworkPrefabs.CloneNetworkPrefab(item.spawnPrefab);
+
+                    if(newPrefab.GetComponent<GrabbableObject>() != null)
+                    {
+                        newPrefab.GetComponent<GrabbableObject>().itemProperties = item;
+                    }
+
+                    if(newPrefab.GetComponentInChildren<ScanNodeProperties>() == null)
+                    {
+                        // add scan node
+                        var scanNode = Object.Instantiate(scanNodePrefab, newPrefab.transform);
+                        scanNode.name = "ScanNode";
+                        scanNode.transform.localPosition = new Vector3(0, 0, 0);
+                        var properties = scanNode.GetComponent<ScanNodeProperties>();
+                        properties.headerText = item.itemName;
+                    }
+
+                    item.spawnPrefab = newPrefab;
+                }
                 this.item = item;
                 this.rarity = rarity;
                 this.spawnLevels = spawnLevels;
@@ -392,6 +438,7 @@ namespace LethalLib.Modules
         public class ShopItem
         {
             public Item item;
+            public Item origItem;
             public TerminalNode buyNode1;
             public TerminalNode buyNode2;
             public TerminalNode itemInfo;
@@ -399,6 +446,26 @@ namespace LethalLib.Modules
             public string modName;
             public ShopItem(Item item, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = 0)
             {
+                origItem = item;
+                if (item.isScrap)
+                {
+                    item = item.Clone();
+                    item.isScrap = false;
+
+                    var newPrefab = NetworkPrefabs.CloneNetworkPrefab(item.spawnPrefab);
+
+                    if (newPrefab.GetComponent<GrabbableObject>() != null)
+                    {
+                        newPrefab.GetComponent<GrabbableObject>().itemProperties = item;
+                    }
+
+                    if (newPrefab.GetComponentInChildren<ScanNodeProperties>() != null)
+                    {
+                        Object.Destroy(newPrefab.GetComponentInChildren<ScanNodeProperties>().gameObject);
+                    }
+
+                    item.spawnPrefab = newPrefab;
+                }
                 this.item = item;
                 this.price = price;
                 if (buyNode1 != null)
@@ -505,8 +572,10 @@ namespace LethalLib.Modules
                         var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
                         if (alwaysValid || levelFlags.HasFlag(levelEnum))
                         {
+                            // find item in scrapItems
+                            var actualItem = scrapItems.FirstOrDefault(x => x.origItem == scrapItem || x.item == scrapItem);
 
-                            var spawnableItemWithRarity = level.spawnableScrap.FirstOrDefault(x => x.spawnableItem == scrapItem);
+                            var spawnableItemWithRarity = level.spawnableScrap.FirstOrDefault(x => x.spawnableItem == actualItem.item);
 
                             if (spawnableItemWithRarity != null)
                             {
@@ -528,9 +597,10 @@ namespace LethalLib.Modules
         {
             if (StartOfRound.Instance != null)
             {
+                var actualItem = shopItems.FirstOrDefault(x => x.origItem == shopItem || x.item == shopItem);
 
                 var itemList = terminal.buyableItemsList.ToList();
-                itemList.RemoveAll(x => x == shopItem);
+                itemList.RemoveAll(x => x == actualItem.item);
                 terminal.buyableItemsList = itemList.ToArray();
 
                 var allKeywords = terminal.terminalNodes.allKeywords.ToList();
@@ -540,9 +610,9 @@ namespace LethalLib.Modules
 
                 var nouns = buyKeyword.compatibleNouns.ToList();
                 var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
-                if (buyableItemAssetInfos.Any(x => x.itemAsset == shopItem))
+                if (buyableItemAssetInfos.Any(x => x.itemAsset == actualItem.item))
                 {
-                    var asset = buyableItemAssetInfos.First(x => x.itemAsset == shopItem);
+                    var asset = buyableItemAssetInfos.First(x => x.itemAsset == actualItem.item);
                     allKeywords.Remove(asset.keyword);
 
                     nouns.RemoveAll(noun => noun.noun == asset.keyword);
@@ -563,13 +633,15 @@ namespace LethalLib.Modules
         {
             if (StartOfRound.Instance != null)
             {
-                shopItem.creditsWorth = price;
+                var actualItem = shopItems.FirstOrDefault(x => x.origItem == shopItem || x.item == shopItem);
+
+                actualItem.item.creditsWorth = price;
                 var buyKeyword = terminal.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
                 var cancelPurchaseNode = buyKeyword.compatibleNouns[0].result.terminalOptions[1].result;
                 var nouns = buyKeyword.compatibleNouns.ToList();
-                if (buyableItemAssetInfos.Any(x => x.itemAsset == shopItem))
+                if (buyableItemAssetInfos.Any(x => x.itemAsset == actualItem.item))
                 {
-                    var asset = buyableItemAssetInfos.First(x => x.itemAsset == shopItem);
+                    var asset = buyableItemAssetInfos.First(x => x.itemAsset == actualItem.item);
 
                     // correct noun
                     if (nouns.Any(noun => noun.noun == asset.keyword))

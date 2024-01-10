@@ -235,12 +235,22 @@ namespace LethalLib.Modules
                     // get prefab name
                     var prefabName = randomMapObject.spawnablePrefabs[i].name;
 
-                    var prefab = networkManager.NetworkConfig.Prefabs.m_Prefabs.First(x => x.Prefab.name == prefabName);
+                    var prefab = networkManager.NetworkConfig.Prefabs.m_Prefabs.FirstOrDefault(x => x.Prefab.name == prefabName);
 
-                    if (prefab != null && prefab.Prefab != randomMapObject.spawnablePrefabs[i])
+                    if (prefab != default(NetworkPrefab) && prefab.Prefab != randomMapObject.spawnablePrefabs[i])
                     {
                         randomMapObject.spawnablePrefabs[i] = prefab.Prefab;
+                        //Plugin.logger.LogInfo($"DungeonGeneration - Remapped prefab ({prefabName})!");
                     }
+                    else if(prefab == default(NetworkPrefab))
+                    {
+                        //Plugin.logger.LogInfo($"DungeonGeneration - Could not find network prefab ({prefabName})!");
+                        Plugin.logger.LogError($"DungeonGeneration - Could not find network prefab ({prefabName})! Make sure your assigned prefab is registered with the network manager, or named identically to the vanilla prefab you are referencing.");
+                    }
+                    /*else
+                    {
+                        Plugin.logger.LogInfo($"DungeonGeneration - Prefab ({prefabName}) was already correctly mapped!");
+                    }*/
                 }
             }
 
