@@ -1,40 +1,69 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <OutputType>Library</OutputType>
         <TargetFramework>netstandard2.1</TargetFramework>
         <AssemblyName>LethalLib</AssemblyName>
-        <Description>Mod for Lethal Company</Description>
-        <Version>1.0.0</Version>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <LangVersion>latest</LangVersion>
+        <Product>LethalLib</Product>
+        <Description>Content-addition API for Lethal Company</Description>
+
+        <PackageId>Evaisa.NetcodePatcher</PackageId>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <IsPackable>true</IsPackable>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
-    </ItemGroup>
-
+    <!-- Extraneous .nupkg includes -->
     <ItemGroup>
-      <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="LethalCompany.GameLibs.Steam" Version="45.0.2-alpha.1" Publicize="true" />
-	  <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
-      <PackageReference Include="BepInEx.Core" Version="5.*" />
-      <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-	  <!--<PackageReference Include="Evaisa.NetcodePatcher.MSBuild" Version="3.*" PrivateAssets="all" />-->
+        <None Include="$(ProjectDir)../README.md" Pack="true" PackagePath="/"/>
     </ItemGroup>
 
+    <!-- Development dependencies (Set PrivateAssets="all") -->
     <ItemGroup>
-      <Reference Include="LethalCompanyInputUtils">
-        <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\plugins\LethalCompanyInputUtils.dll</HintPath>
-      </Reference>
-      <Reference Include="MMHOOK_Assembly-CSharp">
-        <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\plugins\MMHOOK\MMHOOK_Assembly-CSharp.dll</HintPath>
-      </Reference>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" PrivateAssets="all" />
+        <PackageReference Include="Evaisa.NetcodePatcher.MSBuild" Version="3.*" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
     </ItemGroup>
 
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="netcode-patch &quot;$(TargetPath)&quot; &quot;O:\NetcodePatcher\deps&quot;&#xD;&#xA;xcopy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\plugins\LethalLib&quot; /Y&#xD;&#xA;xcopy &quot;$(TargetPath)&quot; &quot;C:\Users\mail\Documents\GitHub\LethalCompanyModding\Assets\Plugins&quot; /Y&#xD;&#xA;xcopy &quot;$(TargetDir)LethalLib.pdb&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\plugins\LethalLib&quot; /Y" />
+    <!-- Runtime dependencies -->
+    <ItemGroup>
+        <PackageReference Include="BepInEx.Core" Version="5.*" />
+        <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" />
+        <Reference Include="Assembly-CSharp">
+            <HintPath>$(LethalCompanyDir)Lethal Company_Data/Managed/Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+            <HintPath>$(LethalCompanyDir)Lethal Company_Data/Managed/Assembly-CSharp-firstpass.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.InputSystem">
+            <HintPath>$(LethalCompanyDir)Lethal Company_Data/Managed/Unity.InputSystem.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.Netcode.Runtime" Publicize="true">
+            <HintPath>$(LethalCompanyDir)Lethal Company_Data/Managed/Unity.Netcode.Runtime.dll</HintPath>
+        </Reference>
+        <Reference Include="LethalCompanyInputUtils">
+            <HintPath>$(TestProfileDir)BepInEx/plugins/Rune580-LethalCompany_InputUtils/LethalCompanyInputUtils.dll</HintPath>
+        </Reference>
+        <Reference Include="MMHOOK_Assembly-CSharp">
+            <HintPath>$(TestProfileDir)BepInEx/plugins/MMHOOK/MMHOOK_Assembly-CSharp.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup Condition="$(CI) == 'true'">
+        <PackageReference Include="LethalCompany.GameLibs.Steam" Version="49.0.0-alpha.1" Publicize="true" />
+        <PackageReference Include="Rune580.LethalCompany_InputUtils" Version="0.4.4" />
+        <Referencen Include="MMHOOK_Assembly-CSharp">
+            <HintPath>$(ProjectDir)../lib/MMHOOK_Assembly-CSharp.dll</HintPath>
+        </Referencen>
+    </ItemGroup>
+
+    <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
+        <Exec Command="dotnet netcode-patch &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')"/>
     </Target>
 </Project>
