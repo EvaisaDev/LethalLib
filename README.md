@@ -31,18 +31,17 @@ You will need to create a `LethalLib/LethalLib.csproj.user` file to provide your
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <LETHAL_COMPANY_DIR>C:/Program Files (x86)/Steam/steamapps/common/Lethal Company</LETHAL_COMPANY_DIR>
-        <TEST_PROFILE_DIR>$(APPDATA)/r2modmanPlus-local/LethalCompany/profiles/Test LethalLib</TEST_PROFILE_DIR>
+        <LethalCompanyDir>C:/Program Files (x86)/Steam/steamapps/common/Lethal Company/</LethalCompanyDir>
+        <TestProfileDir>$(APPDATA)/r2modmanPlus-local/LethalCompany/profiles/Test LethalLib/</TestProfileDir>
     </PropertyGroup>
 
-    <!-- Create your 'Test Profile' using your modman of choice before enabling this. 
-    Enable by setting the Condition attribute to "true". *nix users should switch out `copy` for `cp`. -->
+    <!-- Enable by setting the Condition attribute to "true". *nix users should switch out `copy` for `cp`. -->
     <Target Name="CopyToTestProfile" DependsOnTargets="NetcodePatch" AfterTargets="PostBuildEvent" Condition="false">
         <MakeDir
-                Directories="$(TEST_PROFILE_DIR)/BepInEx/plugins/Evaisa-LethalLib/LethalLib"
-                Condition="Exists('$(TEST_PROFILE_DIR)') And !Exists('$(TEST_PROFILE_DIR)/BepInEx/plugins/Evaisa-LethalLib/LethalLib')"
+                Directories="$(TestProfileDir)BepInEx/plugins/Evaisa-LethalLib/LethalLib"
+                Condition="!Exists('$(TestProfileDir)BepInEx/plugins/Evaisa-LethalLib/LethalLib')"
         />
-        <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(TEST_PROFILE_DIR)/BepInEx/plugins/Evaisa-LethalLib/LethalLib/&quot;" />
+        <Exec Command="copy &amp;quot;$(TargetPath)&amp;quot; &amp;quot;$(TestProfileDir)BepInEx/plugins/Evaisa-LethalLib/LethalLib/&amp;quot;" />
     </Target>
 </Project>
 ```
