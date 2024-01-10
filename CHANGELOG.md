@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## LethalLib [0.11.1]
+
+### Changed
+
+- RegisterNetworkPrefab now checks prefabs to avoid registering duplicates
+
 ## LethalLib [0.11.0]
 
 ### Added
