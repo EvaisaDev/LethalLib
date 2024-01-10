@@ -13,23 +13,4 @@ Currently includes:
 - Network Prefab API  
 - Weather API  
 
-# LethalLib 0.10.0
-# LethalLib 0.10.0
-- [**BREAKING CHANGE**] Added save system patch which attempts to keep the items array in the same order, so that items don't change when you load an old save after mods have updated.  
-	- This will likely break all existing saves.
-- Added Intellisense comments to all API functions.
-- Added method: Enemies.RemoveEnemyFromLevels()
-- Added method: Items.RemoveScrapFromLevels()
-- Added method: Items.RemoveShopItem()
-- Added method: Items.UpdateShopItemPrice()
-- Added method: Unlockables.DisableUnlockable()
-- Added method: Unlockables.UpdateUnlockablePrice()
-- Added method: Weathers.RemoveWeather()
-- Added method: MapObjects.RemoveMapObject()
-- Added method: MapObjects.RemoveOutsideObject()
-- Added Module: ContentLoader
-	- This acts as an alternative way to register content, abstracting some extra stuff away such as network registry and asset loading.  
-- Added Module: Player  
-	- Added method: RegisterPlayerRagdoll()  
-	- Added method: GetRagdollIndex()  
-	- Added method: GetRagdoll()  
+See the [changelog](https://github.com/EvaisaDev/LethalLib/blob/main/CHANGELOG.md) for changes by-version and unreleased changes.
