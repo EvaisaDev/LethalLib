@@ -40,4 +40,11 @@ LethalLib/[Oo]bj
 LethalLib/[Dd]ist
 
 # Explicit exceptions/ignores
+
+## Any `.user` (e.g. `.csproj.user`)
 **.user
+
+## allow MMHook lib, but nothing else
+!/lib
+lib/*
+!lib/MMHOOK_Assembly-CSharp.dll
