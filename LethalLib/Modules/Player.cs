@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -19,14 +20,21 @@ namespace LethalLib.Modules
         {
             orig(self);
 
+
             // loop through ragdollrefs
             foreach (KeyValuePair<string, GameObject> ragdollRef in ragdollRefs)
             {
-                self.playerRagdolls.Add(ragdollRef.Value);
-                // get index
-                int index = self.playerRagdolls.Count - 1;
-                // add to ragdollIndexes
-                ragdollIndexes.Add(ragdollRef.Key, index);
+                if (!self.playerRagdolls.Contains(ragdollRef.Value))
+                {
+                    self.playerRagdolls.Add(ragdollRef.Value);
+                    // get index
+                    int index = self.playerRagdolls.Count - 1;
+                    // add to ragdollIndexes
+                    if(ragdollIndexes.ContainsKey(ragdollRef.Key))
+                        ragdollIndexes[ragdollRef.Key] = index;
+                    else
+                        ragdollIndexes.Add(ragdollRef.Key, index);
+                }
             }
         }
 

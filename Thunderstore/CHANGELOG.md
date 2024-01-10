@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 # LethalLib 0.11.1
 - Added check to RegisterNetworkPrefab, to prevent a prefab from being registered multiple times.
 
@@ -26,7 +24,6 @@
 # LethalLib 0.10.1  
 - Fixed issue with Ragdolls system where ragdolls got registered multiple times.  
 
->>>>>>> Stashed changes
 # LethalLib 0.10.0
 - [**BREAKING CHANGE**] Added save system patch which attempts to keep the items array in the same order, so that items don't change when you load an old save after mods have updated.  
 	- This is experimental and currently locked behind a config setting, may break old saves.
@@ -46,6 +43,8 @@
 	- Added method: RegisterPlayerRagdoll()  
 	- Added method: GetRagdollIndex()  
 	- Added method: GetRagdoll()  
+- Added Module: Utilities
+	- Added method: FixMixerGroups()
 	
 # LethalLib 0.9.0  
 - "All" levels enum now includes modded maps.  

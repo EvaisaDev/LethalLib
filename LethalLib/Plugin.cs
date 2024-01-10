@@ -8,6 +8,7 @@ using MonoMod.RuntimeDetour;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Permissions;
@@ -19,27 +20,30 @@ using static LethalLib.Modules.Enemies;
 namespace LethalLib
 {
     [BepInPlugin(ModGUID, ModName, ModVersion)]
+    //[BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string ModGUID = "evaisa.lethallib";
         public const string ModName = "LethalLib";
-<<<<<<< Updated upstream
-        public const string ModVersion = "0.10.0";
-=======
+
         public const string ModVersion = "0.11.1";
->>>>>>> Stashed changes
 
         public static AssetBundle MainAssets;
 
         public static BepInEx.Logging.ManualLogSource logger;
         public static ConfigFile config;
 
+        public static Plugin Instance;
+
         private void Awake()
         {
+            Instance = this;
             config = Config;
             logger = Logger;
 
             Logger.LogInfo($"LethalLib loaded!!");
+
+            MainAssets = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "lethallib"));
 
             new ILHook(typeof(StackTrace).GetMethod("AddFrames", BindingFlags.Instance | BindingFlags.NonPublic), IlHook);
             Enemies.Init();
