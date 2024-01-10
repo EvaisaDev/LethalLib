@@ -15,6 +15,9 @@
 !*.md
 !LICENSE
 
+## Editorconfig
+!.editorconfig
+
 ## important Git files
 !.gitmodules
 !.gitignore
