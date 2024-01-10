@@ -24,9 +24,28 @@ See the [changelog](https://github.com/EvaisaDev/LethalLib/blob/main/CHANGELOG.m
 
 ## Contributing 
 
+### Fork & Clone
+
+Fork the repository on GitHub and clone your fork locally. 
+
+### Configure Git hooks & `post-checkout`
+
+Configure the Git hooks directory for your local copy of the repository:
+```sh
+git config core.hooksPath hooks/
+```
+
+Alternatively, you can create symbolic links in `.git/hooks/*` that point to `../hooks/*`.
+
+Then re-checkout to trigger the `post-checkout` hook:
+```sh
+git checkout main
+```
+
+### `LethalLib.csproj.user`
 You will need to create a `LethalLib/LethalLib.csproj.user` file to provide your Lethal Company game directory path.
 
-### Example `LethalLib.csproj.user`
+#### Template
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
