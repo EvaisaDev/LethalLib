@@ -9,5 +9,6 @@ Currently includes:
 - Dungeon API
 - Custom Enemy API  
 - Network Prefab API  
+- Prefab Utils
 - Weather API  
 - ContentLoader
