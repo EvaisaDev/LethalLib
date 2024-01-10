@@ -6,6 +6,8 @@
 
 **A library for adding new content to Lethal Company, mainly for personal use.**
 
+## Features
+
 Currently includes:   
 - Custom Scrap Item API  
 - Custom Shop Item API  
@@ -16,4 +18,8 @@ Currently includes:
 - Network Prefab API  
 - Weather API  
 
+## Changes
+
 See the [changelog](https://github.com/EvaisaDev/LethalLib/blob/main/CHANGELOG.md) for changes by-version and unreleased changes.
+
+## Contributing 
