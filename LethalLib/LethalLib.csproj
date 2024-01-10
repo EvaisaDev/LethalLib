@@ -58,9 +58,9 @@
     <ItemGroup Condition="$(CI) == 'true'">
         <PackageReference Include="LethalCompany.GameLibs.Steam" Version="49.0.0-alpha.1" Publicize="true" />
         <PackageReference Include="Rune580.LethalCompany_InputUtils" Version="0.4.4" />
-        <Referencen Include="MMHOOK_Assembly-CSharp">
+        <Reference Include="MMHOOK_Assembly-CSharp">
             <HintPath>$(ProjectDir)../lib/MMHOOK_Assembly-CSharp.dll</HintPath>
-        </Referencen>
+        </Reference>
     </ItemGroup>
 
     <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
