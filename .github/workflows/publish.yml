@@ -26,7 +26,7 @@ jobs:
           dotnet nuget add source --username lordfirespeed \
             --password ${{ secrets.GITHUB_TOKEN }} \
             --store-password-in-clear-text \
-            --name github "https://nuget.pkg.github.com/Rune580.LethalCompany_InputUtils/index.json"
+            --name github "https://nuget.pkg.github.com/Rune580/index.json"
 
       - name: Restore project
         run: |
