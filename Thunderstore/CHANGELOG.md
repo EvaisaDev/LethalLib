@@ -1,3 +1,32 @@
+<<<<<<< Updated upstream
+=======
+# LethalLib 0.11.1
+- Added check to RegisterNetworkPrefab, to prevent a prefab from being registered multiple times.
+
+# LethalLib 0.11.0
+- Added module: PrefabUtils
+	- Added method: ClonePrefab()
+	- Added method: CreatePrefab()
+- Added method: NetworkPrefabs.CreateNetworkPrefab()
+	- Creates a network prefab programmatically and registers it with the network manager.
+- Added method: NetworkPrefabs.CloneNetworkPrefab()
+	- Clones a network prefab programmatically and registers it with the network manager.
+- Added behaviour for Items module
+	- When a scrap item is registered as a shop item, the LethalLib will now automatically create a copy and switch the IsScrap value.
+	- When a shop item is registered as a scrap, the LethalLib will now automataically create a copy, assign sell values, set IsScrap to true, and add a scan node.
+
+# LethalLib 0.10.4
+- Added additional error logging and prevented an exception when a custom dungeon RandomMapObject had an invalid prefab assigned.
+- Removed LethalExpansion soft dependency as it caused more issues than it was worth.
+
+# LethalLib 0.10.3
+- Fixed custom dungeon generation breaking because of Lethal Company update.
+- Added soft dependency to LethalExpansion which might help compatibility(?
+
+# LethalLib 0.10.1  
+- Fixed issue with Ragdolls system where ragdolls got registered multiple times.  
+
+>>>>>>> Stashed changes
 # LethalLib 0.10.0
 - [**BREAKING CHANGE**] Added save system patch which attempts to keep the items array in the same order, so that items don't change when you load an old save after mods have updated.  
 	- This is experimental and currently locked behind a config setting, may break old saves.

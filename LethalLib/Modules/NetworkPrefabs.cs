@@ -21,7 +21,8 @@ namespace LethalLib.Modules
         /// </summary>
         public static void RegisterNetworkPrefab(GameObject prefab)
         {
-            _networkPrefabs.Add(prefab);
+            if(!_networkPrefabs.Contains(prefab))
+                _networkPrefabs.Add(prefab);
         }
 
         private static void GameNetworkManager_Start(On.GameNetworkManager.orig_Start orig, GameNetworkManager self)
@@ -30,7 +31,8 @@ namespace LethalLib.Modules
 
             foreach (GameObject obj in _networkPrefabs)
             {
-                self.GetComponent<NetworkManager>().AddNetworkPrefab(obj);
+                if(!NetworkManager.Singleton.NetworkConfig.Prefabs.Contains(obj))
+                    NetworkManager.Singleton.AddNetworkPrefab(obj);
             }
             
         }
