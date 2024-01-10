@@ -66,4 +66,8 @@
     <Target Name="NetcodePatch" AfterTargets="PostBuildEvent">
         <Exec Command="dotnet netcode-patch &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')"/>
     </Target>
+
+    <Target Name="PublishThunderstore">
+        <Exec Command="dotnet tcli publish --config-path $(ProjectDir)assets/thunderstore.toml --file $(ProjectDir)dist/*.zip"/>
+    </Target>
 </Project>
