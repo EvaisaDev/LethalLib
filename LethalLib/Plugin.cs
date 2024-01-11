@@ -42,15 +42,13 @@ public class Plugin : BaseUnityPlugin
         Enemies.Init();
         Items.Init();
         Unlockables.Init();
-        MapObjects.Init();  
+        MapObjects.Init();
         Dungeon.Init();
         Weathers.Init();
         Player.Init();
         Utilities.Init();
-        LethalLib.Modules.NetworkPrefabs.Init();
-           
+        NetworkPrefabs.Init();
     }
-
 
     private void IlHook(ILContext il)
     {
@@ -72,8 +70,4 @@ public class Plugin : BaseUnityPlugin
 
         return line.ToString();
     }
-
-
-
-
 }
