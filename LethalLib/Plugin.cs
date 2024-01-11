@@ -36,7 +36,7 @@ public class Plugin : BaseUnityPlugin
 
         Logger.LogInfo($"LethalLib loaded!!");
 
-        MainAssets = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "lethallib"));
+        MainAssets = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Info.Location)!, "lethallib"));
 
         new ILHook(typeof(StackTrace).GetMethod("AddFrames", BindingFlags.Instance | BindingFlags.NonPublic), IlHook);
         Enemies.Init();
