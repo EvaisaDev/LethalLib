@@ -4,11 +4,10 @@ using UnityEngine;
 
 #endregion
 
-namespace LethalLib.Extras
+namespace LethalLib.Extras;
+
+[CreateAssetMenu(menuName = "ScriptableObjects/SpawnableOutsideObject")]
+public class SpawnableOutsideObjectDef : ScriptableObject
 {
-    [CreateAssetMenu(menuName = "ScriptableObjects/SpawnableOutsideObject")]
-    public class SpawnableOutsideObjectDef : ScriptableObject
-    {
-        public SpawnableOutsideObjectWithRarity spawnableMapObject;
-    }
+    public SpawnableOutsideObjectWithRarity spawnableMapObject;
 }

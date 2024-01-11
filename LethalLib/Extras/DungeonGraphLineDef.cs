@@ -5,11 +5,10 @@ using UnityEngine;
 
 #endregion
 
-namespace LethalLib.Extras
+namespace LethalLib.Extras;
+
+[CreateAssetMenu(menuName = "ScriptableObjects/DungeonGraphLine")]
+public class DungeonGraphLineDef : ScriptableObject
 {
-    [CreateAssetMenu(menuName = "ScriptableObjects/DungeonGraphLine")]
-    public class DungeonGraphLineDef : ScriptableObject
-    {
-        public GraphLine graphLine;
-    }
+    public GraphLine graphLine;
 }
