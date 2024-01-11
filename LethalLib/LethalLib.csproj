@@ -47,9 +47,6 @@
         <Reference Include="Unity.Netcode.Runtime" Publicize="true">
             <HintPath>$(LethalCompanyDir)Lethal Company_Data/Managed/Unity.Netcode.Runtime.dll</HintPath>
         </Reference>
-        <Reference Include="LethalCompanyInputUtils">
-            <HintPath>$(TestProfileDir)BepInEx/plugins/Rune580-LethalCompany_InputUtils/LethalCompanyInputUtils.dll</HintPath>
-        </Reference>
         <Reference Include="MMHOOK_Assembly-CSharp">
             <HintPath>$(TestProfileDir)BepInEx/plugins/MMHOOK/MMHOOK_Assembly-CSharp.dll</HintPath>
         </Reference>
@@ -57,7 +54,6 @@
 
     <ItemGroup Condition="$(CI) == 'true'">
         <PackageReference Include="LethalCompany.GameLibs.Steam" Version="49.0.0-alpha.1" Publicize="true" />
-        <PackageReference Include="Rune580.LethalCompany_InputUtils" Version="0.4.4" />
         <Reference Include="MMHOOK_Assembly-CSharp">
             <HintPath>$(ProjectDir)../lib/MMHOOK_Assembly-CSharp.dll</HintPath>
         </Reference>
