@@ -16,30 +16,17 @@ namespace LethalLib.Modules;
 /// </summary>
 public class ContentLoader
 {
-    private Dictionary<string, CustomContent> loadedContent = new Dictionary<string, CustomContent>();
     // getsetter
-    public Dictionary<string, CustomContent> LoadedContent
-    {
-        get { return loadedContent; }
-    }
+    public Dictionary<string, CustomContent> LoadedContent { get; } = new();
 
     // Main stuff
     public PluginInfo modInfo;
     AssetBundle modBundle;
-    public string modName
-    {
-        get { return modInfo.Metadata.Name; }
-    }
+    public string modName => modInfo.Metadata.Name;
 
-    public string modVersion
-    {
-        get { return modInfo.Metadata.Version.ToString(); }
-    }
+    public string modVersion => modInfo.Metadata.Version.ToString();
 
-    public string modGUID
-    {
-        get { return modInfo.Metadata.GUID; }
-    }
+    public string modGUID => modInfo.Metadata.GUID;
 
     public Action<CustomContent, GameObject> prefabCallback = (content, prefab) => { };
 
@@ -64,7 +51,7 @@ public class ContentLoader
     /// </summary>
     public void Register(CustomContent content)
     {
-        if(loadedContent.ContainsKey(content.ID))
+        if(LoadedContent.ContainsKey(content.ID))
         {
             Debug.LogError($"[LethalLib] {modName} tried to register content with ID {content.ID} but it already exists!");
             return;
@@ -197,7 +184,7 @@ public class ContentLoader
 
         }
 
-        loadedContent.Add(content.ID, content);
+        LoadedContent.Add(content.ID, content);
     }
 
     /// <summary>
