@@ -1,11 +1,12 @@
-﻿using LethalLib.Extras;
+﻿#region
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Unity.Netcode;
+using LethalLib.Extras;
 using UnityEngine;
-using static LethalLib.Modules.Items;
+
+#endregion
 
 namespace LethalLib.Modules
 {

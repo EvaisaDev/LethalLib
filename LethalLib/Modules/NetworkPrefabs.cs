@@ -1,14 +1,14 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
-using System.Text;
-using static LethalLib.Modules.Items;
-using static LethalLib.Plugin;
-using Unity.Netcode;
-using UnityEngine;
-using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
-using Object = UnityEngine.Object;
+using System.Text;
+using Unity.Netcode;
+using UnityEngine;
+
+#endregion
 
 namespace LethalLib.Modules
 {

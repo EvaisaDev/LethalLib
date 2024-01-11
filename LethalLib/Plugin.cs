@@ -1,20 +1,18 @@
-﻿using BepInEx;
+﻿#region
+
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Security.Permissions;
+using BepInEx;
 using BepInEx.Configuration;
-using GameNetcodeStuff;
-using HarmonyLib;
 using LethalLib.Modules;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Security.Permissions;
-using Unity.Netcode;
 using UnityEngine;
-using static LethalLib.Modules.Enemies;
+
+#endregion
 
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 namespace LethalLib

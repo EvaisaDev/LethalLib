@@ -1,11 +1,12 @@
-﻿using BepInEx;
-using LethalLib.Extras;
+﻿#region
+
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Unity.Netcode;
+using BepInEx;
+using LethalLib.Extras;
 using UnityEngine;
-using static LethalLib.Modules.MapObjects;
+
+#endregion
 
 namespace LethalLib.Modules
 {
@@ -46,7 +47,7 @@ namespace LethalLib.Modules
         {
             this.modInfo = modInfo;
             this.modBundle = modBundle;
-           
+
             if(prefabCallback != null)
             {
                 this.prefabCallback = prefabCallback;
@@ -107,7 +108,7 @@ namespace LethalLib.Modules
                     Items.RegisterItem(itemAsset);
                 }
 
-                
+
             }
             else if (content is Unlockable unlockable)
             {
@@ -121,7 +122,7 @@ namespace LethalLib.Modules
                 unlockable.unlockable = unlockableAsset.unlockable;
                 unlockable.registryCallback(unlockableAsset.unlockable);
 
-        
+
                 TerminalNode buyNode1 = null;
                 TerminalNode buyNode2 = null;
                 TerminalNode itemInfo = null;

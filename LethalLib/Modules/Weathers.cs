@@ -1,10 +1,12 @@
-﻿using LethalLib.Extras;
-using MonoMod.RuntimeDetour;
+﻿#region
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using static LethalLib.Modules.Items;
+using LethalLib.Extras;
+using MonoMod.RuntimeDetour;
+
+#endregion
 
 namespace LethalLib.Modules
 {

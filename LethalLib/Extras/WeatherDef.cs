@@ -1,8 +1,9 @@
-﻿using LethalLib.Modules;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿#region
+
+using LethalLib.Modules;
 using UnityEngine;
+
+#endregion
 
 namespace LethalLib.Extras
 {

@@ -1,13 +1,13 @@
-﻿using System;
+﻿#region
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using static LethalLib.Modules.Items;
-using UnityEngine;
 using System.Reflection;
 using LethalLib.Extras;
-using static LethalLib.Extras.UnlockableItemDef;
-using static LethalLib.Modules.Unlockables;
+using UnityEngine;
+using static LethalLib.Modules.Items;
+
+#endregion
 
 namespace LethalLib.Modules
 {

@@ -1,15 +1,15 @@
-﻿using DunGen;
-using DunGen.Graph;
-using LethalLib.Extras;
+﻿#region
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Xml.Linq;
+using DunGen;
+using DunGen.Graph;
+using LethalLib.Extras;
 using Unity.Netcode;
 using UnityEngine;
-using static LethalLib.Modules.Items;
+
+#endregion
 
 namespace LethalLib.Modules
 {

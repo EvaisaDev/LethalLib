@@ -1,25 +1,15 @@
-﻿using BepInEx.Logging;
-using LethalLib;
+﻿#region
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using static LethalLib.Modules.Enemies;
-using MonoMod.Cil;
-using MonoMod.RuntimeDetour;
-using System.Diagnostics;
 using System.Reflection;
-using HarmonyLib;
-using UnityEngine;
-using BepInEx.Bootstrap;
-using static LethalLib.Modules.Items;
-using System.Collections;
-using System.Reflection.Emit;
-using UnityEngine.InputSystem;
-using Object = UnityEngine.Object;
 using BepInEx.Configuration;
 using LethalLib.Extras;
-using static LethalLib.Modules.ContentLoader;
+using UnityEngine;
+using Object = UnityEngine.Object;
+
+#endregion
 
 namespace LethalLib.Modules
 {
@@ -35,7 +25,7 @@ namespace LethalLib.Modules
             scanNodePrefab = Plugin.MainAssets.LoadAsset<GameObject>("Assets/Custom/ItemScanNode.prefab");
 
             On.StartOfRound.Awake += StartOfRound_Awake;
-            
+
             On.StartOfRound.Start += StartOfRound_Start;
             On.Terminal.Awake += Terminal_Awake;
         }
@@ -175,8 +165,8 @@ namespace LethalLib.Modules
                     buyNode2.displayText = $"Ordered [variableAmount] {itemNamePlural}. Your new balance is [playerCredits].\n\nOur contractors enjoy fast, free shipping while on the job! Any purchased items will arrive hourly at your approximate location.\r\n\r\n";
                     buyNode2.clearPreviousText = true;
                     buyNode2.maxCharactersToType = 15;
-                    
-                   
+
+
                 }
                 buyNode2.buyItemIndex = itemList.Count - 1;
                 buyNode2.isConfirmationNode = false;
@@ -381,7 +371,7 @@ namespace LethalLib.Modules
                 origItem = item;
                 if (item.isScrap == false)
                 {
-    
+
                     item = item.Clone();
                     item.isScrap = true;
                     if(item.maxValue == 0 && item.minValue == 0)
@@ -606,7 +596,7 @@ namespace LethalLib.Modules
                 var allKeywords = terminal.terminalNodes.allKeywords.ToList();
                 var infoKeyword = terminal.terminalNodes.allKeywords.First(keyword => keyword.word == "info");
                 var buyKeyword = terminal.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
-               
+
 
                 var nouns = buyKeyword.compatibleNouns.ToList();
                 var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
@@ -653,7 +643,7 @@ namespace LethalLib.Modules
                         if (node.terminalOptions.Length > 0)
                         {
                             // loop through terminal options
-                            foreach (var option in node.terminalOptions) { 
+                            foreach (var option in node.terminalOptions) {
                                 if(option.result != null && option.result.buyItemIndex != -1)
                                 {
                                     option.result.itemCost = price;

@@ -1,8 +1,9 @@
-﻿using DunGen.Graph;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿#region
+
+using DunGen.Graph;
 using UnityEngine;
+
+#endregion
 
 namespace LethalLib.Extras
 {

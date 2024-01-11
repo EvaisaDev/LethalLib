@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿#region
+
 using UnityEngine;
 using Object = UnityEngine.Object;
+
+#endregion
 
 namespace LethalLib.Extras
 {

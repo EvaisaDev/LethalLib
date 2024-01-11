@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿#region
+
+using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
+
+#endregion
 
 namespace LethalLib.Modules
 {
