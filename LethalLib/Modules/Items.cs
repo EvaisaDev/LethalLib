@@ -34,10 +34,32 @@ namespace LethalLib.Modules
 
             scanNodePrefab = Plugin.MainAssets.LoadAsset<GameObject>("Assets/Custom/ItemScanNode.prefab");
 
-            On.StartOfRound.Awake += StartOfRound_Awake;
-            
             On.StartOfRound.Start += StartOfRound_Start;
             On.Terminal.Awake += Terminal_Awake;
+            On.Terminal.TextPostProcess += Terminal_TextPostProcess;
+        }
+
+        private static string Terminal_TextPostProcess(On.Terminal.orig_TextPostProcess orig, Terminal self, string modifiedDisplayText, TerminalNode node)
+        {
+            var oldItemList = self.buyableItemsList.ToList();
+            var itemList = self.buyableItemsList.ToList();
+
+            // remove any disabled items, this is horrific for performance but i do not have a better solution rn
+            itemList.RemoveAll(x => {
+                var actualItem = shopItems.FirstOrDefault(item => item.origItem == x || item.item == x);
+                if (actualItem != null)
+                {
+                    return actualItem.wasRemoved;
+                }
+                return false;
+            });
+
+            self.buyableItemsList = itemList.ToArray();
+            var output = orig(self, modifiedDisplayText, node);
+
+            self.buyableItemsList = oldItemList.ToArray();
+
+            return output;
         }
 
         public struct ItemSaveOrderData
@@ -132,149 +154,12 @@ namespace LethalLib.Modules
 
         private static void Terminal_Awake(On.Terminal.orig_Awake orig, Terminal self)
         {
-            terminal = self;
-            var itemList = self.buyableItemsList.ToList();
-
-            var buyKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
-            var cancelPurchaseNode = buyKeyword.compatibleNouns[0].result.terminalOptions[1].result;
-            var infoKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "info");
-
-
-
-            Plugin.logger.LogInfo($"Adding {shopItems.Count} items to terminal");
-            foreach (ShopItem item in shopItems)
-            {
-                if (itemList.Any((Item x) => x.itemName == item.item.itemName))
-                {
-                    Plugin.logger.LogInfo((object)("Item " + item.item.itemName + " already exists in terminal, skipping"));
-                    continue;
-                }
-
-                if (item.price == -1)
-                {
-                    item.price = item.item.creditsWorth;
-                }
-                else
-                {
-                    item.item.creditsWorth = item.price;
-                }
-
-                itemList.Add(item.item);
-
-                var itemName = item.item.itemName;
-                var lastChar = itemName[itemName.Length - 1];
-                var itemNamePlural = itemName;
-
-                var buyNode2 = item.buyNode2;
-
-                if(buyNode2 == null)
-                {
-                    buyNode2 = ScriptableObject.CreateInstance<TerminalNode>();
-
-                    buyNode2.name = $"{itemName.Replace(" ", "-")}BuyNode2";
-                    buyNode2.displayText = $"Ordered [variableAmount] {itemNamePlural}. Your new balance is [playerCredits].\n\nOur contractors enjoy fast, free shipping while on the job! Any purchased items will arrive hourly at your approximate location.\r\n\r\n";
-                    buyNode2.clearPreviousText = true;
-                    buyNode2.maxCharactersToType = 15;
-                    
-                   
-                }
-                buyNode2.buyItemIndex = itemList.Count - 1;
-                buyNode2.isConfirmationNode = false;
-                buyNode2.itemCost = item.price;
-                buyNode2.playSyncedClip = 0;
-
-                var buyNode1 = item.buyNode1;
-                if (buyNode1 == null)
-                {
-                    buyNode1 = ScriptableObject.CreateInstance<TerminalNode>();
-                    buyNode1.name = $"{itemName.Replace(" ", "-")}BuyNode1";
-                    buyNode1.displayText = $"You have requested to order {itemNamePlural}. Amount: [variableAmount].\nTotal cost of items: [totalCost].\n\nPlease CONFIRM or DENY.\r\n\r\n";
-                    buyNode1.clearPreviousText = true;
-                    buyNode1.maxCharactersToType = 35;
-                }
-
-                buyNode1.buyItemIndex = itemList.Count - 1;
-                buyNode1.isConfirmationNode = true;
-                buyNode1.overrideOptions = true;
-                buyNode1.itemCost = item.price;
-                buyNode1.terminalOptions = new CompatibleNoun[2]
-                {
-                    new CompatibleNoun()
-                    {
-                        noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "confirm"),
-                        result = buyNode2
-                    },
-                    new CompatibleNoun()
-                    {
-                        noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "deny"),
-                        result = cancelPurchaseNode
-                    }
-                };
-
-                var keyword = TerminalUtils.CreateTerminalKeyword(itemName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: buyKeyword);
-
-                //self.terminalNodes.allKeywords.AddItem(keyword);
-                var allKeywords = self.terminalNodes.allKeywords.ToList();
-                allKeywords.Add(keyword);
-                self.terminalNodes.allKeywords = allKeywords.ToArray();
-
-                var nouns = buyKeyword.compatibleNouns.ToList();
-                nouns.Add(new CompatibleNoun()
-                {
-                    noun = keyword,
-                    result = buyNode1
-                });
-                buyKeyword.compatibleNouns = nouns.ToArray();
-
-
-                var itemInfo = item.itemInfo;
-                if (itemInfo == null)
-                {
-                    itemInfo = ScriptableObject.CreateInstance<TerminalNode>();
-                    itemInfo.name = $"{itemName.Replace(" ", "-")}InfoNode";
-                    itemInfo.displayText = $"[No information about this object was found.]\n\n";
-                    itemInfo.clearPreviousText = true;
-                    itemInfo.maxCharactersToType = 25;
-                }
-
-                self.terminalNodes.allKeywords = allKeywords.ToArray();
-
-                var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
-                itemInfoNouns.Add(new CompatibleNoun()
-                {
-                    noun = keyword,
-                    result = itemInfo
-                });
-                infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
-
-                BuyableItemAssetInfo buyableItemAssetInfo = new BuyableItemAssetInfo()
-                {
-                    itemAsset = item.item,
-                    keyword = keyword
-                };
-
-                buyableItemAssetInfos.Add(buyableItemAssetInfo);
-            }
-
-            self.buyableItemsList = itemList.ToArray();
-
-            orig(self);
-        }
-
-        public static List<ScrapItem> scrapItems = new List<ScrapItem>();
-        public static List<ShopItem> shopItems = new List<ShopItem>();
-        public static List<PlainItem> plainItems = new List<PlainItem>();
-
-
-
-        private static void StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
-        {
-            orig(self);
+            var startOfRound = StartOfRound.Instance;
 
             foreach (ScrapItem scrapItem in scrapItems)
             {
 
-                foreach (SelectableLevel level in self.levels)
+                foreach (SelectableLevel level in startOfRound.levels)
                 {
                     var name = level.name;
 
@@ -307,49 +192,49 @@ namespace LethalLib.Modules
                 }
             }
 
-           // self.allItemsList.itemsList.RemoveAll(x => LethalLibItemList.Contains(x));
+            // startOfRound.allItemsList.itemsList.RemoveAll(x => LethalLibItemList.Contains(x));
 
             foreach (ScrapItem scrapItem in scrapItems)
             {
-                if (!self.allItemsList.itemsList.Contains(scrapItem.item))
+                if (!startOfRound.allItemsList.itemsList.Contains(scrapItem.item))
                 {
                     if (scrapItem.modName != "LethalLib")
                     {
-                        Plugin.logger.LogInfo($"{scrapItem.modName} registered item: {scrapItem.item.itemName}");
+                        Plugin.logger.LogInfo($"{scrapItem.modName} registered scrap item: {scrapItem.item.itemName}");
                     }
                     else
                     {
-                        Plugin.logger.LogInfo($"Registered item: {scrapItem.item.itemName}");
+                        Plugin.logger.LogInfo($"Registered scrap item: {scrapItem.item.itemName}");
                     }
 
                     LethalLibItemList.Add(scrapItem.item);
 
-                    self.allItemsList.itemsList.Add(scrapItem.item);
+                    startOfRound.allItemsList.itemsList.Add(scrapItem.item);
                 }
             }
 
             foreach (ShopItem shopItem in shopItems)
             {
-                if (!self.allItemsList.itemsList.Contains(shopItem.item))
+                if (!startOfRound.allItemsList.itemsList.Contains(shopItem.item))
                 {
                     if (shopItem.modName != "LethalLib")
                     {
-                        Plugin.logger.LogInfo($"{shopItem.modName} registered item: {shopItem.item.itemName}");
+                        Plugin.logger.LogInfo($"{shopItem.modName} registered shop item: {shopItem.item.itemName}");
                     }
                     else
                     {
-                        Plugin.logger.LogInfo($"Registered item: {shopItem.item.itemName}");
+                        Plugin.logger.LogInfo($"Registered shop item: {shopItem.item.itemName}");
                     }
 
                     LethalLibItemList.Add(shopItem.item);
 
-                    self.allItemsList.itemsList.Add(shopItem.item);
+                    startOfRound.allItemsList.itemsList.Add(shopItem.item);
                 }
             }
 
             foreach (PlainItem plainItem in plainItems)
             {
-                if (!self.allItemsList.itemsList.Contains(plainItem.item))
+                if (!startOfRound.allItemsList.itemsList.Contains(plainItem.item))
                 {
                     if (plainItem.modName != "LethalLib")
                     {
@@ -362,10 +247,174 @@ namespace LethalLib.Modules
 
                     LethalLibItemList.Add(plainItem.item);
 
-                    self.allItemsList.itemsList.Add(plainItem.item);
+                    startOfRound.allItemsList.itemsList.Add(plainItem.item);
                 }
             }
+
+
+
+            terminal = self;
+            var itemList = self.buyableItemsList.ToList();
+
+            var buyKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
+            var cancelPurchaseNode = buyKeyword.compatibleNouns[0].result.terminalOptions[1].result;
+            var infoKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "info");
+
+
+
+            Plugin.logger.LogInfo($"Adding {shopItems.Count} items to terminal");
+            foreach (ShopItem item in shopItems)
+            {
+                if (itemList.Any((Item x) => x.itemName == item.item.itemName) && !item.wasRemoved)
+                {
+                    Plugin.logger.LogInfo((object)("Item " + item.item.itemName + " already exists in terminal, skipping"));
+                    continue;
+                }
+
+                item.wasRemoved = false;
+
+                if (item.price == -1)
+                {
+                    item.price = item.item.creditsWorth;
+                }
+                else
+                {
+                    item.item.creditsWorth = item.price;
+                }
+
+                var oldIndex = -1;
+
+                if (!itemList.Any((Item x) => x == item.item))
+                {
+                    itemList.Add(item.item);
+                }
+                else
+                {
+                    oldIndex = itemList.IndexOf(item.item);
+                }
+
+                var newIndex = oldIndex == -1 ? itemList.Count - 1 : oldIndex;
+
+                var itemName = item.item.itemName;
+                var lastChar = itemName[itemName.Length - 1];
+                var itemNamePlural = itemName;
+
+                Plugin.logger.LogInfo($"Adding {itemName} to terminal");
+
+                var buyNode2 = item.buyNode2;
+
+                if(buyNode2 == null)
+                {
+                    buyNode2 = ScriptableObject.CreateInstance<TerminalNode>();
+
+                    buyNode2.name = $"{itemName.Replace(" ", "-")}BuyNode2";
+                    buyNode2.displayText = $"Ordered [variableAmount] {itemNamePlural}. Your new balance is [playerCredits].\n\nOur contractors enjoy fast, free shipping while on the job! Any purchased items will arrive hourly at your approximate location.\r\n\r\n";
+                    buyNode2.clearPreviousText = true;
+                    buyNode2.maxCharactersToType = 15;
+
+                    Plugin.logger.LogInfo($"Generating buynode2");
+
+                }
+
+                buyNode2.buyItemIndex = newIndex;
+                buyNode2.isConfirmationNode = false;
+                buyNode2.itemCost = item.price;
+                buyNode2.playSyncedClip = 0;
+
+                Plugin.logger.LogInfo($"Item price: {buyNode2.itemCost}, Item index: {buyNode2.buyItemIndex}");
+
+                var buyNode1 = item.buyNode1;
+                if (buyNode1 == null)
+                {
+                    buyNode1 = ScriptableObject.CreateInstance<TerminalNode>();
+                    buyNode1.name = $"{itemName.Replace(" ", "-")}BuyNode1";
+                    buyNode1.displayText = $"You have requested to order {itemNamePlural}. Amount: [variableAmount].\nTotal cost of items: [totalCost].\n\nPlease CONFIRM or DENY.\r\n\r\n";
+                    buyNode1.clearPreviousText = true;
+                    buyNode1.maxCharactersToType = 35;
+
+                    Plugin.logger.LogInfo($"Generating buynode1");
+                    
+                }
+
+                buyNode1.buyItemIndex = newIndex;
+                buyNode1.isConfirmationNode = true;
+                buyNode1.overrideOptions = true;
+                buyNode1.itemCost = item.price;
+
+                Plugin.logger.LogInfo($"Item price: {buyNode1.itemCost}, Item index: {buyNode1.buyItemIndex}");
+
+                buyNode1.terminalOptions = new CompatibleNoun[2]
+                {
+                    new CompatibleNoun()
+                    {
+                        noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "confirm"),
+                        result = buyNode2
+                    },
+                    new CompatibleNoun()
+                    {
+                        noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "deny"),
+                        result = cancelPurchaseNode
+                    }
+                };
+
+                var keyword = TerminalUtils.CreateTerminalKeyword(itemName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: buyKeyword);
+
+                Plugin.logger.LogInfo($"Generated keyword: {keyword.word}");
+
+                //self.terminalNodes.allKeywords.AddItem(keyword);
+                var allKeywords = self.terminalNodes.allKeywords.ToList();
+                allKeywords.Add(keyword);
+                self.terminalNodes.allKeywords = allKeywords.ToArray();
+
+                var nouns = buyKeyword.compatibleNouns.ToList();
+                nouns.Add(new CompatibleNoun()
+                {
+                    noun = keyword,
+                    result = buyNode1
+                });
+                buyKeyword.compatibleNouns = nouns.ToArray();
+
+
+                var itemInfo = item.itemInfo;
+                if (itemInfo == null)
+                {
+                    itemInfo = ScriptableObject.CreateInstance<TerminalNode>();
+                    itemInfo.name = $"{itemName.Replace(" ", "-")}InfoNode";
+                    itemInfo.displayText = $"[No information about this object was found.]\n\n";
+                    itemInfo.clearPreviousText = true;
+                    itemInfo.maxCharactersToType = 25;
+
+                    Plugin.logger.LogInfo($"Generated item info!!");
+                }
+
+                self.terminalNodes.allKeywords = allKeywords.ToArray();
+
+                var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
+                itemInfoNouns.Add(new CompatibleNoun()
+                {
+                    noun = keyword,
+                    result = itemInfo
+                });
+                infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
+
+                BuyableItemAssetInfo buyableItemAssetInfo = new BuyableItemAssetInfo()
+                {
+                    itemAsset = item.item,
+                    keyword = keyword
+                };
+
+                buyableItemAssetInfos.Add(buyableItemAssetInfo);
+            }
+
+            self.buyableItemsList = itemList.ToArray();
+
+            orig(self);
         }
+
+        public static List<ScrapItem> scrapItems = new List<ScrapItem>();
+        public static List<ShopItem> shopItems = new List<ShopItem>();
+        public static List<PlainItem> plainItems = new List<PlainItem>();
+
 
         public class ScrapItem
         {
@@ -442,6 +491,7 @@ namespace LethalLib.Modules
             public TerminalNode buyNode1;
             public TerminalNode buyNode2;
             public TerminalNode itemInfo;
+            public bool wasRemoved = false;
             public int price;
             public string modName;
             public ShopItem(Item item, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = 0)
@@ -599,9 +649,14 @@ namespace LethalLib.Modules
             {
                 var actualItem = shopItems.FirstOrDefault(x => x.origItem == shopItem || x.item == shopItem);
 
+                // do not remove from list because it fucks up the indexes
+                /*
                 var itemList = terminal.buyableItemsList.ToList();
                 itemList.RemoveAll(x => x == actualItem.item);
                 terminal.buyableItemsList = itemList.ToArray();
+                */
+                
+                actualItem.wasRemoved = true;
 
                 var allKeywords = terminal.terminalNodes.allKeywords.ToList();
                 var infoKeyword = terminal.terminalNodes.allKeywords.First(keyword => keyword.word == "info");

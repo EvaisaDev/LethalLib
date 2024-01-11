@@ -8,6 +8,7 @@ using System.Reflection;
 using LethalLib.Extras;
 using static LethalLib.Extras.UnlockableItemDef;
 using static LethalLib.Modules.Unlockables;
+using static LethalLib.Modules.ContentLoader;
 
 namespace LethalLib.Modules
 {
@@ -44,8 +45,7 @@ namespace LethalLib.Modules
 
         public static void Init()
         {
-            On.StartOfRound.Awake += StartOfRound_Awake;
-            On.Terminal.Start += Terminal_Start;
+            On.Terminal.Awake += Terminal_Awake;
             On.Terminal.TextPostProcess += Terminal_TextPostProcess;
         }
 
@@ -86,8 +86,30 @@ namespace LethalLib.Modules
 
         public static List<BuyableUnlockableAssetInfo> buyableUnlockableAssetInfos = new List<BuyableUnlockableAssetInfo>();
 
-        private static void Terminal_Start(On.Terminal.orig_Start orig, Terminal self)
+        private static void Terminal_Awake(On.Terminal.orig_Awake orig, Terminal self)
         {
+            var startOfRound = StartOfRound.Instance;
+
+            Plugin.logger.LogInfo($"Adding {registeredUnlockables.Count} unlockables to unlockables list");
+            foreach (var unlockable in registeredUnlockables)
+            {
+                if (startOfRound.unlockablesList.unlockables.Any((UnlockableItem x) => x.unlockableName == unlockable.unlockable.unlockableName))
+                {
+                    Plugin.logger.LogInfo((object)("Unlockable " + unlockable.unlockable.unlockableName + " already exists in unlockables list, skipping"));
+                    continue;
+                }
+
+
+                if (unlockable.unlockable.prefabObject != null)
+                {
+                    var placeable = unlockable.unlockable.prefabObject.GetComponentInChildren<PlaceableShipObject>();
+                    if (placeable != null)
+                    {
+                        placeable.unlockableID = startOfRound.unlockablesList.unlockables.Count;
+                    }
+                }
+                startOfRound.unlockablesList.unlockables.Add(unlockable.unlockable);
+            }
 
             var buyKeyword = self.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
             var cancelPurchaseNode = buyKeyword.compatibleNouns[0].result.terminalOptions[1].result;
@@ -120,7 +142,7 @@ namespace LethalLib.Modules
                     Debug.Log("STARTOFROUND INSTANCE NOT FOUND");
                 }
 
-
+                item.disabled = false;
                 
                if (item.price == -1 && item.buyNode1 != null)
                {
@@ -238,32 +260,7 @@ namespace LethalLib.Modules
             orig(self);
         }
 
-        private static void StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
-        {
-            orig(self);
-            // add unlockables
-            Plugin.logger.LogInfo($"Adding {registeredUnlockables.Count} unlockables to unlockables list");
-            foreach(var unlockable in registeredUnlockables)
-            {
-                unlockable.disabled = false;
-                if (self.unlockablesList.unlockables.Any((UnlockableItem x) => x.unlockableName == unlockable.unlockable.unlockableName))
-                {
-                    Plugin.logger.LogInfo((object)("Unlockable " + unlockable.unlockable.unlockableName + " already exists in unlockables list, skipping"));
-                    continue;
-                }
 
-
-                if (unlockable.unlockable.prefabObject != null)
-                {
-                    var placeable = unlockable.unlockable.prefabObject.GetComponentInChildren<PlaceableShipObject>();
-                    if(placeable != null)
-                    {
-                        placeable.unlockableID = self.unlockablesList.unlockables.Count;
-                    }
-                }
-                self.unlockablesList.unlockables.Add(unlockable.unlockable);
-            }
-        }
 
         ///<summary>
         ///Registers a unlockable.
@@ -307,7 +304,6 @@ namespace LethalLib.Modules
         ///Removes a unlockable.
         ///This needs to be called after StartOfRound.Awake, can be used for config sync.
         ///This is prone to breaking saves.
-        ///Does not currently handle removing the terminal keywords.
         /// </summary>
         public static void DisableUnlockable(UnlockableItemDef unlockable)
         {
@@ -318,18 +314,34 @@ namespace LethalLib.Modules
         ///Removes a unlockable.
         ///This needs to be called after StartOfRound.Awake, can be used for config sync.
         ///This is prone to breaking saves.
-        ///Does not currently handle removing the terminal keywords.
         /// </summary>
         public static void DisableUnlockable(UnlockableItem unlockable)
         {
-            var registeredUnlockable = registeredUnlockables.Find(unlock => unlock.unlockable == unlockable);
-            if(registeredUnlockable != null)
+            if (StartOfRound.Instance != null)
             {
+                var allKeywords = terminal.terminalNodes.allKeywords.ToList();
+                var infoKeyword = terminal.terminalNodes.allKeywords.First(keyword => keyword.word == "info");
+                var buyKeyword = terminal.terminalNodes.allKeywords.First(keyword => keyword.word == "buy");
+                var cancelPurchaseNode = buyKeyword.compatibleNouns[0].result.terminalOptions[1].result;
+                var nouns = buyKeyword.compatibleNouns.ToList();
+                var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
+                RegisteredUnlockable registeredUnlockable = registeredUnlockables.Find(unlock => unlock.unlockable == unlockable);
+
                 registeredUnlockable.disabled = true;
-                if(StartOfRound.Instance != null)
+
+                if (buyableUnlockableAssetInfos.Any(x => x.itemAsset == unlockable))
                 {
-                    StartOfRound.Instance.unlockablesList.unlockables.Remove(registeredUnlockable.unlockable);
+
+
+                    var asset = buyableUnlockableAssetInfos.First(x => x.itemAsset == unlockable);
+                    allKeywords.Remove(asset.keyword);
+
+                    nouns.RemoveAll(noun => noun.noun == asset.keyword);
+                    itemInfoNouns.RemoveAll(noun => noun.noun == asset.keyword);
                 }
+                terminal.terminalNodes.allKeywords = allKeywords.ToArray();
+                buyKeyword.compatibleNouns = nouns.ToArray();
+                infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
             }
         }
 

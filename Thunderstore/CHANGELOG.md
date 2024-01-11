@@ -1,3 +1,6 @@
+# LethalLib 0.11.2
+- (Hopefully) Fixed issue with Terminal, where when a mod was disabling a shop item, all the shop items after it would mess up their orders.
+
 # LethalLib 0.11.1
 - Added check to RegisterNetworkPrefab, to prevent a prefab from being registered multiple times.
 

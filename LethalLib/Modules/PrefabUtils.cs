@@ -50,6 +50,7 @@ namespace LethalLib.Modules
         {
             var prefab = new GameObject(name);
             prefab.hideFlags = HideFlags.HideAndDontSave;
+
             prefab.transform.SetParent(prefabParent.transform);
 
             return prefab;
