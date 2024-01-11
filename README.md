@@ -1,6 +1,6 @@
 # LethalLib
 
-[![GitHub Build Status](https://img.shields.io/github/actions/workflow/status/lordfirespeed/lethallib/build.yml?style=for-the-badge&logo=github)](https://github.com/Lordfirespeed/lethallib/actions/workflows/build.yml)
+[![GitHub Build Status](https://img.shields.io/github/actions/workflow/status/evaisadev/lethallib/build.yml?style=for-the-badge&logo=github)](https://github.com/evaisadev/lethallib/actions/workflows/build.yml)
 [![Thunderstore Version](https://img.shields.io/thunderstore/v/Evaisa/LethalLib?style=for-the-badge&logo=thunderstore&logoColor=white)](https://thunderstore.io/c/lethal-company/p/Evaisa/LethalLib/)
 [![Thunderstore Downloads](https://img.shields.io/thunderstore/dt/Evaisa/LethalLib?style=for-the-badge&logo=thunderstore&logoColor=white)](https://thunderstore.io/c/lethal-company/p/Evaisa/LethalLib/)
 
