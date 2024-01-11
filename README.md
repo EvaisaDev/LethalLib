@@ -1,35 +1,66 @@
-# LethalLib  
+# LethalLib
+
+[![GitHub Build Status](https://img.shields.io/github/actions/workflow/status/lordfirespeed/lethallib/build.yml?style=for-the-badge&logo=github)](https://github.com/Lordfirespeed/lethallib/actions/workflows/build.yml)
+[![Thunderstore Version](https://img.shields.io/thunderstore/v/Evaisa/LethalLib?style=for-the-badge&logo=thunderstore&logoColor=white)](https://thunderstore.io/c/lethal-company/p/Evaisa/LethalLib/)
+[![Thunderstore Downloads](https://img.shields.io/thunderstore/dt/Evaisa/LethalLib?style=for-the-badge&logo=thunderstore&logoColor=white)](https://thunderstore.io/c/lethal-company/p/Evaisa/LethalLib/)
+
 **A library for adding new content to Lethal Company, mainly for personal use.**
-  
-https://thunderstore.io/c/lethal-company/p/Evaisa/LethalLib/
-  
-Currently includes:   
-- Custom Scrap Item API  
-- Custom Shop Item API  
-- Unlockables API  
+
+## Features
+
+Currently includes:
+- Custom Scrap Item API
+- Custom Shop Item API
+- Unlockables API
 - Map Objects API
 - Dungeon API
-- Custom Enemy API  
-- Network Prefab API  
-- Weather API  
+- Custom Enemy API
+- Network Prefab API
+- Weather API
 
-# LethalLib 0.10.0
-# LethalLib 0.10.0
-- [**BREAKING CHANGE**] Added save system patch which attempts to keep the items array in the same order, so that items don't change when you load an old save after mods have updated.  
-	- This will likely break all existing saves.
-- Added Intellisense comments to all API functions.
-- Added method: Enemies.RemoveEnemyFromLevels()
-- Added method: Items.RemoveScrapFromLevels()
-- Added method: Items.RemoveShopItem()
-- Added method: Items.UpdateShopItemPrice()
-- Added method: Unlockables.DisableUnlockable()
-- Added method: Unlockables.UpdateUnlockablePrice()
-- Added method: Weathers.RemoveWeather()
-- Added method: MapObjects.RemoveMapObject()
-- Added method: MapObjects.RemoveOutsideObject()
-- Added Module: ContentLoader
-	- This acts as an alternative way to register content, abstracting some extra stuff away such as network registry and asset loading.  
-- Added Module: Player  
-	- Added method: RegisterPlayerRagdoll()  
-	- Added method: GetRagdollIndex()  
-	- Added method: GetRagdoll()  
+## Changes
+
+See the [changelog](https://github.com/EvaisaDev/LethalLib/blob/main/CHANGELOG.md) for changes by-version and unreleased changes.
+
+## Contributing
+
+### Fork & Clone
+
+Fork the repository on GitHub and clone your fork locally.
+
+### Configure Git hooks & `post-checkout`
+
+Configure the Git hooks directory for your local copy of the repository:
+```sh
+git config core.hooksPath hooks/
+```
+
+Alternatively, you can create symbolic links in `.git/hooks/*` that point to `../hooks/*`.
+
+Then re-checkout to trigger the `post-checkout` hook:
+```sh
+git checkout main
+```
+
+### `LethalLib.csproj.user`
+You will need to create a `LethalLib/LethalLib.csproj.user` file to provide your Lethal Company game directory path.
+
+#### Template
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <LethalCompanyDir>C:/Program Files (x86)/Steam/steamapps/common/Lethal Company/</LethalCompanyDir>
+        <TestProfileDir>$(APPDATA)/r2modmanPlus-local/LethalCompany/profiles/Test LethalLib/</TestProfileDir>
+    </PropertyGroup>
+
+    <!-- Enable by setting the Condition attribute to "true". *nix users should switch out `copy` for `cp`. -->
+    <Target Name="CopyToTestProfile" DependsOnTargets="NetcodePatch" AfterTargets="PostBuildEvent" Condition="false">
+        <MakeDir
+                Directories="$(TestProfileDir)BepInEx/plugins/Evaisa-LethalLib/LethalLib"
+                Condition="!Exists('$(TestProfileDir)BepInEx/plugins/Evaisa-LethalLib/LethalLib')"
+        />
+        <Exec Command="copy &amp;quot;$(TargetPath)&amp;quot; &amp;quot;$(TestProfileDir)BepInEx/plugins/Evaisa-LethalLib/LethalLib/&amp;quot;" />
+    </Target>
+</Project>
+```

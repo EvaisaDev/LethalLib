@@ -1,0 +1,25 @@
+<Project>
+    <PropertyGroup>
+        <Authors>Evaisa</Authors>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/EvaisaDev/LethalLib</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/EvaisaDev/LethalLib</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+
+    <!-- MinVer -->
+    <PropertyGroup>
+        <MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
+        <MinVerTagPrefix>v</MinVerTagPrefix>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="MinVer" Version="4.3.0">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+</Project>
