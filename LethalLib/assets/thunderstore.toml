@@ -20,7 +20,7 @@ readme = "../../README.md"
 outdir = "../dist"
 
 [[build.copy]]
-source = "../bin/Release/netstandard2.1/evaisa.lethallib.dll"
+source = "../bin/Release/netstandard2.1/LethalLib.dll"
 target = "plugins/LethalLib/"
 
 [[build.copy]]
