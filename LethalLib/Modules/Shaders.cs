@@ -1,24 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿#region
+
 using UnityEngine;
 
-namespace LethalLib.Modules
-{
-    public class Shaders
-    {
+#endregion
 
-        public static void FixShaders(GameObject gameObject)
+namespace LethalLib.Modules;
+
+public class Shaders
+{
+
+    public static void FixShaders(GameObject gameObject)
+    {
+        foreach (var renderer in gameObject.GetComponentsInChildren<Renderer>())
         {
-            foreach (var renderer in gameObject.GetComponentsInChildren<Renderer>())
+            foreach (var material in renderer.materials)
             {
-                foreach (var material in renderer.materials)
+                if (material.shader.name.Contains("Standard"))
                 {
-                    if (material.shader.name.Contains("Standard"))
-                    {
-                        // ge
-                        material.shader = Shader.Find("HDRP/Lit");
-                    }
+                    // ge
+                    material.shader = Shader.Find("HDRP/Lit");
                 }
             }
         }

@@ -7,13 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> [!WARNING]
+> Includes breaking changes!
+
 ### Added
 
 ### Fixed
 
 ### Changed
 
+- Assembly name `LethalLib.dll` -> `evaisa.lethallib.dll`
+
 ### Removed
+
+## LethalLib [0.11.2]
+
+### Fixed
+
+- (to verify) Issue with Terminal, where when a mod was disabling a shop item,
+  all the shop items after it would mess up their orders.
 
 ## LethalLib [0.11.1]
 
@@ -36,16 +48,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Behaviour for Items module
-  - When a scrap item is registered as a shop item, the LethalLib 
+  - When a scrap item is registered as a shop item, the LethalLib
     will now automatically create a copy and switch the IsScrap value.
-  - When a shop item is registered as a scrap, the LethalLib will now 
+  - When a shop item is registered as a scrap, the LethalLib will now
     automatically create a copy, assign sell values, set IsScrap to true, and add a scan node.
 
 ## LethalLib [0.10.4]
 
 ### Added
 
-- Additional error logging and prevented an exception when 
+- Additional error logging and prevented an exception when
   a custom dungeon RandomMapObject had an invalid prefab assigned.
 
 ### Removed
@@ -75,7 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Save system patch which attempts to keep the items array in the same order, 
+- Save system patch which attempts to keep the items array in the same order,
   so that items don't change when you load an old save after mods have updated.
   - This will likely break all existing saves.
 - Intellisense comments to all API functions.
@@ -89,9 +101,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Method: MapObjects.RemoveMapObject()
 - Method: MapObjects.RemoveOutsideObject()
 - Added Module: ContentLoader
-  - This acts as an alternative way to register content, abstracting 
+  - This acts as an alternative way to register content, abstracting
     some extra stuff away such as network registry and asset loading.
 - Added Module: Player
   - Method: RegisterPlayerRagdoll()
   - Method: GetRagdollIndex()
-  - Method: GetRagdoll()  
+  - Method: GetRagdoll()

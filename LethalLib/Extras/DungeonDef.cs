@@ -1,17 +1,17 @@
-﻿using DunGen.Graph;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿#region
+
+using DunGen.Graph;
 using UnityEngine;
 
-namespace LethalLib.Extras
+#endregion
+
+namespace LethalLib.Extras;
+
+[CreateAssetMenu(menuName = "ScriptableObjects/DungeonDef")]
+public class DungeonDef : ScriptableObject
 {
-    [CreateAssetMenu(menuName = "ScriptableObjects/DungeonDef")]
-    public class DungeonDef : ScriptableObject
-    {
-        public DungeonFlow dungeonFlow;
-        [Range(0f, 300f)]
-        public int rarity;
-        public AudioClip firstTimeDungeonAudio;
-    }
+    public DungeonFlow dungeonFlow;
+    [Range(0f, 300f)]
+    public int rarity;
+    public AudioClip firstTimeDungeonAudio;
 }

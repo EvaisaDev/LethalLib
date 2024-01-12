@@ -1,14 +1,13 @@
-﻿using LethalLib.Modules;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿#region
+
 using UnityEngine;
 
-namespace LethalLib.Extras
+#endregion
+
+namespace LethalLib.Extras;
+
+[CreateAssetMenu(menuName = "ScriptableObjects/SpawnableMapObject")]
+public class SpawnableMapObjectDef : ScriptableObject
 {
-    [CreateAssetMenu(menuName = "ScriptableObjects/SpawnableMapObject")]
-    public class SpawnableMapObjectDef : ScriptableObject
-    {
-        public SpawnableMapObject spawnableMapObject;
-    }
+    public SpawnableMapObject spawnableMapObject;
 }

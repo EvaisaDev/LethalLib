@@ -7,6 +7,12 @@
       "commands": [
         "netcode-patch"
       ]
+    },
+    "tcli": {
+      "version": "0.2.3",
+      "commands": [
+        "tcli"
+      ]
     }
   }
 }

@@ -1,80 +1,79 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
-using System.Text;
-using static LethalLib.Modules.Items;
-using static LethalLib.Plugin;
-using Unity.Netcode;
-using UnityEngine;
-using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
-using Object = UnityEngine.Object;
+using System.Text;
+using Unity.Netcode;
+using UnityEngine;
 
-namespace LethalLib.Modules
+#endregion
+
+namespace LethalLib.Modules;
+
+public class NetworkPrefabs
 {
-    public class NetworkPrefabs
+
+
+    private static List<GameObject> _networkPrefabs = new List<GameObject>();
+    internal static void Init()
     {
+        On.GameNetworkManager.Start += GameNetworkManager_Start;
+    }
+
+    /// <summary>
+    /// Registers a prefab to be added to the network manager.
+    /// </summary>
+    public static void RegisterNetworkPrefab(GameObject prefab)
+    {
+        if(!_networkPrefabs.Contains(prefab))
+            _networkPrefabs.Add(prefab);
+    }
+
+    /// <summary>
+    /// Creates a network prefab programmatically and registers it with the network manager.
+    /// Credit to Day and Xilo.
+    /// </summary>
+    public static GameObject CreateNetworkPrefab(string name)
+    {
+        var prefab = PrefabUtils.CreatePrefab(name);
+        prefab.AddComponent<NetworkObject>();
+
+        var hash = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(Assembly.GetCallingAssembly().GetName().Name + name));
+
+        prefab.GetComponent<NetworkObject>().GlobalObjectIdHash = BitConverter.ToUInt32(hash, 0);
+
+        RegisterNetworkPrefab(prefab);
+        return prefab;
+    }
+
+    /// <summary>
+    /// Clones a network prefab programmatically and registers it with the network manager.
+    /// Credit to Day and Xilo.
+    /// </summary>
+    public static GameObject CloneNetworkPrefab(GameObject prefabToClone, string newName = null)
+    {
+        var prefab = PrefabUtils.ClonePrefab(prefabToClone, newName);
+
+        var hash = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(Assembly.GetCallingAssembly().GetName().Name + prefab.name));
+
+        prefab.GetComponent<NetworkObject>().GlobalObjectIdHash = BitConverter.ToUInt32(hash, 0);
+
+        RegisterNetworkPrefab(prefab);
+        return prefab;
+    }
 
 
-        private static List<GameObject> _networkPrefabs = new List<GameObject>();
-        internal static void Init()
+    private static void GameNetworkManager_Start(On.GameNetworkManager.orig_Start orig, GameNetworkManager self)
+    {
+        orig(self);
+
+        foreach (GameObject obj in _networkPrefabs)
         {
-            On.GameNetworkManager.Start += GameNetworkManager_Start;
+            if(!NetworkManager.Singleton.NetworkConfig.Prefabs.Contains(obj))
+                NetworkManager.Singleton.AddNetworkPrefab(obj);
         }
-
-        /// <summary>
-        /// Registers a prefab to be added to the network manager.
-        /// </summary>
-        public static void RegisterNetworkPrefab(GameObject prefab)
-        {
-            if(!_networkPrefabs.Contains(prefab))
-                _networkPrefabs.Add(prefab);
-        }
-
-        /// <summary>
-        /// Creates a network prefab programmatically and registers it with the network manager.
-        /// Credit to Day and Xilo.
-        /// </summary>
-        public static GameObject CreateNetworkPrefab(string name)
-        {
-            var prefab = PrefabUtils.CreatePrefab(name);
-            prefab.AddComponent<NetworkObject>();
-
-            var hash = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(Assembly.GetCallingAssembly().GetName().Name + name));
-
-            prefab.GetComponent<NetworkObject>().GlobalObjectIdHash = BitConverter.ToUInt32(hash, 0);
-
-            RegisterNetworkPrefab(prefab);
-            return prefab;
-        }
-
-        /// <summary>
-        /// Clones a network prefab programmatically and registers it with the network manager.
-        /// Credit to Day and Xilo.
-        /// </summary>
-        public static GameObject CloneNetworkPrefab(GameObject prefabToClone, string newName = null)
-        {
-            var prefab = PrefabUtils.ClonePrefab(prefabToClone, newName);
-
-            var hash = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(Assembly.GetCallingAssembly().GetName().Name + prefab.name));
-
-            prefab.GetComponent<NetworkObject>().GlobalObjectIdHash = BitConverter.ToUInt32(hash, 0);
-
-            RegisterNetworkPrefab(prefab);
-            return prefab;
-        }
-
-
-        private static void GameNetworkManager_Start(On.GameNetworkManager.orig_Start orig, GameNetworkManager self)
-        {
-            orig(self);
-
-            foreach (GameObject obj in _networkPrefabs)
-            {
-                if(!NetworkManager.Singleton.NetworkConfig.Prefabs.Contains(obj))
-                    NetworkManager.Singleton.AddNetworkPrefab(obj);
-            }
             
-        }
     }
 }
