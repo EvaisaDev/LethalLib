@@ -3,6 +3,7 @@
 [![GitHub Build Status](https://img.shields.io/github/actions/workflow/status/evaisadev/lethallib/build.yml?style=for-the-badge&logo=github)](https://github.com/evaisadev/lethallib/actions/workflows/build.yml)
 [![Thunderstore Version](https://img.shields.io/thunderstore/v/Evaisa/LethalLib?style=for-the-badge&logo=thunderstore&logoColor=white)](https://thunderstore.io/c/lethal-company/p/Evaisa/LethalLib/)
 [![Thunderstore Downloads](https://img.shields.io/thunderstore/dt/Evaisa/LethalLib?style=for-the-badge&logo=thunderstore&logoColor=white)](https://thunderstore.io/c/lethal-company/p/Evaisa/LethalLib/)
+[![NuGet Version](https://img.shields.io/nuget/v/evaisa.lethallib?style=for-the-badge&logo=nuget)](https://www.nuget.org/packages/Evaisa.LethalLib) 
 
 **A library for adding new content to Lethal Company, mainly for personal use.**
 
