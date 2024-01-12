@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## LethalLib [0.12.1]
+
+### Fixed
+
+- Reverted function signature changes for backwards compatibility reasons.
+- Readded some removed properties (These do not do anything now but they are there to prevent old mods from dying.)
+
 ## LethalLib [0.12.0]
 
 > [!WARNING]
