@@ -5,20 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## LethalLib [0.12.0]
 
 > [!WARNING]
-> Includes breaking changes!
+> Includes potentially breaking changes!
 
 ### Added
-
-### Fixed
+- Ability to pass rarity dictionaries for registering scrap items.
 
 ### Changed
-
-- Assembly name `LethalLib.dll` -> `evaisa.lethallib.dll`
-
-### Removed
+- Cleaned up git repo slightly.  
+- Internal changes to the way scrap items are added to levels.  
+- When registering the same scrap item multiple times it will be merged with the previous ones.  
 
 ## LethalLib [0.11.2]
 
