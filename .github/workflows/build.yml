@@ -30,7 +30,7 @@ jobs:
 
       - name: Build solution
         run: |
-          dotnet build
+          dotnet build -c Release
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

@@ -7,7 +7,7 @@
         <Product>LethalLib</Product>
         <Description>Content-addition API for Lethal Company</Description>
 
-        <PackageId>Evaisa.NetcodePatcher</PackageId>
+        <PackageId>Evaisa.LethalLib</PackageId>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <IsPackable>true</IsPackable>
     </PropertyGroup>
