@@ -28,19 +28,20 @@ public class ContentLoader
 
     public string modGUID => modInfo.Metadata.GUID;
 
-    public Action<CustomContent, GameObject> prefabCallback = (content, prefab) => { };
+    public delegate void ContentRegisteredCallback(CustomContent content, GameObject prefab);
 
-    public ContentLoader(PluginInfo modInfo, AssetBundle modBundle, Action<CustomContent, GameObject> prefabCallback = null)
+    private readonly ContentRegisteredCallback _contentRegisteredCallback = (_, _) => { };
+
+    public ContentLoader(PluginInfo modInfo, AssetBundle modBundle, ContentRegisteredCallback? contentRegisteredCallback = null)
     {
         this.modInfo = modInfo;
         this.modBundle = modBundle;
 
-        if(prefabCallback != null)
-        {
-            this.prefabCallback = prefabCallback;
-        }
+        if(contentRegisteredCallback != null)
+            _contentRegisteredCallback = contentRegisteredCallback;
     }
-    public ContentLoader Create(PluginInfo modInfo, AssetBundle modBundle, Action<CustomContent, GameObject> prefabCallback = null)
+
+    public static ContentLoader Create(PluginInfo modInfo, AssetBundle modBundle, ContentRegisteredCallback? prefabCallback = null)
     {
         return new ContentLoader(modInfo, modBundle, prefabCallback);
     }
@@ -63,7 +64,7 @@ public class ContentLoader
             item.item = itemAsset;
             NetworkPrefabs.RegisterNetworkPrefab(itemAsset.spawnPrefab);
             Utilities.FixMixerGroups(itemAsset.spawnPrefab);
-            prefabCallback(content, itemAsset.spawnPrefab);
+            _contentRegisteredCallback(content, itemAsset.spawnPrefab);
             item.registryCallback(itemAsset);
 
             if(content is ShopItem shopItem)
@@ -103,7 +104,7 @@ public class ContentLoader
             if(unlockableAsset.unlockable.prefabObject != null)
             {
                 NetworkPrefabs.RegisterNetworkPrefab(unlockableAsset.unlockable.prefabObject);
-                prefabCallback(content, unlockableAsset.unlockable.prefabObject);
+                _contentRegisteredCallback(content, unlockableAsset.unlockable.prefabObject);
                 Utilities.FixMixerGroups(unlockableAsset.unlockable.prefabObject);
             }
             unlockable.unlockable = unlockableAsset.unlockable;
@@ -135,7 +136,7 @@ public class ContentLoader
             NetworkPrefabs.RegisterNetworkPrefab(enemyAsset.enemyPrefab);
             Utilities.FixMixerGroups(enemyAsset.enemyPrefab);
             enemy.enemy = enemyAsset;
-            prefabCallback(content, enemyAsset.enemyPrefab);
+            _contentRegisteredCallback(content, enemyAsset.enemyPrefab);
             enemy.registryCallback(enemyAsset);
 
             TerminalNode infoNode = null;
@@ -165,7 +166,7 @@ public class ContentLoader
             mapObject.hazard = mapObjectAsset;
             NetworkPrefabs.RegisterNetworkPrefab(mapObjectAsset.spawnableMapObject.prefabToSpawn);
             Utilities.FixMixerGroups(mapObjectAsset.spawnableMapObject.prefabToSpawn);
-            prefabCallback(content, mapObjectAsset.spawnableMapObject.prefabToSpawn);
+            _contentRegisteredCallback(content, mapObjectAsset.spawnableMapObject.prefabToSpawn);
             mapObject.registryCallback(mapObjectAsset);
 
             MapObjects.RegisterMapObject(mapObjectAsset, mapObject.LevelTypes, mapObject.levelOverrides, mapObject.spawnRateFunction);
@@ -177,7 +178,7 @@ public class ContentLoader
             outsideObject.mapObject = mapObjectAsset;
             NetworkPrefabs.RegisterNetworkPrefab(mapObjectAsset.spawnableMapObject.spawnableObject.prefabToSpawn);
             Utilities.FixMixerGroups(mapObjectAsset.spawnableMapObject.spawnableObject.prefabToSpawn);
-            prefabCallback(content, mapObjectAsset.spawnableMapObject.spawnableObject.prefabToSpawn);
+            _contentRegisteredCallback(content, mapObjectAsset.spawnableMapObject.spawnableObject.prefabToSpawn);
             outsideObject.registryCallback(mapObjectAsset);
 
             MapObjects.RegisterOutsideObject(mapObjectAsset, outsideObject.LevelTypes, outsideObject.levelOverrides, outsideObject.spawnRateFunction);
