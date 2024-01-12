@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
@@ -89,7 +89,7 @@ public class ContentLoader
             }
             else if(content is ScrapItem scrapItem)
             {
-                Items.RegisterScrap(itemAsset, scrapItem.Rarity, scrapItem.LevelTypes, scrapItem.levelOverrides);
+                Items.RegisterScrap(itemAsset, scrapItem.levelRarities, scrapItem.customLevelRarities);
             }
             else
             {
@@ -271,22 +271,40 @@ public class ContentLoader
 
     public class ScrapItem : CustomItem
     {
-        private int rarity = 0;
-        public int Rarity => rarity;
-
         public void RemoveFromLevels(Levels.LevelTypes levelFlags)
         {
             Items.RemoveScrapFromLevels(Item, levelFlags);
         }
 
-        public Levels.LevelTypes LevelTypes = Levels.LevelTypes.None;
-        public string[] levelOverrides = null;
+        public Dictionary<Levels.LevelTypes, int> levelRarities = new Dictionary<Levels.LevelTypes, int>();
+        public Dictionary<string, int> customLevelRarities = new Dictionary<string, int>();
 
         public ScrapItem(string id, string contentPath, int rarity, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null, Action<Item> registryCallback = null) : base(id, contentPath, registryCallback)
         {
-            this.rarity = rarity;
-            this.LevelTypes = levelFlags;
-            this.levelOverrides = levelOverrides;
+            // assign level rarities
+            if(levelFlags != Levels.LevelTypes.None)
+            {
+                levelRarities.Add(levelFlags, rarity);
+            }
+            else if(levelOverrides != null)
+            {
+                foreach(string s in levelOverrides)
+                {
+                    customLevelRarities.Add(s, rarity);
+                }
+            }
+        }
+
+        public ScrapItem(string id, string contentPath, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null, Action<Item> registryCallback = null) : base(id, contentPath, registryCallback)
+        {
+            if(levelRarities != null)
+            {
+                this.levelRarities = levelRarities;
+            }
+            if(customLevelRarities != null)
+            {
+                this.customLevelRarities = customLevelRarities;
+            }
         }
     }
 

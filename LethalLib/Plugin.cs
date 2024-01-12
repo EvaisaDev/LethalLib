@@ -21,7 +21,7 @@ namespace LethalLib;
 //[BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
 public class Plugin : BaseUnityPlugin
 {
-    public const string ModGUID = MyPluginInfo.PLUGIN_GUID;
+    public const string ModGUID = "evaisa.lethallib";//MyPluginInfo.PLUGIN_GUID;
     public const string ModName = MyPluginInfo.PLUGIN_NAME;
     public const string ModVersion = MyPluginInfo.PLUGIN_VERSION;
 

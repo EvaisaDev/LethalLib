@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
@@ -153,18 +153,34 @@ public class Items
             {
                 var name = level.name;
 
-                var alwaysValid = scrapItem.spawnLevels.HasFlag(Levels.LevelTypes.All) || (scrapItem.spawnLevelOverrides != null && scrapItem.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+                //var alwaysValid = scrapItem.spawnLevels.HasFlag(Levels.LevelTypes.All) || (scrapItem.spawnLevelOverrides != null && scrapItem.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+
+                var alwaysValid = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.All) || (scrapItem.customLevelRarities != null && scrapItem.customLevelRarities.ContainsKey(name));
 
                 if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                 {
                     var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
 
-                    if (alwaysValid || scrapItem.spawnLevels.HasFlag(levelEnum))
+                    // old: scrapItem.spawnLevels.HasFlag(levelEnum)
+                    if (alwaysValid || scrapItem.levelRarities.Keys.Any(key => key.HasFlag(levelEnum)))
                     {
+                        // find rarity
+                        int rarity = 0;
+
+                        if (scrapItem.levelRarities.Keys.Any(key => key.HasFlag(levelEnum)))
+                        {
+                           rarity = scrapItem.levelRarities.First(x => x.Key.HasFlag(levelEnum)).Value;
+                        }
+                        else if (scrapItem.customLevelRarities != null && scrapItem.customLevelRarities.ContainsKey(name))
+                        {
+                            rarity = scrapItem.customLevelRarities[name];
+                        }
+
+
                         var spawnableÍtemWithRarity = new SpawnableItemWithRarity()
                         {
                             spawnableItem = scrapItem.item,
-                            rarity = scrapItem.rarity
+                            rarity = rarity
                         };
 
                         // make sure spawnableScrap does not already contain item
@@ -173,7 +189,7 @@ public class Items
                         if (!level.spawnableScrap.Any(x => x.spawnableItem == scrapItem.item))
                         {
                             level.spawnableScrap.Add(spawnableÍtemWithRarity);
-                            //Plugin.logger.LogInfo($"Added {scrapItem.item.name} to {name}");
+                            Plugin.logger.LogInfo($"Added {scrapItem.item.name} to {name}");
 
 
                         }
@@ -410,10 +426,12 @@ public class Items
     {
         public Item item;
         public Item origItem;
-        public int rarity;
-        public Levels.LevelTypes spawnLevels;
-        public string[] spawnLevelOverrides;
-        public string modName;
+        //public int rarity;
+        //public Levels.LevelTypes spawnLevels;
+        //public string[] spawnLevelOverrides;
+        public string modName = "Unknown";
+        public Dictionary<string, int> customLevelRarities = new Dictionary<string, int>();
+        public Dictionary<Levels.LevelTypes, int> levelRarities = new Dictionary<Levels.LevelTypes, int>();
 
         public ScrapItem(Item item, int rarity, Levels.LevelTypes spawnLevels = Levels.LevelTypes.None, string[] spawnLevelOverrides = null)
         {
@@ -457,9 +475,84 @@ public class Items
                 item.spawnPrefab = newPrefab;
             }
             this.item = item;
-            this.rarity = rarity;
+            /*this.rarity = rarity;
             this.spawnLevels = spawnLevels;
-            this.spawnLevelOverrides = spawnLevelOverrides;
+            this.spawnLevelOverrides = spawnLevelOverrides;*/
+
+
+            if (spawnLevelOverrides != null)
+            {
+                foreach (var level in spawnLevelOverrides)
+                {
+                    customLevelRarities.Add(level, rarity);
+                }
+            }
+
+            if (spawnLevels != Levels.LevelTypes.None)
+            {
+                foreach (Levels.LevelTypes level in Enum.GetValues(typeof(Levels.LevelTypes)))
+                {
+                    if (spawnLevels.HasFlag(level))
+                    {
+                        levelRarities.Add(level, rarity);
+                    }
+                }
+            }
+        }
+
+        public ScrapItem(Item item, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null)
+        {
+            origItem = item;
+            if (item.isScrap == false)
+            {
+
+                item = item.Clone();
+                item.isScrap = true;
+                if (item.maxValue == 0 && item.minValue == 0)
+                {
+                    item.minValue = 40;
+                    item.maxValue = 100;
+                }
+                else if (item.maxValue == 0)
+                {
+                    item.maxValue = item.minValue * 2;
+                }
+                else if (item.minValue == 0)
+                {
+                    item.minValue = item.maxValue / 2;
+                }
+
+                var newPrefab = NetworkPrefabs.CloneNetworkPrefab(item.spawnPrefab);
+
+                if (newPrefab.GetComponent<GrabbableObject>() != null)
+                {
+                    newPrefab.GetComponent<GrabbableObject>().itemProperties = item;
+                }
+
+                if (newPrefab.GetComponentInChildren<ScanNodeProperties>() == null)
+                {
+                    // add scan node
+                    var scanNode = Object.Instantiate(scanNodePrefab, newPrefab.transform);
+                    scanNode.name = "ScanNode";
+                    scanNode.transform.localPosition = new Vector3(0, 0, 0);
+                    var properties = scanNode.GetComponent<ScanNodeProperties>();
+                    properties.headerText = item.itemName;
+                }
+
+                item.spawnPrefab = newPrefab;
+            }
+
+            this.item = item;
+
+            if (customLevelRarities != null)
+            {
+                this.customLevelRarities = customLevelRarities;
+            }
+
+            if (levelRarities != null)
+            {
+                this.levelRarities = levelRarities;
+            }
         }
     }
 
@@ -528,7 +621,19 @@ public class Items
     ///</summary>
     public static void RegisterScrap(Item spawnableItem, int rarity, Levels.LevelTypes levelFlags)
     {
-        var scrapItem = new ScrapItem(spawnableItem, rarity, levelFlags);
+        // check if item is already registered, if it is we just want to add to the rarity table
+        var scrapItem = scrapItems.FirstOrDefault(x => x.origItem == spawnableItem || x.item == spawnableItem);
+
+        if (scrapItem != null)
+        {
+            if (levelFlags != Levels.LevelTypes.None)
+            {
+                scrapItem.levelRarities.Add(levelFlags, rarity);
+            }
+            return;
+        }
+
+        scrapItem = new ScrapItem(spawnableItem, rarity, levelFlags);
 
         var callingAssembly = Assembly.GetCallingAssembly();
         var modDLL = callingAssembly.GetName().Name;
@@ -544,12 +649,70 @@ public class Items
     ///</summary>
     public static void RegisterScrap(Item spawnableItem, int rarity, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
     {
-        var scrapItem = new ScrapItem(spawnableItem, rarity, levelFlags, levelOverrides);
+        // check if item is already registered, if it is we just want to add to the rarity table
+        var scrapItem = scrapItems.FirstOrDefault(x => x.origItem == spawnableItem || x.item == spawnableItem);
+
+        if (scrapItem != null)
+        {
+            if (levelFlags != Levels.LevelTypes.None)
+            {
+                scrapItem.levelRarities.Add(levelFlags, rarity);
+            }
+
+
+            if (levelOverrides != null)
+            {
+                foreach (var level in levelOverrides)
+                {
+                    scrapItem.customLevelRarities.Add(level, rarity);
+                }
+            }
+            return;
+        }
+
+        scrapItem = new ScrapItem(spawnableItem, rarity, levelFlags, levelOverrides);
 
         var callingAssembly = Assembly.GetCallingAssembly();
         var modDLL = callingAssembly.GetName().Name;
         scrapItem.modName = modDLL;
 
+
+        scrapItems.Add(scrapItem);
+    }
+
+    ///<summary
+    ///This method registers a scrap item to the game, However it allows you to pass rarity tables, instead of just a single rarity.
+    ///</summary>
+    public static void RegisterScrap(Item spawnableItem, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null)
+    {
+        // check if item is already registered, if it is we just want to add to the rarity table
+        var scrapItem = scrapItems.FirstOrDefault(x => x.origItem == spawnableItem || x.item == spawnableItem);
+
+        if (scrapItem != null)
+        {
+            if (levelRarities != null)
+            {
+                foreach (var level in levelRarities)
+                {
+                    scrapItem.levelRarities.Add(level.Key, level.Value);
+                }
+            }
+
+            if (customLevelRarities != null)
+            {
+                foreach (var level in customLevelRarities)
+                {
+                    scrapItem.customLevelRarities.Add(level.Key, level.Value);
+                }
+            }
+            return;
+        }
+
+        scrapItem = new ScrapItem(spawnableItem, levelRarities, customLevelRarities);
+
+        var callingAssembly = Assembly.GetCallingAssembly();
+        var modDLL = callingAssembly.GetName().Name;
+        scrapItem.modName = modDLL;
 
         scrapItems.Add(scrapItem);
     }

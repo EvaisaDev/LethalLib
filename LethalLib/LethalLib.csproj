@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>netstandard2.1</TargetFramework>
-        <AssemblyName>evaisa.lethallib</AssemblyName>
+        <AssemblyName>LethalLib</AssemblyName>
         <Product>LethalLib</Product>
         <Description>Content-addition API for Lethal Company</Description>
 
