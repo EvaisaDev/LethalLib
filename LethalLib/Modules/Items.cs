@@ -426,9 +426,24 @@ public class Items
     {
         public Item item;
         public Item origItem;
-        //public int rarity;
-        //public Levels.LevelTypes spawnLevels;
-        //public string[] spawnLevelOverrides;
+
+        /// <summary>
+        /// Deprecated
+        /// This is never set or used, use levelRarities and customLevelRarities instead.
+        /// </summary>
+        public int rarity = 0;
+        /// <summary>
+        /// Deprecated
+        /// This is never set or used, use levelRarities and customLevelRarities instead.
+        /// </summary>
+        public Levels.LevelTypes spawnLevels;
+        /// <summary>
+        /// Deprecated
+        /// This is never set or used, use levelRarities and customLevelRarities instead.
+        /// </summary>
+        public string[] spawnLevelOverrides;
+
+
         public string modName = "Unknown";
         public Dictionary<string, int> customLevelRarities = new Dictionary<string, int>();
         public Dictionary<Levels.LevelTypes, int> levelRarities = new Dictionary<Levels.LevelTypes, int>();
