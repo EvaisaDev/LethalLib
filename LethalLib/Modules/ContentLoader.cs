@@ -218,10 +218,7 @@ public class ContentLoader
     public class CustomContent
     {
         private string id = "";
-        public string ID
-        {
-            get { return id; }
-        }
+        public string ID => id;
 
         public CustomContent(string id)
         {
@@ -234,10 +231,7 @@ public class ContentLoader
         public Action<Item> registryCallback = (item) => { };
         public string contentPath = "";
         internal Item item;
-        public Item Item
-        {
-            get { return item; }
-        }
+        public Item Item => item;
 
         public CustomItem(string id, string contentPath, Action<Item> registryCallback = null) : base(id)
         {
@@ -278,10 +272,7 @@ public class ContentLoader
     public class ScrapItem : CustomItem
     {
         private int rarity = 0;
-        public int Rarity
-        {
-            get { return rarity; }
-        }
+        public int Rarity => rarity;
 
         public void RemoveFromLevels(Levels.LevelTypes levelFlags)
         {
@@ -303,10 +294,7 @@ public class ContentLoader
     {
         public Action<UnlockableItem> registryCallback = (unlockable) => { };
         internal UnlockableItem unlockable;
-        public UnlockableItem UnlockableItem
-        {
-            get { return unlockable; }
-        }
+        public UnlockableItem UnlockableItem => unlockable;
         public string contentPath = "";
         public int initPrice = 0;
         public string buyNode1Path = null;
@@ -344,10 +332,7 @@ public class ContentLoader
         public Action<EnemyType> registryCallback = (enemy) => { };
         public string contentPath = "";
         internal EnemyType enemy;
-        public EnemyType Enemy
-        {
-            get { return enemy; }
-        }
+        public EnemyType Enemy => enemy;
         public string infoNodePath = null;
         public string infoKeywordPath = null;
         public int rarity = 0;
@@ -384,10 +369,7 @@ public class ContentLoader
         public Action<SpawnableMapObjectDef> registryCallback = (hazard) => { };
         public string contentPath = "";
         internal SpawnableMapObjectDef hazard;
-        public SpawnableMapObjectDef Hazard
-        {
-            get { return hazard; }
-        }
+        public SpawnableMapObjectDef Hazard => hazard;
         public Func<SelectableLevel, AnimationCurve> spawnRateFunction;
 
         public Levels.LevelTypes LevelTypes = Levels.LevelTypes.None;
@@ -416,10 +398,7 @@ public class ContentLoader
         public Action<SpawnableOutsideObjectDef> registryCallback = (hazard) => { };
         public string contentPath = "";
         internal SpawnableOutsideObjectDef mapObject;
-        public SpawnableOutsideObjectDef MapObject
-        {
-            get { return mapObject; }
-        }
+        public SpawnableOutsideObjectDef MapObject => mapObject;
         public Func<SelectableLevel, AnimationCurve> spawnRateFunction;
 
         public Levels.LevelTypes LevelTypes = Levels.LevelTypes.None;
