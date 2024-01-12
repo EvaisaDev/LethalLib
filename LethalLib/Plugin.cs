@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Diagnostics;
@@ -17,10 +17,14 @@ using UnityEngine;
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 namespace LethalLib;
 
-[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+[BepInPlugin(ModGUID, ModName, ModVersion)]
 //[BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
 public class Plugin : BaseUnityPlugin
 {
+    public const string ModGUID = "evaisa.lethallib";
+    public const string ModName = "LethalLib";
+    public const string ModVersion = "0.0.0";
+
     public static AssetBundle MainAssets;
 
     public static BepInEx.Logging.ManualLogSource logger;
