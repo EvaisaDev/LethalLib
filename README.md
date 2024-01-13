@@ -63,7 +63,7 @@ You will need to create a `LethalLib/LethalLib.csproj.user` file to provide your
                 Directories="$(TestProfileDir)BepInEx/plugins/Evaisa-LethalLib/LethalLib"
                 Condition="!Exists('$(TestProfileDir)BepInEx/plugins/Evaisa-LethalLib/LethalLib')"
         />
-        <Exec Command="copy &amp;quot;$(TargetPath)&amp;quot; &amp;quot;$(TestProfileDir)BepInEx/plugins/Evaisa-LethalLib/LethalLib/&amp;quot;" />
+        <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(TestProfileDir)BepInEx/plugins/Evaisa-LethalLib/LethalLib/&quot;" />
     </Target>
 </Project>
 ```
