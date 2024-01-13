@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using static LethalLib.Modules.Enemies;
 
 #endregion
 
@@ -112,6 +113,12 @@ public class Enemies
                 var name = level.name;
 
                 var alwaysValid = spawnableEnemy.spawnLevels.HasFlag(Levels.LevelTypes.All) || (spawnableEnemy.spawnLevelOverrides != null && spawnableEnemy.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+                var isModded = spawnableEnemy.spawnLevels.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+
+                if (isModded)
+                {
+                    alwaysValid = true;
+                }
 
                 if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                 {
@@ -280,8 +287,13 @@ public class Enemies
             foreach (SelectableLevel level in StartOfRound.Instance.levels)
             {
                 var name = level.name;
-
                 var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+
+                if (isModded)
+                {
+                    alwaysValid = true;
+                }
 
                 if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                 {

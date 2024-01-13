@@ -156,6 +156,12 @@ public class Items
                 //var alwaysValid = scrapItem.spawnLevels.HasFlag(Levels.LevelTypes.All) || (scrapItem.spawnLevelOverrides != null && scrapItem.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
 
                 var alwaysValid = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.All) || (scrapItem.customLevelRarities != null && scrapItem.customLevelRarities.ContainsKey(name));
+                var isModded = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+
+                if (isModded)
+                {
+                    alwaysValid = true;
+                }
 
                 if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                 {
@@ -784,6 +790,12 @@ public class Items
                 var name = level.name;
 
                 var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+
+                if (isModded)
+                {
+                    alwaysValid = true;
+                }
 
                 if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                 {
