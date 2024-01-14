@@ -1,10 +1,11 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using static LethalLib.Modules.Enemies;
 
 #endregion
 
@@ -111,7 +112,16 @@ public class Enemies
             {
                 var name = level.name;
 
-                var alwaysValid = spawnableEnemy.spawnLevels.HasFlag(Levels.LevelTypes.All) || (spawnableEnemy.spawnLevelOverrides != null && spawnableEnemy.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+                //var alwaysValid = spawnableEnemy.spawnLevels.HasFlag(Levels.LevelTypes.All) || (spawnableEnemy.spawnLevelOverrides != null && spawnableEnemy.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+                //var isModded = spawnableEnemy.spawnLevels.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+                var alwaysValid = spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.All) || (spawnableEnemy.customLevelRarities != null && spawnableEnemy.customLevelRarities.ContainsKey(name));
+                var isModded = spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+
+
+                if (isModded)
+                {
+                    alwaysValid = true;
+                }
 
                 if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                 {
@@ -119,10 +129,24 @@ public class Enemies
 
                     if (alwaysValid || spawnableEnemy.spawnLevels.HasFlag(levelEnum))
                     {
+                        // find rarity
+                        int rarity = 0;
+
+                        if (spawnableEnemy.levelRarities.Keys.Any(key => key.HasFlag(levelEnum)))
+                        {
+                            rarity = spawnableEnemy.levelRarities.First(x => x.Key.HasFlag(levelEnum)).Value;
+                        }
+                        else if (spawnableEnemy.customLevelRarities != null && spawnableEnemy.customLevelRarities.ContainsKey(name))
+                        {
+                            rarity = spawnableEnemy.customLevelRarities[name];
+                        }
+
+
+
                         var spawnableEnemyWithRarity = new SpawnableEnemyWithRarity()
                         {
                             enemyType = spawnableEnemy.enemy,
-                            rarity = spawnableEnemy.rarity
+                            rarity = rarity
                         };
 
                         // make sure spawnableScrap does not already contain item
@@ -178,21 +202,73 @@ public class Enemies
     public class SpawnableEnemy
     {
         public EnemyType enemy;
-        public int rarity;
-        public Levels.LevelTypes spawnLevels;
         public SpawnType spawnType;
         public TerminalNode terminalNode;
         public TerminalKeyword infoKeyword;
         public string modName;
+
+        /// <summary>
+        /// Deprecated
+        /// This is never set or used, use levelRarities and customLevelRarities instead.
+        /// </summary>
+        public int rarity;
+
+        /// <summary>
+        /// Deprecated
+        /// This is never set or used, use levelRarities and customLevelRarities instead.
+        /// </summary>
+        public Levels.LevelTypes spawnLevels;
+
+        /// <summary>
+        /// Deprecated
+        /// This is never set or used, use levelRarities and customLevelRarities instead.
+        /// </summary>
         public string[] spawnLevelOverrides;
 
+        public Dictionary<string, int> customLevelRarities = new Dictionary<string, int>();
+        public Dictionary<Levels.LevelTypes, int> levelRarities = new Dictionary<Levels.LevelTypes, int>();
         public SpawnableEnemy(EnemyType enemy, int rarity, Levels.LevelTypes spawnLevels, SpawnType spawnType, string[] spawnLevelOverrides = null)
         {
             this.enemy = enemy;
-            this.rarity = rarity;
+            //this.rarity = rarity;
             this.spawnLevels = spawnLevels;
             this.spawnType = spawnType;
-            this.spawnLevelOverrides = spawnLevelOverrides;
+            //this.spawnLevelOverrides = spawnLevelOverrides;
+
+            if (spawnLevelOverrides != null)
+            {
+                foreach (var level in spawnLevelOverrides)
+                {
+                    customLevelRarities.Add(level, rarity);
+                }
+            }
+
+            if (spawnLevels != Levels.LevelTypes.None)
+            {
+                foreach (Levels.LevelTypes level in Enum.GetValues(typeof(Levels.LevelTypes)))
+                {
+                    if (spawnLevels.HasFlag(level))
+                    {
+                        levelRarities.Add(level, rarity);
+                    }
+                }
+            }
+        }
+
+        public SpawnableEnemy(EnemyType enemy, SpawnType spawnType, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null)
+        {
+            this.enemy = enemy;
+            this.spawnType = spawnType;
+
+            if (levelRarities != null)
+            {
+                this.levelRarities = levelRarities;
+            }
+
+            if (customLevelRarities != null)
+            {
+                this.customLevelRarities = customLevelRarities;
+            }
         }
     }
 
@@ -203,17 +279,7 @@ public class Enemies
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, int rarity, Levels.LevelTypes levelFlags, SpawnType spawnType, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
-        var spawnableEnemy = new SpawnableEnemy(enemy, rarity, levelFlags, spawnType);
-
-        spawnableEnemy.terminalNode = infoNode;
-        spawnableEnemy.infoKeyword = infoKeyword;
-
-        var callingAssembly = Assembly.GetCallingAssembly();
-        var modDLL = callingAssembly.GetName().Name;
-        spawnableEnemy.modName = modDLL;
-
-
-        spawnableEnemies.Add(spawnableEnemy);
+        RegisterEnemy(enemy, rarity, levelFlags, spawnType, null, infoNode, infoKeyword);
     }
 
     /// <summary>
@@ -221,7 +287,27 @@ public class Enemies
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, int rarity, Levels.LevelTypes levelFlags, SpawnType spawnType, string[] spawnLevelOverrides = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
-        var spawnableEnemy = new SpawnableEnemy(enemy, rarity, levelFlags, spawnType, spawnLevelOverrides);
+        // if already registered, add rarity to levelRarities
+        var spawnableEnemy = spawnableEnemies.FirstOrDefault(x => x.enemy == enemy && x.spawnType == spawnType);
+
+        if (spawnableEnemy != null)
+        {
+            if (levelFlags != Levels.LevelTypes.None)
+            {
+                spawnableEnemy.levelRarities.Add(levelFlags, rarity);
+            }
+
+            if (spawnLevelOverrides != null)
+            {
+                foreach (var level in spawnLevelOverrides)
+                {
+                    spawnableEnemy.customLevelRarities.Add(level, rarity);
+                }
+            }
+            return;
+        }
+
+        spawnableEnemy = new SpawnableEnemy(enemy, rarity, levelFlags, spawnType, spawnLevelOverrides);
 
         spawnableEnemy.terminalNode = infoNode;
         spawnableEnemy.infoKeyword = infoKeyword;
@@ -235,37 +321,74 @@ public class Enemies
     }
 
     /// <summary>
+    /// Registers a enemy to be added to the given levels, However it allows you to pass rarity tables, instead of just a single rarity
+    /// </summary>
+    public static void RegisterEnemy(EnemyType enemy, SpawnType spawnType, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
+    {
+        // if already registered, add rarity to levelRarities
+        var spawnableEnemy = spawnableEnemies.FirstOrDefault(x => x.enemy == enemy && x.spawnType == spawnType);
+
+        if (spawnableEnemy != null)
+        {
+            if (levelRarities != null)
+            {
+                foreach (var level in levelRarities)
+                {
+                    spawnableEnemy.levelRarities.Add(level.Key, level.Value);
+                }
+            }
+
+            if (customLevelRarities != null)
+            {
+                foreach (var level in customLevelRarities)
+                {
+                    spawnableEnemy.customLevelRarities.Add(level.Key, level.Value);
+                }
+            }
+            return;
+        }
+
+        spawnableEnemy = new SpawnableEnemy(enemy, spawnType, levelRarities, customLevelRarities);
+
+        spawnableEnemy.terminalNode = infoNode;
+        spawnableEnemy.infoKeyword = infoKeyword;
+
+        var callingAssembly = Assembly.GetCallingAssembly();
+        var modDLL = callingAssembly.GetName().Name;
+        spawnableEnemy.modName = modDLL;
+    }
+
+    /// <summary>
     /// Registers a enemy to be added to the given levels.
+    /// Automatically sets the spawnType based on the enemy's isDaytimeEnemy and isOutsideEnemy properties.
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, int rarity, Levels.LevelTypes levelFlags, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
-        var spawnableEnemy = new SpawnableEnemy(enemy, rarity, levelFlags, enemy.isDaytimeEnemy ? SpawnType.Daytime : enemy.isOutsideEnemy ? SpawnType.Outside : SpawnType.Default);
+        var spawnType = enemy.isDaytimeEnemy ? SpawnType.Daytime : enemy.isOutsideEnemy ? SpawnType.Outside : SpawnType.Default;
 
-        spawnableEnemy.terminalNode = infoNode;
-        spawnableEnemy.infoKeyword = infoKeyword;
-
-        var callingAssembly = Assembly.GetCallingAssembly();
-        var modDLL = callingAssembly.GetName().Name;
-        spawnableEnemy.modName = modDLL;
-
-        spawnableEnemies.Add(spawnableEnemy);
+        RegisterEnemy(enemy, rarity, levelFlags, spawnType, null, infoNode, infoKeyword);
     }
 
     /// <summary>
     /// Registers a enemy to be added to the given levels.
+    /// Automatically sets the spawnType based on the enemy's isDaytimeEnemy and isOutsideEnemy properties.
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, int rarity, Levels.LevelTypes levelFlags, string[] spawnLevelOverrides = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
-        var spawnableEnemy = new SpawnableEnemy(enemy, rarity, levelFlags, enemy.isDaytimeEnemy ? SpawnType.Daytime : enemy.isOutsideEnemy ? SpawnType.Outside : SpawnType.Default, spawnLevelOverrides);
+        var spawnType = enemy.isDaytimeEnemy ? SpawnType.Daytime : enemy.isOutsideEnemy ? SpawnType.Outside : SpawnType.Default;
 
-        spawnableEnemy.terminalNode = infoNode;
-        spawnableEnemy.infoKeyword = infoKeyword;
+        RegisterEnemy(enemy, rarity, levelFlags, spawnType, spawnLevelOverrides, infoNode, infoKeyword);
+    }
 
-        var callingAssembly = Assembly.GetCallingAssembly();
-        var modDLL = callingAssembly.GetName().Name;
-        spawnableEnemy.modName = modDLL;
+    /// <summary>
+    /// Registers a enemy to be added to the given levels, However it allows you to pass rarity tables, instead of just a single rarity
+    /// Automatically sets the spawnType based on the enemy's isDaytimeEnemy and isOutsideEnemy properties.
+    /// </summary>
+    public static void RegisterEnemy(EnemyType enemy, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
+    {
+        var spawnType = enemy.isDaytimeEnemy ? SpawnType.Daytime : enemy.isOutsideEnemy ? SpawnType.Outside : SpawnType.Default;
 
-        spawnableEnemies.Add(spawnableEnemy);
+        RegisterEnemy(enemy, spawnType, levelRarities, customLevelRarities, infoNode, infoKeyword);
     }
 
     ///<summary>
@@ -280,8 +403,13 @@ public class Enemies
             foreach (SelectableLevel level in StartOfRound.Instance.levels)
             {
                 var name = level.name;
-
                 var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+
+                if (isModded)
+                {
+                    alwaysValid = true;
+                }
 
                 if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                 {

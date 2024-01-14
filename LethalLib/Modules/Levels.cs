@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 
@@ -22,8 +22,15 @@ public class Levels
         DineLevel = 1 << 8,
         TitanLevel = 1 << 9,
         Vanilla = ExperimentationLevel | AssuranceLevel | VowLevel | OffenseLevel | MarchLevel | RendLevel | DineLevel | TitanLevel,
+
         /// <summary>
-        /// This includes modded levels!!
+        /// Only modded levels
+        /// </summary>
+        Modded = 1 << 10,
+
+        /// <summary>
+        /// This includes modded levels!
+        /// Acts as a global override
         /// </summary>
         All = ~0
     }

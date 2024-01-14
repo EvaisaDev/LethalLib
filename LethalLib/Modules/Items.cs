@@ -7,6 +7,7 @@ using System.Reflection;
 using BepInEx.Configuration;
 using LethalLib.Extras;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
 #endregion
@@ -27,6 +28,18 @@ public class Items
         On.StartOfRound.Start += StartOfRound_Start;
         On.Terminal.Awake += Terminal_Awake;
         On.Terminal.TextPostProcess += Terminal_TextPostProcess;
+        //On.RoundManager.SpawnScrapInLevel += RoundManager_SpawnScrapInLevel;
+    }
+
+    private static void RoundManager_SpawnScrapInLevel(On.RoundManager.orig_SpawnScrapInLevel orig, RoundManager self)
+    {
+        orig(self);
+        // debug log printing out the scrap rarities
+        Plugin.logger.LogInfo($"Spawnable scrap in level {self.currentLevel.name}:");
+        foreach(var level in self.currentLevel.spawnableScrap)
+        {
+            Plugin.logger.LogInfo($"Item: {level.spawnableItem.itemName}, Rarity: {level.rarity}");
+        }
     }
 
     private static string Terminal_TextPostProcess(On.Terminal.orig_TextPostProcess orig, Terminal self, string modifiedDisplayText, TerminalNode node)
@@ -156,6 +169,12 @@ public class Items
                 //var alwaysValid = scrapItem.spawnLevels.HasFlag(Levels.LevelTypes.All) || (scrapItem.spawnLevelOverrides != null && scrapItem.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
 
                 var alwaysValid = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.All) || (scrapItem.customLevelRarities != null && scrapItem.customLevelRarities.ContainsKey(name));
+                var isModded = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+
+                if (isModded)
+                {
+                    alwaysValid = true;
+                }
 
                 if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                 {
@@ -437,10 +456,10 @@ public class Items
         /// This is never set or used, use levelRarities and customLevelRarities instead.
         /// </summary>
         public Levels.LevelTypes spawnLevels;
-        /// <summary>
-        /// Deprecated
-        /// This is never set or used, use levelRarities and customLevelRarities instead.
-        /// </summary>
+            /// <summary>
+            /// Deprecated
+            /// This is never set or used, use levelRarities and customLevelRarities instead.
+            /// </summary>
         public string[] spawnLevelOverrides;
 
 
@@ -784,6 +803,12 @@ public class Items
                 var name = level.name;
 
                 var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+
+                if (isModded)
+                {
+                    alwaysValid = true;
+                }
 
                 if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
                 {
