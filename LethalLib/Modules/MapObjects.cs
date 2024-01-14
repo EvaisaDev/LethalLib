@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
@@ -164,6 +164,7 @@ public class MapObjects
         public SpawnableOutsideObjectWithRarity outsideObject;
         public Levels.LevelTypes levels;
         public string[] spawnLevelOverrides;
+        // this way of handling things is very inconsistent with the enemies and items modules.
         public Func<SelectableLevel, AnimationCurve> spawnRateFunction;
     }
 
