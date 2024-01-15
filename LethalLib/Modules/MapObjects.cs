@@ -113,7 +113,7 @@ public class MapObjects
                     {
                         if (mapObject.mapObject != null)
                         {
-                            if (!level.spawnableMapObjects.Any(x => x.prefabToSpawn == mapObject.mapObject.prefabToSpawn))
+                            if (level.spawnableMapObjects.Any(x => x.prefabToSpawn == mapObject.mapObject.prefabToSpawn))
                             {
                                 // remove the object from the list
                                 var list = level.spawnableMapObjects.ToList();
