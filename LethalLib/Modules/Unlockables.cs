@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +29,7 @@ public class Unlockables
         public int price;
         public string modName;
         public bool disabled = false;
+        public bool wasAlwaysInStock = false;
 
         public RegisteredUnlockable(UnlockableItem unlockable, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = -1)
         {
@@ -46,6 +47,31 @@ public class Unlockables
     {
         On.Terminal.Awake += Terminal_Awake;
         On.Terminal.TextPostProcess += Terminal_TextPostProcess;
+        On.Terminal.RotateShipDecorSelection += Terminal_RotateShipDecorSelection;
+    }
+
+    private static void Terminal_RotateShipDecorSelection(On.Terminal.orig_RotateShipDecorSelection orig, Terminal self)
+    {
+        // horrific hax to make sure disabled decor is not in the shop..
+
+        foreach (var unlockable in registeredUnlockables)
+        {
+            if (unlockable.StoreType == StoreType.Decor && unlockable.disabled)
+            {
+                unlockable.wasAlwaysInStock = unlockable.unlockable.alwaysInStock;
+                unlockable.unlockable.alwaysInStock = true;
+            }
+        }
+
+        orig(self);
+
+        foreach (var unlockable in registeredUnlockables)
+        {
+            if (unlockable.StoreType == StoreType.Decor && unlockable.disabled)
+            {
+                unlockable.unlockable.alwaysInStock = unlockable.wasAlwaysInStock;
+            }
+        }
     }
 
     private static string Terminal_TextPostProcess(On.Terminal.orig_TextPostProcess orig, Terminal self, string modifiedDisplayText, TerminalNode node)
@@ -341,6 +367,12 @@ public class Unlockables
             terminal.terminalNodes.allKeywords = allKeywords.ToArray();
             buyKeyword.compatibleNouns = nouns.ToArray();
             infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
+
+            if (StartOfRound.Instance.IsServer)
+            {
+                // i lack a better way to prevent disabled decor from being in the shop because the ship decor is rotated too early.
+                UnityEngine.Object.FindObjectOfType<Terminal>().RotateShipDecorSelection();
+            }
         }
     }
 
