@@ -33,7 +33,7 @@
     <!-- Runtime dependencies -->
     <ItemGroup>
         <PackageReference Include="BepInEx.Core" Version="5.4.21" />
-        <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" />
+        <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" PrivateAssets="all"/>
         <Reference Include="Assembly-CSharp">
             <HintPath>$(LethalCompanyDir)Lethal Company_Data/Managed/Assembly-CSharp.dll</HintPath>
         </Reference>
@@ -52,7 +52,7 @@
     </ItemGroup>
 
     <ItemGroup Condition="$(CI) == 'true'">
-        <PackageReference Include="LethalCompany.GameLibs.Steam" Version="49.0.0-alpha.1" Publicize="true" />
+        <PackageReference Include="LethalCompany.GameLibs.Steam" Version="49.0.0-alpha.1" Publicize="true" PrivateAssets="all" />
         <Reference Include="MMHOOK_Assembly-CSharp">
             <HintPath>$(ProjectDir)../lib/MMHOOK_Assembly-CSharp.dll</HintPath>
         </Reference>
