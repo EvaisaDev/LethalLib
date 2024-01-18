@@ -35,7 +35,7 @@ public class NetworkPrefabs
     /// Creates a network prefab programmatically and registers it with the network manager.
     /// Credit to Day and Xilo.
     /// </summary>
-    public static GameObject CreateNetworkPrefab(string name)
+    public static GameObject CreateNetworkPrefab(string name, bool register = true)
     {
         var prefab = PrefabUtils.CreatePrefab(name);
         prefab.AddComponent<NetworkObject>();
@@ -44,7 +44,7 @@ public class NetworkPrefabs
 
         prefab.GetComponent<NetworkObject>().GlobalObjectIdHash = BitConverter.ToUInt32(hash, 0);
 
-        RegisterNetworkPrefab(prefab);
+        if (register) RegisterNetworkPrefab(prefab);
         return prefab;
     }
 
