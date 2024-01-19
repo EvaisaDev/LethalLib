@@ -614,6 +614,8 @@ public class Items
         public ShopItem(Item item, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = 0)
         {
             origItem = item;
+            // removed until further notice... this confuses people who add their scrap to the shop for testing.
+            /*
             if (item.isScrap)
             {
                 item = item.Clone();
@@ -632,7 +634,7 @@ public class Items
                 }
 
                 item.spawnPrefab = newPrefab;
-            }
+            }*/
             this.item = item;
             this.price = price;
             if (buyNode1 != null)
