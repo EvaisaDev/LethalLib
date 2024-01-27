@@ -29,16 +29,33 @@ public class Enemies
             return;
         }
         var testLevel = self.testAllEnemiesLevel;
-        var enemies = testLevel.Enemies;
+        var inside = testLevel.Enemies;
+        var daytime = testLevel.DaytimeEnemies;
+        var outside = testLevel.OutsideEnemies;
         foreach (SpawnableEnemy spawnableEnemy in spawnableEnemies)
         {
-            if (enemies.All(x => x.enemyType == spawnableEnemy.enemy)) continue;
-            enemies.Add(new SpawnableEnemyWithRarity
+            if (inside.All(x => x.enemyType == spawnableEnemy.enemy)) continue;
+            SpawnableEnemyWithRarity spawnableEnemyWithRarity = new SpawnableEnemyWithRarity
             {
                 enemyType = spawnableEnemy.enemy,
                 rarity = spawnableEnemy.rarity
-            });
-            Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.enemyName} to debug list!");
+            };
+            switch (spawnableEnemy.spawnType)
+            {
+                case SpawnType.Default:
+                    if (!inside.Any(x => x.enemyType == spawnableEnemy.enemy))
+                        inside.Add(spawnableEnemyWithRarity);
+                    break;
+                case SpawnType.Daytime:
+                    if (!daytime.Any(x => x.enemyType == spawnableEnemy.enemy))
+                        daytime.Add(spawnableEnemyWithRarity);
+                    break;
+                case SpawnType.Outside:
+                    if (!outside.Any(x => x.enemyType == spawnableEnemy.enemy))
+                        outside.Add(spawnableEnemyWithRarity);
+                    break;
+            }
+            Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.enemyName} to DebugList [{spawnableEnemy.spawnType}]");
         }
         addedToDebug = true;
         orig(self);
