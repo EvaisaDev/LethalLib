@@ -17,8 +17,33 @@ public class Enemies
     {
         On.StartOfRound.Awake += RegisterLevelEnemies;
         On.Terminal.Start += Terminal_Start;
-
+        On.QuickMenuManager.Start += QuickMenuManager_Start;
     }
+
+    static bool addedToDebug = false; // This method of initializing can be changed to your liking.
+    private static void QuickMenuManager_Start(On.QuickMenuManager.orig_Start orig, QuickMenuManager self)
+    {
+        if (addedToDebug)
+        {
+            orig(self);
+            return;
+        }
+        var testLevel = self.testAllEnemiesLevel;
+        var enemies = testLevel.Enemies;
+        foreach (SpawnableEnemy spawnableEnemy in spawnableEnemies)
+        {
+            if (enemies.All(x => x.enemyType == spawnableEnemy.enemy)) continue;
+            enemies.Add(new SpawnableEnemyWithRarity
+            {
+                enemyType = spawnableEnemy.enemy,
+                rarity = spawnableEnemy.rarity
+            });
+            Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.enemyName} to debug list!");
+        }
+        addedToDebug = true;
+        orig(self);
+    }
+
     public struct EnemyAssetInfo
     {
         public EnemyType EnemyAsset;
