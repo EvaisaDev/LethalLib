@@ -17,8 +17,50 @@ public class Enemies
     {
         On.StartOfRound.Awake += RegisterLevelEnemies;
         On.Terminal.Start += Terminal_Start;
-
+        On.QuickMenuManager.Start += QuickMenuManager_Start;
     }
+
+    static bool addedToDebug = false; // This method of initializing can be changed to your liking.
+    private static void QuickMenuManager_Start(On.QuickMenuManager.orig_Start orig, QuickMenuManager self)
+    {
+        if (addedToDebug)
+        {
+            orig(self);
+            return;
+        }
+        var testLevel = self.testAllEnemiesLevel;
+        var inside = testLevel.Enemies;
+        var daytime = testLevel.DaytimeEnemies;
+        var outside = testLevel.OutsideEnemies;
+        foreach (SpawnableEnemy spawnableEnemy in spawnableEnemies)
+        {
+            if (inside.All(x => x.enemyType == spawnableEnemy.enemy)) continue;
+            SpawnableEnemyWithRarity spawnableEnemyWithRarity = new SpawnableEnemyWithRarity
+            {
+                enemyType = spawnableEnemy.enemy,
+                rarity = spawnableEnemy.rarity
+            };
+            switch (spawnableEnemy.spawnType)
+            {
+                case SpawnType.Default:
+                    if (!inside.Any(x => x.enemyType == spawnableEnemy.enemy))
+                        inside.Add(spawnableEnemyWithRarity);
+                    break;
+                case SpawnType.Daytime:
+                    if (!daytime.Any(x => x.enemyType == spawnableEnemy.enemy))
+                        daytime.Add(spawnableEnemyWithRarity);
+                    break;
+                case SpawnType.Outside:
+                    if (!outside.Any(x => x.enemyType == spawnableEnemy.enemy))
+                        outside.Add(spawnableEnemyWithRarity);
+                    break;
+            }
+            Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.enemyName} to DebugList [{spawnableEnemy.spawnType}]");
+        }
+        addedToDebug = true;
+        orig(self);
+    }
+
     public struct EnemyAssetInfo
     {
         public EnemyType EnemyAsset;
