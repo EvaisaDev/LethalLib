@@ -129,7 +129,8 @@ public class MapObjects
                             var mapObjectsList = level.spawnableMapObjects.ToList();
                             mapObjectsList.Add(spawnableMapObject);
                             level.spawnableMapObjects = mapObjectsList.ToArray();
-                            Plugin.logger.LogInfo($"Added {spawnableMapObject.prefabToSpawn.name} to {name}");
+                            if (Plugin.extendedLogging.Value)
+                                Plugin.logger.LogInfo($"Added {spawnableMapObject.prefabToSpawn.name} to {name}");
                         }
                         else if (mapObject.outsideObject != null)
                         {
@@ -149,7 +150,8 @@ public class MapObjects
                             var mapObjectsList = level.spawnableOutsideObjects.ToList();
                             mapObjectsList.Add(spawnableOutsideObject);
                             level.spawnableOutsideObjects = mapObjectsList.ToArray();
-                            Plugin.logger.LogInfo($"Added {spawnableOutsideObject.spawnableObject.prefabToSpawn.name} to {name}");
+                            if (Plugin.extendedLogging.Value)
+                                Plugin.logger.LogInfo($"Added {spawnableOutsideObject.spawnableObject.prefabToSpawn.name} to {name}");
                         }
                     }
 

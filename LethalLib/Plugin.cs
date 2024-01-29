@@ -32,6 +32,8 @@ public class Plugin : BaseUnityPlugin
 
     public static Plugin Instance;
 
+    public static ConfigEntry<bool> extendedLogging;
+
     private void Awake()
     {
         Instance = this;
@@ -39,6 +41,8 @@ public class Plugin : BaseUnityPlugin
         logger = Logger;
 
         Logger.LogInfo($"LethalLib loaded!!");
+
+        extendedLogging = Config.Bind("General", "ExtendedLogging", false, "Enable extended logging");
 
         MainAssets = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Info.Location)!, "lethallib"));
 

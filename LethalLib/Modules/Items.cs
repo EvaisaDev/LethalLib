@@ -28,19 +28,9 @@ public class Items
         On.StartOfRound.Start += StartOfRound_Start;
         On.Terminal.Awake += Terminal_Awake;
         On.Terminal.TextPostProcess += Terminal_TextPostProcess;
-        //On.RoundManager.SpawnScrapInLevel += RoundManager_SpawnScrapInLevel;
     }
 
-    private static void RoundManager_SpawnScrapInLevel(On.RoundManager.orig_SpawnScrapInLevel orig, RoundManager self)
-    {
-        orig(self);
-        // debug log printing out the scrap rarities
-        Plugin.logger.LogInfo($"Spawnable scrap in level {self.currentLevel.name}:");
-        foreach(var level in self.currentLevel.spawnableScrap)
-        {
-            Plugin.logger.LogInfo($"Item: {level.spawnableItem.itemName}, Rarity: {level.rarity}");
-        }
-    }
+
 
     private static string Terminal_TextPostProcess(On.Terminal.orig_TextPostProcess orig, Terminal self, string modifiedDisplayText, TerminalNode node)
     {
@@ -208,7 +198,9 @@ public class Items
                         if (!level.spawnableScrap.Any(x => x.spawnableItem == scrapItem.item))
                         {
                             level.spawnableScrap.Add(spawnableÍtemWithRarity);
-                            Plugin.logger.LogInfo($"Added {scrapItem.item.name} to {name}");
+
+                            if(Plugin.extendedLogging.Value)
+                                Plugin.logger.LogInfo($"Added {scrapItem.item.name} to {name}");
 
 
                         }
@@ -223,13 +215,16 @@ public class Items
         {
             if (!startOfRound.allItemsList.itemsList.Contains(scrapItem.item))
             {
-                if (scrapItem.modName != "LethalLib")
+                if (Plugin.extendedLogging.Value)
                 {
-                    Plugin.logger.LogInfo($"{scrapItem.modName} registered scrap item: {scrapItem.item.itemName}");
-                }
-                else
-                {
-                    Plugin.logger.LogInfo($"Registered scrap item: {scrapItem.item.itemName}");
+                    if (scrapItem.modName != "LethalLib")
+                    {
+                        Plugin.logger.LogInfo($"{scrapItem.modName} registered scrap item: {scrapItem.item.itemName}");
+                    }
+                    else
+                    {
+                        Plugin.logger.LogInfo($"Registered scrap item: {scrapItem.item.itemName}");
+                    }
                 }
 
                 LethalLibItemList.Add(scrapItem.item);
@@ -242,13 +237,16 @@ public class Items
         {
             if (!startOfRound.allItemsList.itemsList.Contains(shopItem.item))
             {
-                if (shopItem.modName != "LethalLib")
+                if (Plugin.extendedLogging.Value)
                 {
-                    Plugin.logger.LogInfo($"{shopItem.modName} registered shop item: {shopItem.item.itemName}");
-                }
-                else
-                {
-                    Plugin.logger.LogInfo($"Registered shop item: {shopItem.item.itemName}");
+                    if (shopItem.modName != "LethalLib")
+                    {
+                        Plugin.logger.LogInfo($"{shopItem.modName} registered shop item: {shopItem.item.itemName}");
+                    }
+                    else
+                    {
+                        Plugin.logger.LogInfo($"Registered shop item: {shopItem.item.itemName}");
+                    }
                 }
 
                 LethalLibItemList.Add(shopItem.item);
@@ -261,13 +259,16 @@ public class Items
         {
             if (!startOfRound.allItemsList.itemsList.Contains(plainItem.item))
             {
-                if (plainItem.modName != "LethalLib")
+                if (Plugin.extendedLogging.Value)
                 {
-                    Plugin.logger.LogInfo($"{plainItem.modName} registered item: {plainItem.item.itemName}");
-                }
-                else
-                {
-                    Plugin.logger.LogInfo($"Registered item: {plainItem.item.itemName}");
+                    if (plainItem.modName != "LethalLib")
+                    {
+                        Plugin.logger.LogInfo($"{plainItem.modName} registered item: {plainItem.item.itemName}");
+                    }
+                    else
+                    {
+                        Plugin.logger.LogInfo($"Registered item: {plainItem.item.itemName}");
+                    }
                 }
 
                 LethalLibItemList.Add(plainItem.item);
@@ -324,7 +325,7 @@ public class Items
             var lastChar = itemName[itemName.Length - 1];
             var itemNamePlural = itemName;
 
-            Plugin.logger.LogInfo($"Adding {itemName} to terminal");
+            //Plugin.logger.LogInfo($"Adding {itemName} to terminal");
 
             var buyNode2 = item.buyNode2;
 
@@ -336,9 +337,6 @@ public class Items
                 buyNode2.displayText = $"Ordered [variableAmount] {itemNamePlural}. Your new balance is [playerCredits].\n\nOur contractors enjoy fast, free shipping while on the job! Any purchased items will arrive hourly at your approximate location.\r\n\r\n";
                 buyNode2.clearPreviousText = true;
                 buyNode2.maxCharactersToType = 15;
-
-                Plugin.logger.LogInfo($"Generating buynode2");
-
             }
 
             buyNode2.buyItemIndex = newIndex;
@@ -346,7 +344,7 @@ public class Items
             buyNode2.itemCost = item.price;
             buyNode2.playSyncedClip = 0;
 
-            Plugin.logger.LogInfo($"Item price: {buyNode2.itemCost}, Item index: {buyNode2.buyItemIndex}");
+            //Plugin.logger.LogInfo($"Item price: {buyNode2.itemCost}, Item index: {buyNode2.buyItemIndex}");
 
             var buyNode1 = item.buyNode1;
             if (buyNode1 == null)
@@ -357,7 +355,7 @@ public class Items
                 buyNode1.clearPreviousText = true;
                 buyNode1.maxCharactersToType = 35;
 
-                Plugin.logger.LogInfo($"Generating buynode1");
+                //Plugin.logger.LogInfo($"Generating buynode1");
                     
             }
 
@@ -366,7 +364,7 @@ public class Items
             buyNode1.overrideOptions = true;
             buyNode1.itemCost = item.price;
 
-            Plugin.logger.LogInfo($"Item price: {buyNode1.itemCost}, Item index: {buyNode1.buyItemIndex}");
+            //Plugin.logger.LogInfo($"Item price: {buyNode1.itemCost}, Item index: {buyNode1.buyItemIndex}");
 
             buyNode1.terminalOptions = new CompatibleNoun[2]
             {
@@ -384,7 +382,7 @@ public class Items
 
             var keyword = TerminalUtils.CreateTerminalKeyword(itemName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: buyKeyword);
 
-            Plugin.logger.LogInfo($"Generated keyword: {keyword.word}");
+            //Plugin.logger.LogInfo($"Generated keyword: {keyword.word}");
 
             //self.terminalNodes.allKeywords.AddItem(keyword);
             var allKeywords = self.terminalNodes.allKeywords.ToList();
@@ -409,7 +407,7 @@ public class Items
                 itemInfo.clearPreviousText = true;
                 itemInfo.maxCharactersToType = 25;
 
-                Plugin.logger.LogInfo($"Generated item info!!");
+               // Plugin.logger.LogInfo($"Generated item info!!");
             }
 
             self.terminalNodes.allKeywords = allKeywords.ToArray();
@@ -429,6 +427,11 @@ public class Items
             };
 
             buyableItemAssetInfos.Add(buyableItemAssetInfo);
+
+            if (Plugin.extendedLogging.Value)
+            {
+                Plugin.logger.LogInfo($"Added {itemName} to terminal (Item price: {buyNode1.itemCost}, Item Index: {buyNode1.buyItemIndex}, Terminal keyword: {keyword.word})");
+            }
         }
 
         self.buyableItemsList = itemList.ToArray();

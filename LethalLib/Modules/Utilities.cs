@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,8 +14,6 @@ public class Utilities
     public static List<GameObject> fixedPrefabs = new List<GameObject>();
     public static void Init()
     {
-        // log to check if this do be runnin or not
-        Plugin.logger.LogInfo("Utilities.Init()");
         On.StartOfRound.Start += StartOfRound_Start;
         On.MenuManager.Start += MenuManager_Start;
     }
@@ -24,8 +22,9 @@ public class Utilities
     {
         AudioMixer audioMixer = SoundManager.Instance.diageticMixer;
 
-        // log 
-        Plugin.logger.LogInfo($"Diagetic mixer is {audioMixer.name}");
+        // log
+        if (Plugin.extendedLogging.Value)
+            Plugin.logger.LogInfo($"Diagetic mixer is {audioMixer.name}");
 
         Plugin.logger.LogInfo($"Found {prefabsToFix.Count} prefabs to fix");
 
@@ -58,7 +57,8 @@ public class Utilities
                     {
                         audioSource.outputAudioMixerGroup = mixerGroup;
                         // log
-                        Plugin.logger.LogInfo($"Set mixer group for {audioSource.name} in {prefab.name} to Diagetic:{mixerGroup.name}");
+                        if (Plugin.extendedLogging.Value)
+                            Plugin.logger.LogInfo($"Set mixer group for {audioSource.name} in {prefab.name} to Diagetic:{mixerGroup.name}");
 
                         // remove from list
                         prefabsToRemove.Add(prefab);
@@ -116,7 +116,8 @@ public class Utilities
                     {
                         audioSource.outputAudioMixerGroup = mixerGroup;
                         // log
-                        Plugin.logger.LogInfo($"Set mixer group for {audioSource.name} in {prefab.name} to NonDiagetic:{mixerGroup.name}");
+                        if (Plugin.extendedLogging.Value)
+                            Plugin.logger.LogInfo($"Set mixer group for {audioSource.name} in {prefab.name} to NonDiagetic:{mixerGroup.name}");
 
                         // remove from list
                         prefabsToRemove.Add(prefab);
