@@ -51,6 +51,7 @@ public class Plugin : BaseUnityPlugin
         Weathers.Init();
         Player.Init();
         Utilities.Init();
+        NetworkPrefabs.Init();
     }
 
     private void IlHook(ILContext il)
