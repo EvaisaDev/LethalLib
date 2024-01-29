@@ -142,7 +142,6 @@ public class Unlockables
 
         var shopItems = registeredUnlockables.FindAll(unlockable => unlockable.price != -1).ToList();
 
-        Plugin.logger.LogInfo($"Adding {shopItems.Count} items to terminal");
         foreach (var item in shopItems)
         {
             string itemName = item.unlockable.unlockableName;
@@ -278,8 +277,8 @@ public class Unlockables
             };
 
             buyableUnlockableAssetInfos.Add(buyableItemAssetInfo);
-
-            Plugin.logger.LogInfo($"{item.modName} registered item: {item.unlockable.unlockableName}");
+            if (Plugin.extendedLogging.Value)
+                Plugin.logger.LogInfo($"{item.modName} registered item: {item.unlockable.unlockableName}");
         }
 
         orig(self);

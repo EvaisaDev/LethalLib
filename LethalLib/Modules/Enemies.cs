@@ -55,7 +55,8 @@ public class Enemies
                         outside.Add(spawnableEnemyWithRarity);
                     break;
             }
-            Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.enemyName} to DebugList [{spawnableEnemy.spawnType}]");
+            if (Plugin.extendedLogging.Value)
+                Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.enemyName} to DebugList [{spawnableEnemy.spawnType}]");
         }
         addedToDebug = true;
         orig(self);
@@ -207,21 +208,24 @@ public class Enemies
                                 if (!level.Enemies.Any(x => x.enemyType == spawnableEnemy.enemy))
                                 {
                                     level.Enemies.Add(spawnableEnemyWithRarity);
-                                    Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.name} to {name} with SpawnType [Default]");
+                                    if (Plugin.extendedLogging.Value)
+                                        Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.name} to {name} with SpawnType [Default]");
                                 }
                                 break;
                             case SpawnType.Daytime:
                                 if (!level.DaytimeEnemies.Any(x => x.enemyType == spawnableEnemy.enemy))
                                 {
                                     level.DaytimeEnemies.Add(spawnableEnemyWithRarity);
-                                    Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.name} to {name} with SpawnType [Daytime]");
+                                    if (Plugin.extendedLogging.Value)
+                                        Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.name} to {name} with SpawnType [Daytime]");
                                 }
                                 break;
                             case SpawnType.Outside:
                                 if (!level.OutsideEnemies.Any(x => x.enemyType == spawnableEnemy.enemy))
                                 {
                                     level.OutsideEnemies.Add(spawnableEnemyWithRarity);
-                                    Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.name} to {name} with SpawnType [Outside]");
+                                    if (Plugin.extendedLogging.Value)
+                                        Plugin.logger.LogInfo($"Added {spawnableEnemy.enemy.name} to {name} with SpawnType [Outside]");
                                 }
                                 break;
                             default:

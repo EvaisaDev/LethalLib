@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
@@ -136,7 +136,8 @@ public class Dungeon
                     {
                         if (!line.DungeonArchetypes.Contains(dungeonArchetype.archeType) && (dungeonArchetype.lineIndex == -1 || dungeonArchetype.lineIndex == index)) { 
                             line.DungeonArchetypes.Add(dungeonArchetype.archeType);
-                            Plugin.logger.LogInfo($"Added {dungeonArchetype.archeType.name} to {name}");
+                            if (Plugin.extendedLogging.Value)
+                                Plugin.logger.LogInfo($"Added {dungeonArchetype.archeType.name} to {name}");
                         }
                     }
                 }
@@ -151,7 +152,8 @@ public class Dungeon
                         if (!archetype.TileSets.Contains(tileSet))
                         {
                             archetype.TileSets.Add(tileSet);
-                            Plugin.logger.LogInfo($"Added {tileSet.name} to {name}");
+                            if (Plugin.extendedLogging.Value)
+                                Plugin.logger.LogInfo($"Added {tileSet.name} to {name}");
                         }
                     }
                     foreach (var tileSet in archetype.TileSets)
