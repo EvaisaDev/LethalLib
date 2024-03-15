@@ -132,7 +132,11 @@ public class Enemies
 
             self.enemyFiles.Add(spawnableEnemy.terminalNode);
 
-            spawnableEnemy.enemy.enemyPrefab.GetComponentInChildren<ScanNodeProperties>().creatureScanID = spawnableEnemy.terminalNode.creatureFileID;
+            var scanNodePropertyComponents = spawnableEnemy.enemy.enemyPrefab.GetComponentsInChildren<ScanNodeProperties>();
+            for (int i = 0; i < scanNodePropertyComponents.Length; i++)
+            {
+                scanNodePropertyComponents[i].creatureScanID = spawnableEnemy.terminalNode.creatureFileID;
+            }
 
             var enemyAssetInfo = new EnemyAssetInfo()
             {
@@ -358,12 +362,7 @@ public class Enemies
         spawnableEnemy.terminalNode = infoNode;
         spawnableEnemy.infoKeyword = infoKeyword;
 
-        var callingAssembly = Assembly.GetCallingAssembly();
-        var modDLL = callingAssembly.GetName().Name;
-        spawnableEnemy.modName = modDLL;
-
-
-        spawnableEnemies.Add(spawnableEnemy);
+        FinalizeRegisterEnemy(spawnableEnemy);
     }
 
     /// <summary>
@@ -399,10 +398,26 @@ public class Enemies
         spawnableEnemy.terminalNode = infoNode;
         spawnableEnemy.infoKeyword = infoKeyword;
 
+        FinalizeRegisterEnemy(spawnableEnemy);
+    }
+
+    private static void FinalizeRegisterEnemy(SpawnableEnemy spawnableEnemy)
+    {
         var callingAssembly = Assembly.GetCallingAssembly();
         var modDLL = callingAssembly.GetName().Name;
         spawnableEnemy.modName = modDLL;
 
+        if (spawnableEnemy.enemy.enemyPrefab is null) {
+            throw new NullReferenceException($"Cannot register enemy '{spawnableEnemy.enemy.enemyName}', because enemy.enemyPrefab is null!");
+        }
+
+        var collisionComponents = spawnableEnemy.enemy.enemyPrefab.GetComponentsInChildren<EnemyAICollisionDetect>();
+        foreach (var collisionObject in collisionComponents)
+        {
+            if (collisionObject.mainScript is null) {
+                Plugin.logger.LogError($"An Enemy AI Collision Detect Script on GameObject '{collisionObject.gameObject.name}' of enemy '{spawnableEnemy.enemy.enemyName}' does not reference a 'Main Script', and will cause errors!");
+            }
+        }
 
         spawnableEnemies.Add(spawnableEnemy);
     }
