@@ -337,6 +337,7 @@ public class Enemies
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, int rarity, Levels.LevelTypes levelFlags, SpawnType spawnType, string[] spawnLevelOverrides = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
+        EnemyNullCheck(enemy);
         // if already registered, add rarity to levelRarities
         var spawnableEnemy = spawnableEnemies.FirstOrDefault(x => x.enemy == enemy && x.spawnType == spawnType);
 
@@ -370,6 +371,7 @@ public class Enemies
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, SpawnType spawnType, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
+        EnemyNullCheck(enemy);
         // if already registered, add rarity to levelRarities
         var spawnableEnemy = spawnableEnemies.FirstOrDefault(x => x.enemy == enemy && x.spawnType == spawnType);
 
@@ -422,12 +424,20 @@ public class Enemies
         spawnableEnemies.Add(spawnableEnemy);
     }
 
+    private static void EnemyNullCheck(EnemyType enemy)
+    {
+        if (enemy is null) {
+            throw new ArgumentNullException(nameof(enemy), $"The first argument of {nameof(RegisterEnemy)} was null!");
+        }
+    }
+
     /// <summary>
     /// Registers a enemy to be added to the given levels.
     /// Automatically sets the spawnType based on the enemy's isDaytimeEnemy and isOutsideEnemy properties.
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, int rarity, Levels.LevelTypes levelFlags, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
+        EnemyNullCheck(enemy);
         var spawnType = enemy.isDaytimeEnemy ? SpawnType.Daytime : enemy.isOutsideEnemy ? SpawnType.Outside : SpawnType.Default;
 
         RegisterEnemy(enemy, rarity, levelFlags, spawnType, null, infoNode, infoKeyword);
@@ -439,6 +449,7 @@ public class Enemies
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, int rarity, Levels.LevelTypes levelFlags, string[] spawnLevelOverrides = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
+        EnemyNullCheck(enemy);
         var spawnType = enemy.isDaytimeEnemy ? SpawnType.Daytime : enemy.isOutsideEnemy ? SpawnType.Outside : SpawnType.Default;
 
         RegisterEnemy(enemy, rarity, levelFlags, spawnType, spawnLevelOverrides, infoNode, infoKeyword);
@@ -450,6 +461,7 @@ public class Enemies
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
+        EnemyNullCheck(enemy);
         var spawnType = enemy.isDaytimeEnemy ? SpawnType.Daytime : enemy.isOutsideEnemy ? SpawnType.Outside : SpawnType.Default;
 
         RegisterEnemy(enemy, spawnType, levelRarities, customLevelRarities, infoNode, infoKeyword);

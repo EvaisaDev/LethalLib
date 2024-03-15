@@ -28,7 +28,7 @@ public class NetworkPrefabs
     public static void RegisterNetworkPrefab(GameObject prefab)
     {
         if (prefab is null)
-            throw new NullReferenceException($"Cannot register a null Prefab as a Network Prefab!");
+            throw new ArgumentNullException(nameof(prefab), $"The given argument for {nameof(RegisterNetworkPrefab)} is null!");
         if (!_networkPrefabs.Contains(prefab))
             _networkPrefabs.Add(prefab);
     }
