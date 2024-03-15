@@ -411,11 +411,11 @@ public class Enemies
             throw new NullReferenceException($"Cannot register enemy '{spawnableEnemy.enemy.enemyName}', because enemy.enemyPrefab is null!");
         }
 
-        var collisionComponents = spawnableEnemy.enemy.enemyPrefab.GetComponentsInChildren<EnemyAICollisionDetect>();
-        foreach (var collisionObject in collisionComponents)
+        var collisionDetectComponents = spawnableEnemy.enemy.enemyPrefab.GetComponentsInChildren<EnemyAICollisionDetect>();
+        foreach (var collisionDetectComponent in collisionDetectComponents)
         {
-            if (collisionObject.mainScript is null) {
-                Plugin.logger.LogError($"An Enemy AI Collision Detect Script on GameObject '{collisionObject.gameObject.name}' of enemy '{spawnableEnemy.enemy.enemyName}' does not reference a 'Main Script', and will cause errors!");
+            if (collisionDetectComponent.mainScript is null) {
+                Plugin.logger.LogError($"An Enemy AI Collision Detect Script on GameObject '{collisionDetectComponent.gameObject.name}' of enemy '{spawnableEnemy.enemy.enemyName}' does not reference a 'Main Script', and will cause errors!");
             }
         }
 
