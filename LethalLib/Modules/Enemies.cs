@@ -170,7 +170,7 @@ public class Enemies
                 {
                     var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
 
-                    if (alwaysValid || spawnableEnemy.spawnLevels.HasFlag(levelEnum))
+                    if (alwaysValid || spawnableEnemy.levelRarities.ContainsKey(levelEnum))
                     {
                         // find rarity
                         int rarity = 0;
@@ -402,6 +402,9 @@ public class Enemies
         var callingAssembly = Assembly.GetCallingAssembly();
         var modDLL = callingAssembly.GetName().Name;
         spawnableEnemy.modName = modDLL;
+
+
+        spawnableEnemies.Add(spawnableEnemy);
     }
 
     /// <summary>
