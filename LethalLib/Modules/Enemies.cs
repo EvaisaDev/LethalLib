@@ -132,7 +132,11 @@ public class Enemies
 
             self.enemyFiles.Add(spawnableEnemy.terminalNode);
 
-            spawnableEnemy.enemy.enemyPrefab.GetComponentInChildren<ScanNodeProperties>().creatureScanID = spawnableEnemy.terminalNode.creatureFileID;
+            var scanNodePropertyComponents = spawnableEnemy.enemy.enemyPrefab.GetComponentsInChildren<ScanNodeProperties>();
+            for (int i = 0; i < scanNodePropertyComponents.Length; i++)
+            {
+                scanNodePropertyComponents[i].creatureScanID = spawnableEnemy.terminalNode.creatureFileID;
+            }
 
             var enemyAssetInfo = new EnemyAssetInfo()
             {
@@ -333,6 +337,7 @@ public class Enemies
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, int rarity, Levels.LevelTypes levelFlags, SpawnType spawnType, string[] spawnLevelOverrides = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
+        EnemyNullCheck(enemy);
         // if already registered, add rarity to levelRarities
         var spawnableEnemy = spawnableEnemies.FirstOrDefault(x => x.enemy == enemy && x.spawnType == spawnType);
 
@@ -358,12 +363,7 @@ public class Enemies
         spawnableEnemy.terminalNode = infoNode;
         spawnableEnemy.infoKeyword = infoKeyword;
 
-        var callingAssembly = Assembly.GetCallingAssembly();
-        var modDLL = callingAssembly.GetName().Name;
-        spawnableEnemy.modName = modDLL;
-
-
-        spawnableEnemies.Add(spawnableEnemy);
+        FinalizeRegisterEnemy(spawnableEnemy);
     }
 
     /// <summary>
@@ -371,6 +371,7 @@ public class Enemies
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, SpawnType spawnType, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
+        EnemyNullCheck(enemy);
         // if already registered, add rarity to levelRarities
         var spawnableEnemy = spawnableEnemies.FirstOrDefault(x => x.enemy == enemy && x.spawnType == spawnType);
 
@@ -399,12 +400,35 @@ public class Enemies
         spawnableEnemy.terminalNode = infoNode;
         spawnableEnemy.infoKeyword = infoKeyword;
 
+        FinalizeRegisterEnemy(spawnableEnemy);
+    }
+
+    private static void FinalizeRegisterEnemy(SpawnableEnemy spawnableEnemy)
+    {
         var callingAssembly = Assembly.GetCallingAssembly();
         var modDLL = callingAssembly.GetName().Name;
         spawnableEnemy.modName = modDLL;
 
+        if (spawnableEnemy.enemy.enemyPrefab is null) {
+            throw new NullReferenceException($"Cannot register enemy '{spawnableEnemy.enemy.enemyName}', because enemy.enemyPrefab is null!");
+        }
+
+        var collisionDetectComponents = spawnableEnemy.enemy.enemyPrefab.GetComponentsInChildren<EnemyAICollisionDetect>();
+        foreach (var collisionDetectComponent in collisionDetectComponents)
+        {
+            if (collisionDetectComponent.mainScript is null) {
+                Plugin.logger.LogError($"An Enemy AI Collision Detect Script on GameObject '{collisionDetectComponent.gameObject.name}' of enemy '{spawnableEnemy.enemy.enemyName}' does not reference a 'Main Script', and will cause errors!");
+            }
+        }
 
         spawnableEnemies.Add(spawnableEnemy);
+    }
+
+    private static void EnemyNullCheck(EnemyType enemy)
+    {
+        if (enemy is null) {
+            throw new ArgumentNullException(nameof(enemy), $"The first argument of {nameof(RegisterEnemy)} was null!");
+        }
     }
 
     /// <summary>
@@ -413,6 +437,7 @@ public class Enemies
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, int rarity, Levels.LevelTypes levelFlags, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
+        EnemyNullCheck(enemy);
         var spawnType = enemy.isDaytimeEnemy ? SpawnType.Daytime : enemy.isOutsideEnemy ? SpawnType.Outside : SpawnType.Default;
 
         RegisterEnemy(enemy, rarity, levelFlags, spawnType, null, infoNode, infoKeyword);
@@ -424,6 +449,7 @@ public class Enemies
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, int rarity, Levels.LevelTypes levelFlags, string[] spawnLevelOverrides = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
+        EnemyNullCheck(enemy);
         var spawnType = enemy.isDaytimeEnemy ? SpawnType.Daytime : enemy.isOutsideEnemy ? SpawnType.Outside : SpawnType.Default;
 
         RegisterEnemy(enemy, rarity, levelFlags, spawnType, spawnLevelOverrides, infoNode, infoKeyword);
@@ -435,6 +461,7 @@ public class Enemies
     /// </summary>
     public static void RegisterEnemy(EnemyType enemy, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null, TerminalNode infoNode = null, TerminalKeyword infoKeyword = null)
     {
+        EnemyNullCheck(enemy);
         var spawnType = enemy.isDaytimeEnemy ? SpawnType.Daytime : enemy.isOutsideEnemy ? SpawnType.Outside : SpawnType.Default;
 
         RegisterEnemy(enemy, spawnType, levelRarities, customLevelRarities, infoNode, infoKeyword);

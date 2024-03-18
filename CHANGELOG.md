@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## LethalLib [0.14.4]
+
+### Fixed
+- Added various null checks to prevent crashes and to give better feedback to developers when using custom enemy API.
+
+## LethalLib [0.14.3]
+
+### Fixed
+- API for enemy registration with rarity tables works now.
+
 ## LethalLib [0.14.2]
 
 ### Changed
