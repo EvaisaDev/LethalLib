@@ -41,8 +41,8 @@ public class Levels
     {
         /*
         // The following code is from LLL, but is copied here because we need to use it
-        // even when LLL is not installed, beacause LLL alters LE(C) moon names to be
-        // usable in e.g. BepInEx configuration files by removing illagal characters.
+        // even when LLL is not installed, because LLL alters LE(C) moon names to be
+        // usable in e.g. BepInEx configuration files by removing illegal characters.
         //
         // https://github.com/IAmBatby/LethalLevelLoader
         */
