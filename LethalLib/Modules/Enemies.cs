@@ -463,7 +463,7 @@ public class Enemies
         foreach (var collisionDetectComponent in collisionDetectComponents)
         {
             if (collisionDetectComponent.mainScript is null) {
-                Plugin.logger.LogError($"An Enemy AI Collision Detect Script on GameObject '{collisionDetectComponent.gameObject.name}' of enemy '{spawnableEnemy.enemy.enemyName}' does not reference a 'Main Script', and will cause errors!");
+                Plugin.logger.LogWarning($"An Enemy AI Collision Detect Script on GameObject '{collisionDetectComponent.gameObject.name}' of enemy '{spawnableEnemy.enemy.enemyName}' does not reference a 'Main Script', and could cause Null Reference Exceptions.");
             }
         }
 
