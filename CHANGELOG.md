@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## LethalLib [0.15.0]
+
+### Added
+- LethalLib will now also register enemies and items for when LethalLevelLoader adds its moons.
+
+### Changed
+- customLevelRarities will now accept the original level name or the level name modified by LethalLevelLoader, meaning enemies and items can target a custom moon using either name
+
+### Fixed
+- Enemy and item spawn weights now get applied as one would expect
+  - `Levels.LevelTypes.All` no longer overrrides all spawn weights
+  - `Levels.LevelTypes.Modded` now applies its spawn weights
+    - this used to only apply its weight if customLevelRarities contained the level's name
+  - customLevelRarities now applies its weights
+
 ## LethalLib [0.14.4]
 
 ### Fixed
