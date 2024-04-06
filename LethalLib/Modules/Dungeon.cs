@@ -33,7 +33,7 @@ public class Dungeon
 
     private static void RoundManager_Start(On.RoundManager.orig_Start orig, RoundManager self)
     {
-        foreach(var dungeon in customDungeons)
+        /*foreach(var dungeon in customDungeons)
         {
             if (!self.dungeonFlowTypes.Contains(dungeon.dungeonFlow))
             {
@@ -87,7 +87,7 @@ public class Dungeon
                 }
             }
         }
-
+        */
         orig(self);
     }
 
