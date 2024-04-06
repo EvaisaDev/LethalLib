@@ -61,11 +61,13 @@ public class Plugin : BaseUnityPlugin
     private void IlHook(ILContext il)
     {
         var cursor = new ILCursor(il);
-        cursor.GotoNext(
-            x => x.MatchCallvirt(typeof(StackFrame).GetMethod("GetFileLineNumber", BindingFlags.Instance | BindingFlags.Public))
-        );
-        cursor.RemoveRange(2);
-        cursor.EmitDelegate<Func<StackFrame, string>>(GetLineOrIL);
+        var getFileLineNumberMethod = typeof(StackFrame).GetMethod("GetFileLineNumber", BindingFlags.Instance | BindingFlags.Public);
+
+        if (cursor.TryGotoNext(x => x.MatchCallvirt(getFileLineNumberMethod)))
+        {
+            cursor.RemoveRange(2);
+            cursor.EmitDelegate<Func<StackFrame, string>>(GetLineOrIL);
+        }
     }
 
     private static string GetLineOrIL(StackFrame instance)
