@@ -36,6 +36,7 @@ public class Weathers
     public static int numCustomWeathers = 0;
     // public static Array newWeatherValuesArray;
     //public static string[] newWeatherNamesArray;
+    private static Hook? weatherEnumHook ;
 
     public static void Init()
     {
@@ -54,7 +55,7 @@ public class Weathers
         }), typeof(Weathers).GetMethod("GetNamesHook"));*/
 
         //public override string ToString();
-        new Hook(typeof(Enum).GetMethod("ToString", new Type[]
+        weatherEnumHook = new Hook(typeof(Enum).GetMethod("ToString", new Type[]
         {
         }), typeof(Weathers).GetMethod("ToStringHook"));
 
