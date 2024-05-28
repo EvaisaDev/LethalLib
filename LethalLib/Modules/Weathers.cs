@@ -33,6 +33,8 @@ public class Weathers
     }
 
     public static Dictionary<int, CustomWeather> customWeathers = new Dictionary<int, CustomWeather>();
+    private static List<SelectableLevel> levelsAlreadyAddedTo = new();
+
     public static int numCustomWeathers = 0;
     // public static Array newWeatherValuesArray;
     //public static string[] newWeatherNamesArray;
@@ -60,53 +62,76 @@ public class Weathers
         }), typeof(Weathers).GetMethod("ToStringHook"));
 
         On.TimeOfDay.Awake += TimeOfDay_Awake;
-        On.StartOfRound.Awake += StartOfRound_Awake;
+        On.StartOfRound.Awake += RegisterLevelWeathers_StartOfRound_Awake;
     }
 
-    private static void StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
+    private static void RegisterLevelWeathers_StartOfRound_Awake(On.StartOfRound.orig_Awake orig, StartOfRound self)
     {
-        foreach (KeyValuePair<int, CustomWeather> entry in customWeathers)
+        RegisterLethalLibWeathersForAllLevels(self);
+
+        if(BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("imabatby.lethallevelloader") || // currently has typo
+            BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("iambatby.lethallevelloader")) // might be changed to this
         {
-            foreach (SelectableLevel level in self.levels)
+            // LLL adds it's moons later, so we add the weathers for it also
+            On.RoundManager.Start += (orig, selfRoundManager) =>
             {
-                var name = level.name;
-
-                var alwaysValid = entry.Value.levels.HasFlag(Levels.LevelTypes.All) || (entry.Value.spawnLevelOverrides != null && entry.Value.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
-                var isModded = entry.Value.levels.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
-
-                if (isModded)
-                {
-                    alwaysValid = true;
-                }
-
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
-                {
-                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
-                    var weathers = level.randomWeathers.ToList();
-                    // loop through custom weathers
-        
-                    // if the custom weather has the level
-                    if (alwaysValid || entry.Value.levels.HasFlag(levelEnum))
-                    {
-                        // add it to the level
-                        weathers.Add(new RandomWeatherWithVariables()
-                        {
-                            weatherType = (LevelWeatherType)entry.Key,
-                            weatherVariable = entry.Value.weatherVariable1,
-                            weatherVariable2 = entry.Value.weatherVariable2
-                        });
-                        if (Plugin.extendedLogging.Value)
-                            Plugin.logger.LogInfo($"Added weather {entry.Value.name} to level {level.name} at weather index: {entry.Key}");
-                    }
-                    
-                    level.randomWeathers = weathers.ToArray();
-
-                }
-            }
+                orig(selfRoundManager);
+                RegisterLethalLibWeathersForAllLevels(self);
+            };
         }
 
-
         orig(self);
+    }
+
+    private static void RegisterLethalLibWeathersForAllLevels(StartOfRound startOfRound)
+    {
+        foreach (SelectableLevel level in startOfRound.levels)
+        {
+            if(levelsAlreadyAddedTo.Contains(level))
+                continue;
+            foreach (KeyValuePair<int, CustomWeather> entry in customWeathers)
+            {
+                AddWeatherToLevel(entry, level);
+            }
+            levelsAlreadyAddedTo.Add(level);
+        }
+    }
+
+    private static void AddWeatherToLevel(KeyValuePair<int, CustomWeather> entry, SelectableLevel level)
+    {
+        var name = level.name;
+
+        var alwaysValid = entry.Value.levels.HasFlag(Levels.LevelTypes.All) || (entry.Value.spawnLevelOverrides != null && entry.Value.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
+        var isModded = entry.Value.levels.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+
+        if (isModded)
+        {
+            alwaysValid = true;
+        }
+
+        if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+        {
+            var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+            var weathers = level.randomWeathers.ToList();
+            // loop through custom weathers
+
+            // if the custom weather has the level
+            if (alwaysValid || entry.Value.levels.HasFlag(levelEnum))
+            {
+                // add it to the level
+                weathers.Add(new RandomWeatherWithVariables()
+                {
+                    weatherType = (LevelWeatherType)entry.Key,
+                    weatherVariable = entry.Value.weatherVariable1,
+                    weatherVariable2 = entry.Value.weatherVariable2
+                });
+                if (Plugin.extendedLogging.Value)
+                    Plugin.logger.LogInfo($"To level {level.name} added weather {entry.Value.name} at weather index: {entry.Key}");
+            }
+            
+            level.randomWeathers = weathers.ToArray();
+
+        }
     }
 
     private static void TimeOfDay_Awake(On.TimeOfDay.orig_Awake orig, TimeOfDay self)
@@ -228,11 +253,11 @@ public class Weathers
     ///This needs to be called after StartOfRound.Awake.
     ///Only works for weathers registered by LethalLib.
     ///</summary>
-    public static void RemoveWeather(string levelName, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
+    public static void RemoveWeather(string weatherName, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[]? levelOverrides = null)
     {
         foreach (KeyValuePair<int, CustomWeather> entry in customWeathers)
         {
-            if (entry.Value.name == levelName && StartOfRound.Instance != null)
+            if (entry.Value.name == weatherName && StartOfRound.Instance != null)
             {
 
                 foreach (SelectableLevel level in StartOfRound.Instance.levels)

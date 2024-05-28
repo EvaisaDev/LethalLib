@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## LethalLib [0.16.0]
+
+### Added
+- Version 50 moons were finally added to the `LevelTypes` enum.
+- LethalLib weathers now also get added to LethalLevelLoader moons.
+
+### Changed
+- Use `TryGotoNext` instead of `GotoNext` for `StackFrame.AddFrames` ILHook so it doesn't throw if sequence was not found due to another mod patching the method first ([#74](https://github.com/EvaisaDev/LethalLib/pull/74))
+- Added a reference to a `ToString` weather enum Hook ([#81](https://github.com/EvaisaDev/LethalLib/pull/81))
+
+### Fixed
+- `RemoveWeather`'s first argument was named "levelName", now it is "weatherName".
+
 ## LethalLib [0.15.1]
 
 ### Fixed

@@ -23,7 +23,10 @@ public class Levels
         RendLevel = 1 << 7,
         DineLevel = 1 << 8,
         TitanLevel = 1 << 9,
-        Vanilla = ExperimentationLevel | AssuranceLevel | VowLevel | OffenseLevel | MarchLevel | RendLevel | DineLevel | TitanLevel,
+        AdamanceLevel = 1 << 11,
+        ArtificeLevel = 1 << 12,
+        EmbrionLevel = 1 << 13,
+        Vanilla = ExperimentationLevel | AssuranceLevel | VowLevel | OffenseLevel | MarchLevel | RendLevel | DineLevel | TitanLevel | AdamanceLevel | ArtificeLevel | EmbrionLevel,
 
         /// <summary>
         /// Only modded levels
