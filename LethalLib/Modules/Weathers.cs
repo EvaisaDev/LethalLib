@@ -126,7 +126,7 @@ public class Weathers
                     weatherVariable2 = entry.Value.weatherVariable2
                 });
                 if (Plugin.extendedLogging.Value)
-                    Plugin.logger.LogInfo($"Added weather {entry.Value.name} to level {level.name} at weather index: {entry.Key}");
+                    Plugin.logger.LogInfo($"To level {level.name} added weather {entry.Value.name} at weather index: {entry.Key}");
             }
             
             level.randomWeathers = weathers.ToArray();
