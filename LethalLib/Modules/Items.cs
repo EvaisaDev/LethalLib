@@ -179,7 +179,9 @@ public class Items
 
         //var alwaysValid = scrapItem.spawnLevels.HasFlag(Levels.LevelTypes.All) || (scrapItem.spawnLevelOverrides != null && scrapItem.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
 
-        var alwaysValid = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.All) || (scrapItem.customLevelRarities != null && scrapItem.customLevelRarities.ContainsKey(name));
+        var alwaysValid = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.All)
+            || scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla)
+            || (scrapItem.customLevelRarities != null && scrapItem.customLevelRarities.ContainsKey(name));
         var isModded = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
 
         if (isModded)
@@ -209,6 +211,9 @@ public class Items
 
                 if (isVanilla && scrapItem.levelRarities.ContainsKey(realLevelEnum))
                     rarity = scrapItem.levelRarities[realLevelEnum];
+
+                else if (isVanilla && scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla))
+                    rarity = scrapItem.levelRarities[Levels.LevelTypes.Vanilla];
                 
                 else if (!isVanilla && scrapItem.customLevelRarities != null && scrapItem.customLevelRarities.ContainsKey(name))
                     rarity = scrapItem.customLevelRarities[name];
