@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## LethalLib [0.16.1]
+
+### Fixed
+- `Levels.LevelTypes.Vanilla` now works for registering enemies and items on moons.
+
 ## LethalLib [0.16.0]
 
 ### Added
@@ -33,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Enemy and item spawn weights now get applied as one would expect
-  - `Levels.LevelTypes.All` no longer overrrides all spawn weights
+  - `Levels.LevelTypes.All` no longer overrides all spawn weights
   - `Levels.LevelTypes.Modded` now applies its spawn weights
     - this used to only apply its weight if customLevelRarities contained the level's name
   - customLevelRarities now applies its weights

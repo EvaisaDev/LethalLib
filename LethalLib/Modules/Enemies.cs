@@ -196,7 +196,9 @@ public class Enemies
 
         //var alwaysValid = spawnableEnemy.spawnLevels.HasFlag(Levels.LevelTypes.All) || (spawnableEnemy.spawnLevelOverrides != null && spawnableEnemy.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
         //var isModded = spawnableEnemy.spawnLevels.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
-        var alwaysValid = spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.All) || (spawnableEnemy.customLevelRarities != null && spawnableEnemy.customLevelRarities.ContainsKey(name));
+        var alwaysValid = spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.All)
+            || spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla)
+            || (spawnableEnemy.customLevelRarities != null && spawnableEnemy.customLevelRarities.ContainsKey(name));
         var isModded = spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
 
 
@@ -228,7 +230,10 @@ public class Enemies
 
                 if (isVanilla && spawnableEnemy.levelRarities.ContainsKey(realLevelEnum))
                     rarity = spawnableEnemy.levelRarities[realLevelEnum];
-                
+
+                else if (isVanilla && spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla))
+                    rarity = spawnableEnemy.levelRarities[Levels.LevelTypes.Vanilla];
+
                 else if (!isVanilla && spawnableEnemy.customLevelRarities != null && spawnableEnemy.customLevelRarities.ContainsKey(name))
                     rarity = spawnableEnemy.customLevelRarities[name];
 
