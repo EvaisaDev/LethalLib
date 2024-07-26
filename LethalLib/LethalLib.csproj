@@ -34,6 +34,7 @@
     <ItemGroup>
         <PackageReference Include="BepInEx.Core" Version="5.4.21" />
         <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" PrivateAssets="all"/>
+        <PackageReference Include="MegaPiggy.LCEnumUtils" Version="1.0.5" />
         <Reference Include="Assembly-CSharp">
             <HintPath>$(LethalCompanyDir)Lethal Company_Data/Managed/Assembly-CSharp.dll</HintPath>
         </Reference>

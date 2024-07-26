@@ -18,6 +18,7 @@ using UnityEngine;
 namespace LethalLib;
 
 [BepInPlugin(ModGUID, ModName, ModVersion)]
+[BepInDependency(LCEnumUtils.PluginInfo.ModGUID)]
 //[BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
 public class Plugin : BaseUnityPlugin
 {
