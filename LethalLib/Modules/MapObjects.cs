@@ -97,16 +97,16 @@ public class MapObjects
             {
                 var name = level.name;
                 var alwaysValid = mapObject.levels.HasFlag(Levels.LevelTypes.All) || (mapObject.spawnLevelOverrides != null && mapObject.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
-                var isModded = mapObject.levels.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+                var isModded = mapObject.levels.HasFlag(Levels.LevelTypes.Modded) && !EnumUtils.IsDefined<Levels.LevelTypes>(name);
 
                 if (isModded)
                 {
                     alwaysValid = true;
                 }
 
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+                if (EnumUtils.IsDefined<Levels.LevelTypes>(name) || alwaysValid)
                 {
-                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : EnumUtils.Parse<Levels.LevelTypes>(name);
 
 
                     if (alwaysValid || mapObject.levels.HasFlag(levelEnum))
@@ -278,15 +278,15 @@ public class MapObjects
                 var name = level.name;
 
                 var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
-                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !EnumUtils.IsDefined<Levels.LevelTypes>(name);
 
                 if (isModded)
                 {
                     alwaysValid = true;
                 }
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+                if (EnumUtils.IsDefined<Levels.LevelTypes>(name) || alwaysValid)
                 {
-                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : EnumUtils.Parse<Levels.LevelTypes>(name);
                     if (alwaysValid || levelFlags.HasFlag(levelEnum))
                     {
 
@@ -317,15 +317,15 @@ public class MapObjects
                 var name = level.name;
 
                 var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
-                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !EnumUtils.IsDefined<Levels.LevelTypes>(name);
 
                 if (isModded)
                 {
                     alwaysValid = true;
                 }
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+                if (EnumUtils.IsDefined<Levels.LevelTypes>(name) || alwaysValid)
                 {
-                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : EnumUtils.Parse<Levels.LevelTypes>(name);
                     if (alwaysValid || levelFlags.HasFlag(levelEnum))
                     {
 

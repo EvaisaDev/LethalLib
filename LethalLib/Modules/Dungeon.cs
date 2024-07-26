@@ -67,16 +67,16 @@ public class Dungeon
             {
                 var name = level.name;
                 var alwaysValid = dungeon.LevelTypes.HasFlag(Levels.LevelTypes.All) || (dungeon.levelOverrides != null && dungeon.levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
-                var isModded = dungeon.LevelTypes.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+                var isModded = dungeon.LevelTypes.HasFlag(Levels.LevelTypes.Modded) && !EnumUtils.IsDefined<Levels.LevelTypes>(name);
 
                 if (isModded)
                 {
                     alwaysValid = true;
                 }
 
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+                if (EnumUtils.IsDefined<Levels.LevelTypes>(name) || alwaysValid)
                 {
-                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : EnumUtils.Parse<Levels.LevelTypes>(name);
 
                     if ((alwaysValid || dungeon.LevelTypes.HasFlag(levelEnum)) && !level.dungeonFlowTypes.Any(rarityInt => rarityInt.id == dungeon.dungeonIndex))
                     {
@@ -123,9 +123,9 @@ public class Dungeon
     private static void RoundManager_GenerateNewFloor(On.RoundManager.orig_GenerateNewFloor orig, RoundManager self)
     {
         var name = self.currentLevel.name;
-        if (Enum.IsDefined(typeof(Levels.LevelTypes), name))
+        if (EnumUtils.IsDefined<Levels.LevelTypes>(name))
         {
-            var levelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+            var levelEnum = EnumUtils.Parse<Levels.LevelTypes>(name);
 
             var index = 0;
             self.dungeonGenerator.Generator.DungeonFlow.Lines.ForEach((line) =>

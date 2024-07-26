@@ -182,7 +182,7 @@ public class Items
         var alwaysValid = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.All)
             || scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla)
             || (scrapItem.customLevelRarities != null && scrapItem.customLevelRarities.ContainsKey(name));
-        var isModded = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+        var isModded = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Modded) && !EnumUtils.IsDefined<Levels.LevelTypes>(name);
 
         if (isModded)
         {
@@ -192,8 +192,8 @@ public class Items
         var realLevelEnum = Levels.LevelTypes.None;
         bool isVanilla = false;
         
-        if(Enum.IsDefined(typeof(Levels.LevelTypes), name)){
-            realLevelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+        if(EnumUtils.IsDefined<Levels.LevelTypes>(name)){
+            realLevelEnum = EnumUtils.Parse<Levels.LevelTypes>(name);
             isVanilla = true;
         }
         else
@@ -201,7 +201,7 @@ public class Items
 
         if (isVanilla || alwaysValid)
         {
-            var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+            var levelEnum = alwaysValid ? Levels.LevelTypes.All : EnumUtils.Parse<Levels.LevelTypes>(name);
 
             // old: scrapItem.spawnLevels.HasFlag(levelEnum)
             if (alwaysValid || scrapItem.levelRarities.ContainsKey(levelEnum))
@@ -582,7 +582,7 @@ public class Items
 
             if (spawnLevels != Levels.LevelTypes.None)
             {
-                foreach (Levels.LevelTypes level in Enum.GetValues(typeof(Levels.LevelTypes)))
+                foreach (Levels.LevelTypes level in EnumUtils.GetValues<Levels.LevelTypes>())
                 {
                     if (spawnLevels.HasFlag(level))
                     {
@@ -862,20 +862,20 @@ public class Items
             {
                 var name = level.name;
 
-                if(!Enum.IsDefined(typeof(Levels.LevelTypes), name))
+                if(!EnumUtils.IsDefined<Levels.LevelTypes>(name))
                     name = Levels.Compatibility.GetLLLNameOfLevel(name);
 
                 var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => Levels.Compatibility.GetLLLNameOfLevel(item).ToLowerInvariant() == name.ToLowerInvariant()));
-                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !EnumUtils.IsDefined<Levels.LevelTypes>(name);
 
                 if (isModded)
                 {
                     alwaysValid = true;
                 }
 
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+                if (EnumUtils.IsDefined<Levels.LevelTypes>(name) || alwaysValid)
                 {
-                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : EnumUtils.Parse<Levels.LevelTypes>(name);
                     if (alwaysValid || levelFlags.HasFlag(levelEnum))
                     {
                         // find item in scrapItems

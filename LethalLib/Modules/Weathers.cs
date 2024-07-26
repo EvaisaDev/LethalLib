@@ -102,16 +102,16 @@ public class Weathers
         var name = level.name;
 
         var alwaysValid = entry.Value.levels.HasFlag(Levels.LevelTypes.All) || (entry.Value.spawnLevelOverrides != null && entry.Value.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
-        var isModded = entry.Value.levels.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+        var isModded = entry.Value.levels.HasFlag(Levels.LevelTypes.Modded) && !EnumUtils.IsDefined<Levels.LevelTypes>(name);
 
         if (isModded)
         {
             alwaysValid = true;
         }
 
-        if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+        if (EnumUtils.IsDefined<Levels.LevelTypes>(name) || alwaysValid)
         {
-            var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+            var levelEnum = alwaysValid ? Levels.LevelTypes.All : EnumUtils.Parse<Levels.LevelTypes>(name);
             var weathers = level.randomWeathers.ToList();
             // loop through custom weathers
 
@@ -265,15 +265,15 @@ public class Weathers
                     var name = level.name;
 
                     var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
-                    var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+                    var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !EnumUtils.IsDefined<Levels.LevelTypes>(name);
 
                     if (isModded)
                     {
                         alwaysValid = true;
                     }
-                    if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+                    if (EnumUtils.IsDefined<Levels.LevelTypes>(name) || alwaysValid)
                     {
-                        var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                        var levelEnum = alwaysValid ? Levels.LevelTypes.All : EnumUtils.Parse<Levels.LevelTypes>(name);
                         if (alwaysValid || levelFlags.HasFlag(levelEnum))
                         {
                             var weathers = level.randomWeathers.ToList();

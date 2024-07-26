@@ -195,11 +195,11 @@ public class Enemies
         var name = level.name;
 
         //var alwaysValid = spawnableEnemy.spawnLevels.HasFlag(Levels.LevelTypes.All) || (spawnableEnemy.spawnLevelOverrides != null && spawnableEnemy.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
-        //var isModded = spawnableEnemy.spawnLevels.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+        //var isModded = spawnableEnemy.spawnLevels.HasFlag(Levels.LevelTypes.Modded) && !EnumUtils.IsDefined<Levels.LevelTypes>(name);
         var alwaysValid = spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.All)
             || spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla)
             || (spawnableEnemy.customLevelRarities != null && spawnableEnemy.customLevelRarities.ContainsKey(name));
-        var isModded = spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+        var isModded = spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Modded) && !EnumUtils.IsDefined<Levels.LevelTypes>(name);
 
 
         if (isModded)
@@ -210,8 +210,8 @@ public class Enemies
         var realLevelEnum = Levels.LevelTypes.None;
         bool isVanilla = false;
 
-        if(Enum.IsDefined(typeof(Levels.LevelTypes), name)){
-            realLevelEnum = (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+        if(EnumUtils.IsDefined<Levels.LevelTypes>(name)){
+            realLevelEnum = EnumUtils.Parse<Levels.LevelTypes>(name);
             isVanilla = true;
         }
         else
@@ -346,7 +346,7 @@ public class Enemies
 
             if (spawnLevels != Levels.LevelTypes.None)
             {
-                foreach (Levels.LevelTypes level in Enum.GetValues(typeof(Levels.LevelTypes)))
+                foreach (Levels.LevelTypes level in EnumUtils.GetValues<Levels.LevelTypes>())
                 {
                     if (spawnLevels.HasFlag(level))
                     {
@@ -531,20 +531,20 @@ public class Enemies
             {
                 var name = level.name;
 
-                if(!Enum.IsDefined(typeof(Levels.LevelTypes), name))
+                if(!EnumUtils.IsDefined<Levels.LevelTypes>(name))
                     name = Levels.Compatibility.GetLLLNameOfLevel(name);
                                 
                 var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => Levels.Compatibility.GetLLLNameOfLevel(item).ToLowerInvariant() == name.ToLowerInvariant()));
-                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !EnumUtils.IsDefined<Levels.LevelTypes>(name);
 
                 if (isModded)
                 {
                     alwaysValid = true;
                 }
 
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
+                if (EnumUtils.IsDefined<Levels.LevelTypes>(name) || alwaysValid)
                 {
-                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : EnumUtils.Parse<Levels.LevelTypes>(name);
                     if (alwaysValid || levelFlags.HasFlag(levelEnum))
                     {
 
