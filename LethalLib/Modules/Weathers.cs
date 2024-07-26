@@ -32,13 +32,13 @@ public class Weathers
         }
     }
 
-    public static Dictionary<int, CustomWeather> customWeathers = new Dictionary<int, CustomWeather>();
+    public static Dictionary<LevelWeatherType, CustomWeather> customWeathers = new Dictionary<LevelWeatherType, CustomWeather>();
     private static List<SelectableLevel> levelsAlreadyAddedTo = new();
 
-    public static int numCustomWeathers = 0;
+    // public static int numCustomWeathers = 0;
     // public static Array newWeatherValuesArray;
     //public static string[] newWeatherNamesArray;
-    private static Hook? weatherEnumHook ;
+    // private static Hook? weatherEnumHook ;
 
     public static void Init()
     {
@@ -54,12 +54,12 @@ public class Weathers
         new Hook(typeof(Enum).GetMethod("GetNames", new Type[]
         {
         typeof(Type)
-        }), typeof(Weathers).GetMethod("GetNamesHook"));*/
+        }), typeof(Weathers).GetMethod("GetNamesHook"));
 
         //public override string ToString();
         weatherEnumHook = new Hook(typeof(Enum).GetMethod("ToString", new Type[]
         {
-        }), typeof(Weathers).GetMethod("ToStringHook"));
+        }), typeof(Weathers).GetMethod("ToStringHook"));*/
 
         On.TimeOfDay.Awake += TimeOfDay_Awake;
         On.StartOfRound.Awake += RegisterLevelWeathers_StartOfRound_Awake;
@@ -89,7 +89,7 @@ public class Weathers
         {
             if(levelsAlreadyAddedTo.Contains(level))
                 continue;
-            foreach (KeyValuePair<int, CustomWeather> entry in customWeathers)
+            foreach (KeyValuePair<LevelWeatherType, CustomWeather> entry in customWeathers)
             {
                 AddWeatherToLevel(entry, level);
             }
@@ -97,7 +97,7 @@ public class Weathers
         }
     }
 
-    private static void AddWeatherToLevel(KeyValuePair<int, CustomWeather> entry, SelectableLevel level)
+    private static void AddWeatherToLevel(KeyValuePair<LevelWeatherType, CustomWeather> entry, SelectableLevel level)
     {
         var name = level.name;
 
@@ -121,7 +121,7 @@ public class Weathers
                 // add it to the level
                 weathers.Add(new RandomWeatherWithVariables()
                 {
-                    weatherType = (LevelWeatherType)entry.Key,
+                    weatherType = entry.Key,
                     weatherVariable = entry.Value.weatherVariable1,
                     weatherVariable2 = entry.Value.weatherVariable2
                 });
@@ -137,17 +137,10 @@ public class Weathers
     private static void TimeOfDay_Awake(On.TimeOfDay.orig_Awake orig, TimeOfDay self)
     {
         List<WeatherEffect> weatherList = self.effects.ToList();
-            
+
         // we want to insert things at the right index, but there might be gaps, in which case we need to fill it with nulls
         // first we find our highest index
-        int highestIndex = 0;
-        foreach (KeyValuePair<int, CustomWeather> entry in customWeathers)
-        {
-            if (entry.Key > highestIndex)
-            {
-                highestIndex = entry.Key;
-            }
-        }
+        int highestIndex = (int)EnumUtils.GetMaxValue<LevelWeatherType>();
 
         // then we fill the list with nulls until we reach the highest index
         while (weatherList.Count <= highestIndex)
@@ -156,9 +149,9 @@ public class Weathers
         }
 
         // thne we set the custom weathers at their index
-        foreach (KeyValuePair<int, CustomWeather> entry in customWeathers)
+        foreach (KeyValuePair<LevelWeatherType, CustomWeather> entry in customWeathers)
         {
-            weatherList[entry.Key] = entry.Value.weatherEffect;
+            weatherList[(int)entry.Key] = entry.Value.weatherEffect;
         }
 
         // then we set the list
@@ -186,7 +179,7 @@ public class Weathers
 
         }
         return orig(enumType);
-    }*/
+    }
 
     public static string ToStringHook(Func<Enum, string> orig, Enum self)
     {
@@ -199,7 +192,7 @@ public class Weathers
         }
 
         return orig(self);
-    }
+    }*/
 
 
     ///<summary>
@@ -215,18 +208,11 @@ public class Weathers
     ///</summary>
     public static void RegisterWeather(string name, WeatherEffect weatherEffect, Levels.LevelTypes levels = Levels.LevelTypes.None, int weatherVariable1 = 0, int weatherVariable2 = 0)
     {
-        var origValues = Enum.GetValues(typeof(LevelWeatherType));
-        int num = origValues.Length - 1;
+        var value = EnumUtils.Create<LevelWeatherType>(name);
 
-        num += numCustomWeathers;
+        Plugin.logger.LogInfo($"Registering weather {name} at index {(int)value}");
 
-        // add our numcustomweathers
-        numCustomWeathers++;
-
-        Plugin.logger.LogInfo($"Registering weather {name} at index {num - 1}");
-
-        // add to dictionary at next value
-        customWeathers.Add(num, new CustomWeather(name, weatherEffect, levels, null, weatherVariable1, weatherVariable2));
+        customWeathers.Add(value, new CustomWeather(name, weatherEffect, levels, null, weatherVariable1, weatherVariable2));
     }
 
     ///<summary>
@@ -234,18 +220,12 @@ public class Weathers
     ///</summary>
     public static void RegisterWeather(string name, WeatherEffect weatherEffect, Levels.LevelTypes levels = Levels.LevelTypes.None, string[] spawnLevelOverrides = null, int weatherVariable1 = 0, int weatherVariable2 = 0)
     {
-        var origValues = Enum.GetValues(typeof(LevelWeatherType));
-        int num = origValues.Length - 1;
+        var value = EnumUtils.Create<LevelWeatherType>(name);
 
-        num += numCustomWeathers;
-
-        // add our numcustomweathers
-        numCustomWeathers++;
-
-        Plugin.logger.LogInfo($"Registering weather {name} at index {num - 1}");
+        Plugin.logger.LogInfo($"Registering weather {name} at index {(int)value}");
 
         // add to dictionary at next value
-        customWeathers.Add(num, new CustomWeather(name, weatherEffect, levels, spawnLevelOverrides, weatherVariable1, weatherVariable2));
+        customWeathers.Add(value, new CustomWeather(name, weatherEffect, levels, spawnLevelOverrides, weatherVariable1, weatherVariable2));
     }
 
     ///<summary>
@@ -255,7 +235,7 @@ public class Weathers
     ///</summary>
     public static void RemoveWeather(string weatherName, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[]? levelOverrides = null)
     {
-        foreach (KeyValuePair<int, CustomWeather> entry in customWeathers)
+        foreach (KeyValuePair<LevelWeatherType, CustomWeather> entry in customWeathers)
         {
             if (entry.Value.name == weatherName && StartOfRound.Instance != null)
             {
@@ -278,7 +258,7 @@ public class Weathers
                         {
                             var weathers = level.randomWeathers.ToList();
 
-                            weathers.RemoveAll(item => item.weatherType == (LevelWeatherType)entry.Key);
+                            weathers.RemoveAll(item => item.weatherType == entry.Key);
 
                             level.randomWeathers = weathers.ToArray();
                         }
