@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 #endregion
@@ -80,9 +81,11 @@ public class Levels
             // -> 10 Example
             string newName = StripSpecialCharacters(GetNumberlessPlanetName(levelName));
             // -> Example
-            if (!newName.EndsWith("Level"))
+            if (!newName.EndsWith("Level", true, CultureInfo.InvariantCulture))
                 newName += "Level";
             // -> ExampleLevel
+            newName = newName.ToLowerInvariant();
+            // -> examplelevel
             return newName;
         }
 
