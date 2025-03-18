@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## LethalLib [0.16.4]
 - Fixed `AddEnemyToLevel` needing a `LevelType` to validate custom moon enemy rarities.
+- Fixed `AddScrapItemToLevel` having the same issue as above.
 
 ## LethalLib [0.16.3]
 
