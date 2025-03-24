@@ -95,85 +95,107 @@ public class MapObjects
         {
             foreach (SelectableLevel level in self.levels)
             {
-                var name = level.name;
-                var alwaysValid = mapObject.levels.HasFlag(Levels.LevelTypes.All) || (mapObject.spawnLevelOverrides != null && mapObject.spawnLevelOverrides.Any(item => item.ToLowerInvariant() == name.ToLowerInvariant()));
-                var isModded = mapObject.levels.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
-
-                if (isModded)
-                {
-                    alwaysValid = true;
-                }
-
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
-                {
-                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
-
-
-                    if (alwaysValid || mapObject.levels.HasFlag(levelEnum))
-                    {
-                        if (mapObject.mapObject != null)
-                        {
-                            // Remove existing object if it exists
-                            if (level.spawnableMapObjects.Any(x => x.prefabToSpawn == mapObject.mapObject.prefabToSpawn))
-                            {
-                                var list = level.spawnableMapObjects.ToList();
-                                list.RemoveAll(x => x.prefabToSpawn == mapObject.mapObject.prefabToSpawn);
-                                level.spawnableMapObjects = list.ToArray();
-                            }
-
-                            // Create a new instance so it can have its own `numberToSpawn` value
-                            SpawnableMapObject spawnableMapObject = new()
-                            {
-                                prefabToSpawn = mapObject.mapObject.prefabToSpawn,
-                                spawnFacingAwayFromWall = mapObject.mapObject.spawnFacingAwayFromWall,
-                                spawnFacingWall = mapObject.mapObject.spawnFacingWall,
-                                spawnWithBackToWall = mapObject.mapObject.spawnWithBackToWall,
-                                spawnWithBackFlushAgainstWall = mapObject.mapObject.spawnWithBackFlushAgainstWall,
-                                requireDistanceBetweenSpawns = mapObject.mapObject.requireDistanceBetweenSpawns,
-                                disallowSpawningNearEntrances = mapObject.mapObject.disallowSpawningNearEntrances,
-                            };
-
-                            if (mapObject.spawnRateFunction != null)
-                            {
-                                spawnableMapObject.numberToSpawn = mapObject.spawnRateFunction(level);
-                            }
-
-                            var mapObjectsList = level.spawnableMapObjects.ToList();
-                            mapObjectsList.Add(spawnableMapObject);
-                            level.spawnableMapObjects = mapObjectsList.ToArray();
-
-                            if (Plugin.extendedLogging.Value)
-                                Plugin.logger.LogInfo($"Added {spawnableMapObject.prefabToSpawn.name} to {name}");
-                        }
-                        else if (mapObject.outsideObject != null)
-                        {
-                            if (level.spawnableOutsideObjects.Any(x => x.spawnableObject.prefabToSpawn == mapObject.outsideObject.spawnableObject.prefabToSpawn))
-                            {
-                                var list = level.spawnableOutsideObjects.ToList();
-                                list.RemoveAll(x => x.spawnableObject.prefabToSpawn == mapObject.outsideObject.spawnableObject.prefabToSpawn);
-                                level.spawnableOutsideObjects = list.ToArray();
-                            }
-
-                            SpawnableOutsideObjectWithRarity spawnableOutsideObject = new()
-                            {
-                                spawnableObject = mapObject.outsideObject.spawnableObject
-                            };
-
-                            if (mapObject.spawnRateFunction != null)
-                            {
-                                spawnableOutsideObject.randomAmount = mapObject.spawnRateFunction(level);
-                            }
-
-                            var mapObjectsList = level.spawnableOutsideObjects.ToList();
-                            mapObjectsList.Add(spawnableOutsideObject);
-                            level.spawnableOutsideObjects = mapObjectsList.ToArray();
-
-                            if (Plugin.extendedLogging.Value)
-                                Plugin.logger.LogInfo($"Added {spawnableOutsideObject.spawnableObject.prefabToSpawn.name} to {name}");
-                        }
-                    }
-                }
+                AddMapObjectToLevel(mapObject, level);
             }
+        }
+    }
+
+    private static void AddMapObjectToLevel(RegisteredMapObject mapObject, SelectableLevel level)
+    {
+        string name = level.name;
+        string customName = Levels.Compatibility.GetLLLNameOfLevel(name);
+        Levels.LevelTypes currentLevelType = Levels.LevelTypes.None;
+        bool isCurrentLevelFromVanilla = false;
+
+        if (Enum.TryParse(name, true, out currentLevelType)) // It'd be weird if a level was called "Modded" or "All" so I think im good to not check that lol
+        {
+            isCurrentLevelFromVanilla = true;
+        }
+        else
+        {
+            name = customName;
+        }
+
+        string tagName = string.Empty;
+        bool mapObjectValidToAdd = mapObject.levels.HasFlag(Levels.LevelTypes.All)
+            || Levels.Compatibility.ContentIncludedToLevelViaTag(mapObject.spawnLevelOverrides.ToArray(), level, out tagName)
+            || (isCurrentLevelFromVanilla && mapObject.levels.HasFlag(Levels.LevelTypes.Vanilla))
+            || (!isCurrentLevelFromVanilla && mapObject.levels.HasFlag(Levels.LevelTypes.Modded))
+            || (isCurrentLevelFromVanilla && mapObject.levels.HasFlag(currentLevelType))
+            || (!isCurrentLevelFromVanilla && mapObject.spawnLevelOverrides.Contains(customName));
+
+        string mapObjectName = "invalid!";
+        if (mapObject.mapObject != null)
+        {
+            mapObjectName = mapObject.mapObject.prefabToSpawn.name;
+        }
+        else if (mapObject.outsideObject != null && mapObject.outsideObject != null)
+        {
+            mapObjectName = mapObject.outsideObject.spawnableObject.prefabToSpawn.name;
+        }
+        if (Plugin.extendedLogging.Value)
+            Plugin.logger.LogInfo($"{name} for mapObject: {mapObjectName}, isCurrentLevelFromVanilla: {isCurrentLevelFromVanilla}, Found valid: {mapObjectValidToAdd}");
+
+        if (!mapObjectValidToAdd) return;
+        if (mapObject.mapObject != null)
+        {
+            // Remove existing object if it exists
+            if (level.spawnableMapObjects.Any(x => x.prefabToSpawn == mapObject.mapObject.prefabToSpawn))
+            {
+                var list = level.spawnableMapObjects.ToList();
+                list.RemoveAll(x => x.prefabToSpawn == mapObject.mapObject.prefabToSpawn);
+                level.spawnableMapObjects = list.ToArray();
+            }
+
+            // Create a new instance so it can have its own `numberToSpawn` value
+            SpawnableMapObject spawnableMapObject = new()
+            {
+                prefabToSpawn = mapObject.mapObject.prefabToSpawn,
+                spawnFacingAwayFromWall = mapObject.mapObject.spawnFacingAwayFromWall,
+                spawnFacingWall = mapObject.mapObject.spawnFacingWall,
+                spawnWithBackToWall = mapObject.mapObject.spawnWithBackToWall,
+                spawnWithBackFlushAgainstWall = mapObject.mapObject.spawnWithBackFlushAgainstWall,
+                requireDistanceBetweenSpawns = mapObject.mapObject.requireDistanceBetweenSpawns,
+                disallowSpawningNearEntrances = mapObject.mapObject.disallowSpawningNearEntrances,
+            };
+
+            if (mapObject.spawnRateFunction != null)
+            {
+                spawnableMapObject.numberToSpawn = mapObject.spawnRateFunction(level);
+            }
+
+            var mapObjectsList = level.spawnableMapObjects.ToList();
+            mapObjectsList.Add(spawnableMapObject);
+            level.spawnableMapObjects = mapObjectsList.ToArray();
+
+            if (Plugin.extendedLogging.Value)
+                Plugin.logger.LogInfo($"Added {spawnableMapObject.prefabToSpawn.name} to {name}");
+        }
+        else if (mapObject.outsideObject != null)
+        {
+            if (level.spawnableOutsideObjects.Any(x => x.spawnableObject.prefabToSpawn == mapObject.outsideObject.spawnableObject.prefabToSpawn))
+            {
+                var list = level.spawnableOutsideObjects.ToList();
+                list.RemoveAll(x => x.spawnableObject.prefabToSpawn == mapObject.outsideObject.spawnableObject.prefabToSpawn);
+                level.spawnableOutsideObjects = list.ToArray();
+            }
+
+            SpawnableOutsideObjectWithRarity spawnableOutsideObject = new()
+            {
+                spawnableObject = mapObject.outsideObject.spawnableObject
+            };
+
+            if (mapObject.spawnRateFunction != null)
+            {
+                spawnableOutsideObject.randomAmount = mapObject.spawnRateFunction(level);
+            }
+
+            var mapObjectsList = level.spawnableOutsideObjects.ToList();
+            mapObjectsList.Add(spawnableOutsideObject);
+            level.spawnableOutsideObjects = mapObjectsList.ToArray();
+
+            if (Plugin.extendedLogging.Value)
+                Plugin.logger.LogInfo($"Added {spawnableOutsideObject.spawnableObject.prefabToSpawn.name} to {name}");
         }
     }
 
