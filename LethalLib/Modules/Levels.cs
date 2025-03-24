@@ -103,5 +103,27 @@ public class Levels
             }
             return LLLifiedCustomLevelRarities;
         }
+
+
+        internal static bool ContentIncludedToLevelViaTag(string[] potentialTags, SelectableLevel level, out string chosenTag)
+        {
+            chosenTag = string.Empty;
+            List<string> levelsCurrentTags = LethalLib.Compats.LethalLevelLoaderCompat.TryGetLLLTagsFromLevels(level);
+            foreach (string levelTag in levelsCurrentTags)
+            {
+                foreach (string potentialTag in potentialTags)
+                {
+                    string cleanedTag = potentialTag.Remove(potentialTag.Length - 5);
+                    if (levelTag == cleanedTag)
+                    {
+                        chosenTag = levelTag;
+                        if (Plugin.extendedLogging.Value)
+                            Plugin.logger.LogInfo($"Level {level.name} has valid tag {cleanedTag}");
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }

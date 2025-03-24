@@ -49,6 +49,9 @@
         <Reference Include="MMHOOK_Assembly-CSharp">
             <HintPath>$(TestProfileDir)BepInEx/plugins/MMHOOK/MMHOOK_Assembly-CSharp.dll</HintPath>
         </Reference>
+        <Reference Include="IAmBatby.LethalLevelLoader">
+            <HintPath>$(TestProfileDir)BepInEx/plugins/IAmBatby-LethalLevelLoader/LethalLevelLoader.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup Condition="$(CI) == 'true'">

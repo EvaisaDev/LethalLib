@@ -180,7 +180,7 @@ public class Enemies
 
         foreach (SelectableLevel level in StartOfRound.Instance.levels)
         {
-            if(levelsAlreadyAddedTo.Contains(level))
+            if (levelsAlreadyAddedTo.Contains(level))
                 continue;
             foreach (SpawnableEnemy spawnableEnemy in spawnableEnemies)
             {
@@ -206,10 +206,12 @@ public class Enemies
             name = customName;
         }
 
+        string tagName = string.Empty;
         bool enemyValidToAdd = spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.All)
+            || (spawnableEnemy.customLevelRarities != null && Levels.Compatibility.ContentIncludedToLevelViaTag(spawnableEnemy.customLevelRarities.Keys.ToArray(), level, out tagName))
             || (isCurrentLevelFromVanilla && spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla))
-            || (isCurrentLevelFromVanilla && spawnableEnemy.levelRarities.ContainsKey(currentLevelType))
             || (!isCurrentLevelFromVanilla && spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Modded))
+            || (isCurrentLevelFromVanilla && spawnableEnemy.levelRarities.ContainsKey(currentLevelType))
             || (!isCurrentLevelFromVanilla && spawnableEnemy.customLevelRarities != null && spawnableEnemy.customLevelRarities.ContainsKey(customName));
 
         if (Plugin.extendedLogging.Value)
@@ -223,13 +225,17 @@ public class Enemies
         {
             rarity = spawnableEnemy.levelRarities[currentLevelType];
         }
-        else if (isCurrentLevelFromVanilla && spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla))
-        {
-            rarity = spawnableEnemy.levelRarities[Levels.LevelTypes.Vanilla];
-        }
         else if (spawnableEnemy.customLevelRarities != null && spawnableEnemy.customLevelRarities.ContainsKey(name))
         {
             rarity = spawnableEnemy.customLevelRarities[name];
+        }
+        else if (spawnableEnemy.customLevelRarities != null && tagName != string.Empty && spawnableEnemy.customLevelRarities.ContainsKey(tagName))
+        {
+            rarity = spawnableEnemy.customLevelRarities[tagName];
+        }
+        else if (isCurrentLevelFromVanilla && spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla))
+        {
+            rarity = spawnableEnemy.levelRarities[Levels.LevelTypes.Vanilla];
         }
         else if (!isCurrentLevelFromVanilla && spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Modded))
         {
@@ -557,5 +563,4 @@ public class Enemies
             }
         }
     }
-
 }

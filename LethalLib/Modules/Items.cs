@@ -189,10 +189,12 @@ public class Items
             name = customName;
         }
 
+        string tagName = string.Empty;
         bool itemValidToAdd = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.All)
+            || (scrapItem.customLevelRarities != null && Levels.Compatibility.ContentIncludedToLevelViaTag(scrapItem.customLevelRarities.Keys.ToArray(), level, out tagName))
             || (isCurrentLevelFromVanilla && scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla))
-            || (isCurrentLevelFromVanilla && scrapItem.levelRarities.ContainsKey(currentLevelType))
             || (!isCurrentLevelFromVanilla && scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Modded))
+            || (isCurrentLevelFromVanilla && scrapItem.levelRarities.ContainsKey(currentLevelType))
             || (!isCurrentLevelFromVanilla && scrapItem.customLevelRarities != null && scrapItem.customLevelRarities.ContainsKey(customName));
 
         if (Plugin.extendedLogging.Value)
@@ -206,13 +208,17 @@ public class Items
         {
             rarity = scrapItem.levelRarities[currentLevelType];
         }
-        else if (isCurrentLevelFromVanilla && scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla))
-        {
-            rarity = scrapItem.levelRarities[Levels.LevelTypes.Vanilla];
-        }
         else if (scrapItem.customLevelRarities != null && scrapItem.customLevelRarities.ContainsKey(name))
         {
             rarity = scrapItem.customLevelRarities[name];
+        }
+        else if (scrapItem.customLevelRarities != null && tagName != string.Empty && scrapItem.customLevelRarities.ContainsKey(tagName))
+        {
+            rarity = scrapItem.customLevelRarities[tagName];
+        }
+        else if (isCurrentLevelFromVanilla && scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla))
+        {
+            rarity = scrapItem.levelRarities[Levels.LevelTypes.Vanilla];
         }
         else if (!isCurrentLevelFromVanilla && scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Modded))
         {
