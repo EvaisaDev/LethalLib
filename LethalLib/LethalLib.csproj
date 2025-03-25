@@ -24,7 +24,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="IAmBatby-LethalLevelLoader" Publicize="true" Version="1.4.*" />
+        <PackageReference Include="IAmBatby-LethalLevelLoader" Version="1.4.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" PrivateAssets="all" />
         <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
             <PrivateAssets>all</PrivateAssets>
