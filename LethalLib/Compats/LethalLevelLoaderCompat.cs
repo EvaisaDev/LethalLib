@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace LethalLib.Compats;
 internal static class LethalLevelLoaderCompat
 {
-    public static bool LethalLevelLoaderExists = Chainloader.PluginInfos.ContainsKey("imabatby.lethallevelloader");
+    public static bool LethalLevelLoaderExists => Chainloader.PluginInfos.ContainsKey("imabatby.lethallevelloader");
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
     public static List<string> TryGetLLLTagsFromLevels(SelectableLevel level)
