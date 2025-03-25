@@ -208,7 +208,7 @@ public class Enemies
 
         string tagName = string.Empty;
         bool enemyValidToAdd = spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.All)
-            || (spawnableEnemy.customLevelRarities != null && Levels.Compatibility.ContentIncludedToLevelViaTag(spawnableEnemy.customLevelRarities.Keys.ToArray(), level, out tagName))
+            || (spawnableEnemy.customLevelRarities != null && spawnableEnemy.customLevelRarities.Keys != null && Levels.Compatibility.ContentIncludedToLevelViaTag(spawnableEnemy.customLevelRarities.Keys.ToArray(), level, out tagName))
             || (isCurrentLevelFromVanilla && spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla))
             || (!isCurrentLevelFromVanilla && spawnableEnemy.levelRarities.ContainsKey(Levels.LevelTypes.Modded))
             || (isCurrentLevelFromVanilla && spawnableEnemy.levelRarities.ContainsKey(currentLevelType))
