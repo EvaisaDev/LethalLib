@@ -5,9 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## LethalLib [0.16.5]
+
+### Added
+- Ability for items, levels, outside and inside mapobjects to register to levels through their content tag.
+
+### Fixed
+- mapobjects maybe having the same issues that items and enemies had the previous two versions with case sensitivity and leveltype validation.
+
 ## LethalLib [0.16.4]
-- Fixed `AddEnemyToLevel` needing a `LevelType` to validate custom moon enemy rarities.
-- Fixed `AddScrapItemToLevel` having the same issue as above.
+
+### Fixed
+- `AddEnemyToLevel` needing a `LevelType` to validate custom moon enemy rarities.
+- `AddScrapItemToLevel` having the same issue as above.
 
 ## LethalLib [0.16.3]
 
