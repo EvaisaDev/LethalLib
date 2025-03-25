@@ -5,12 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## LethalLib [0.16.5]
+## LethalLib [1.0.0]
+
+> [!NOTE]
+> Despite the major version jump from 0.16.4 to 1.0.0, no major or breaking changes were made.  
+> This change was made to properly follow SemVer to show that LethalLib's public API is stable.  
 
 ### Added
-- Ability for items, levels, outside and inside mapobjects to register to levels through their content tag.
+
+- Ability for items, levels, outside and inside mapobjects to register to levels through their LethalLevelLoader content tag.
 
 ### Fixed
+
 - mapobjects maybe having the same issues that items and enemies had the previous two versions with case sensitivity and leveltype validation.
 
 ## LethalLib [0.16.4]
