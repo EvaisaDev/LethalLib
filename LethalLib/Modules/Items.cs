@@ -191,7 +191,7 @@ public class Items
 
         string tagName = string.Empty;
         bool itemValidToAdd = scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.All)
-            || (scrapItem.customLevelRarities != null && Levels.Compatibility.ContentIncludedToLevelViaTag(scrapItem.customLevelRarities.Keys.ToArray(), level, out tagName))
+            || (scrapItem.customLevelRarities != null && scrapItem.customLevelRarities.Keys != null && Levels.Compatibility.ContentIncludedToLevelViaTag(scrapItem.customLevelRarities.Keys.ToArray(), level, out tagName))
             || (isCurrentLevelFromVanilla && scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Vanilla))
             || (!isCurrentLevelFromVanilla && scrapItem.levelRarities.ContainsKey(Levels.LevelTypes.Modded))
             || (isCurrentLevelFromVanilla && scrapItem.levelRarities.ContainsKey(currentLevelType))

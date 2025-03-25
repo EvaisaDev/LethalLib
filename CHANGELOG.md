@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LethalLib NuGet package now ships with xml docs (wow!!)
 - Enabled embedded debug symbols for easier to read stacktraces for when LethalLib explodes
 
+### Fixed
+
+- Null checks to avoid errors with loading into lobby with empty MapObjects
+
 ## LethalLib [1.0.0]
 
 > [!NOTE]

@@ -118,18 +118,18 @@ public class MapObjects
 
         string tagName = string.Empty;
         bool mapObjectValidToAdd = mapObject.levels.HasFlag(Levels.LevelTypes.All)
-            || Levels.Compatibility.ContentIncludedToLevelViaTag(mapObject.spawnLevelOverrides.ToArray(), level, out tagName)
+            || (mapObject.spawnLevelOverrides != null && Levels.Compatibility.ContentIncludedToLevelViaTag(mapObject.spawnLevelOverrides, level, out tagName))
             || (isCurrentLevelFromVanilla && mapObject.levels.HasFlag(Levels.LevelTypes.Vanilla))
             || (!isCurrentLevelFromVanilla && mapObject.levels.HasFlag(Levels.LevelTypes.Modded))
             || (isCurrentLevelFromVanilla && mapObject.levels.HasFlag(currentLevelType))
-            || (!isCurrentLevelFromVanilla && mapObject.spawnLevelOverrides.Contains(customName));
+            || (!isCurrentLevelFromVanilla && mapObject.spawnLevelOverrides != null && mapObject.spawnLevelOverrides.Contains(customName));
 
         string mapObjectName = "invalid!";
         if (mapObject.mapObject != null)
         {
             mapObjectName = mapObject.mapObject.prefabToSpawn.name;
         }
-        else if (mapObject.outsideObject != null && mapObject.outsideObject != null)
+        else if (mapObject.outsideObject != null)
         {
             mapObjectName = mapObject.outsideObject.spawnableObject.prefabToSpawn.name;
         }
