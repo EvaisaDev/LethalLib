@@ -599,7 +599,6 @@ public class Items
             origItem = item;
             if (item.isScrap == false)
             {
-
                 item = item.Clone();
                 item.isScrap = true;
                 if (item.maxValue == 0 && item.minValue == 0)
@@ -635,7 +634,6 @@ public class Items
 
                 item.spawnPrefab = newPrefab;
             }
-
             this.item = item;
 
             if (customLevelRarities != null)
@@ -730,6 +728,7 @@ public class Items
         }
 
         scrapItem = new ScrapItem(spawnableItem, rarity, levelFlags);
+        ValidateItemProperties(scrapItem.item);
 
         var callingAssembly = Assembly.GetCallingAssembly();
         var modDLL = callingAssembly.GetName().Name;
@@ -767,6 +766,7 @@ public class Items
         }
 
         scrapItem = new ScrapItem(spawnableItem, rarity, levelFlags, levelOverrides);
+        ValidateItemProperties(scrapItem.item);
 
         var callingAssembly = Assembly.GetCallingAssembly();
         var modDLL = callingAssembly.GetName().Name;
@@ -805,6 +805,7 @@ public class Items
         }
 
         scrapItem = new ScrapItem(spawnableItem, levelRarities, customLevelRarities);
+        ValidateItemProperties(scrapItem.item);
 
         var callingAssembly = Assembly.GetCallingAssembly();
         var modDLL = callingAssembly.GetName().Name;
@@ -819,6 +820,8 @@ public class Items
     public static void RegisterShopItem(Item shopItem, TerminalNode buyNode1 = null, TerminalNode buyNode2 = null, TerminalNode itemInfo = null, int price = -1)
     {
         var item = new ShopItem(shopItem, buyNode1, buyNode2, itemInfo, price);
+        ValidateItemProperties(item.item);
+
         var callingAssembly = Assembly.GetCallingAssembly();
         var modDLL = callingAssembly.GetName().Name;
         item.modName = modDLL;
@@ -832,6 +835,8 @@ public class Items
     public static void RegisterShopItem(Item shopItem, int price = -1)
     {
         var item = new ShopItem(shopItem, null, null, null, price);
+        ValidateItemProperties(item.item);
+
         var callingAssembly = Assembly.GetCallingAssembly();
         var modDLL = callingAssembly.GetName().Name;
         item.modName = modDLL;
@@ -845,6 +850,8 @@ public class Items
     public static void RegisterItem(Item plainItem)
     {
         var item = new PlainItem(plainItem);
+        ValidateItemProperties(item.item);
+
         var callingAssembly = Assembly.GetCallingAssembly();
         var modDLL = callingAssembly.GetName().Name;
         item.modName = modDLL;
@@ -852,6 +859,17 @@ public class Items
         plainItems.Add(item);
     }
 
+    private static void ValidateItemProperties(Item item)
+    {
+        if (item == null)
+            return;
+
+        if (item.weight < 1 || item.weight > 4)
+        {
+            Plugin.logger.LogWarning($"Item {item.itemName} has an invalid weight of {item.weight}, resetting to weight of 1, please check the lethal.wiki for how to give an item a valid weight, anything below 1 or above 4 gets reset to 1.");
+            item.weight = 1;
+        }
+    }
     ///<summary>
     ///Removes a scrap from the given levels.
     ///This needs to be called after StartOfRound.Awake.
