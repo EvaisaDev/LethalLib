@@ -866,7 +866,7 @@ public class Items
 
         if (item.weight < 1 || item.weight > 4)
         {
-            Plugin.logger.LogWarning($"Item {item.itemName} has an invalid weight of {item.weight}, resetting to weight of 1, please check the lethal.wiki for how to give an item a valid weight, anything below 1 or above 4 gets reset to 1.");
+            Plugin.logger.LogWarning($"Item {item.itemName} has an invalid weight of {item.weight}, resetting to weight of 1, please check the lethal.wiki for the weight calculation and give it a valid number, anything below 1 or above 4 gets forced to be 1 or 4.");
             item.weight = Mathf.Clamp(item.weight, 1, 4);
         }
     }
