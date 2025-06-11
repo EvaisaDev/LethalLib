@@ -13,6 +13,7 @@ containsNsfwContent = false
 [package.dependencies]
 BepInEx-BepInExPack = "5.4.2100"
 Evaisa-HookGenPatcher = "0.0.5"
+MonoDetour-MonoDetour_BepInEx_5 = "0.6.3"
 
 [build]
 icon = "icons/lethal-lib.png"
