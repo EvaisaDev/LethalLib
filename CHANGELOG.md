@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## LethalLib [1.1.1]
 
-## Added
+### Added
 
 - MonoDetour added as a Thunderstore dependency to provide CIL analysis in stack traces when any ILHook (includes HarmonyX transpilers) manipulation target method throws on compilation. LethalLib has no real dependency on it. This change is purely made to make debugging ILHooks/transpilers easier for modders who happen to have LethalLib installed.
 
