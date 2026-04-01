@@ -69,8 +69,9 @@ public class Items
         public TerminalKeyword keyword;
     }
 
-    public static List<Item> LethalLibItemList = new List<Item>();
-    public static List<BuyableItemAssetInfo> buyableItemAssetInfos = new List<BuyableItemAssetInfo>();
+    public static List<Item> LethalLibItemList = new();
+    public static List<ItemGroup> vanillaItemGroups = new();
+    public static List<BuyableItemAssetInfo> buyableItemAssetInfos = new();
     public static Terminal terminal;
 
     private static void StartOfRound_Start(On.StartOfRound.orig_Start orig, StartOfRound self)
@@ -92,8 +93,6 @@ public class Items
                 });
             });
 
-
-
             // load itemlist from es3
             if (ES3.KeyExists("LethalLibAllItemsList", GameNetworkManager.Instance.currentSaveFileName))
             {
@@ -105,7 +104,7 @@ public class Items
             // if item is not in list, add it at the end
             List<Item> list = StartOfRound.Instance.allItemsList.itemsList;
 
-            List<Item> newList = new List<Item>();
+            List<Item> newList = new();
 
             foreach (ItemSaveOrderData item in itemList)
             {
@@ -160,11 +159,11 @@ public class Items
 
     private static void RegisterLethalLibScrapItemsForAllLevels()
     {
-
         foreach (SelectableLevel level in StartOfRound.Instance.levels)
         {
-            if(levelsAlreadyAddedTo.Contains(level))
+            if (levelsAlreadyAddedTo.Contains(level))
                 continue;
+
             foreach (ScrapItem scrapItem in scrapItems)
             {
                 AddScrapItemToLevel(scrapItem, level);
@@ -229,12 +228,7 @@ public class Items
             rarity = scrapItem.levelRarities[Levels.LevelTypes.All];
         }
 
-        var spawnableÍtemWithRarity = new SpawnableItemWithRarity()
-        {
-            spawnableItem = scrapItem.item,
-            rarity = rarity
-        };
-
+        var spawnableÍtemWithRarity = new SpawnableItemWithRarity(scrapItem.item, rarity);
         // make sure spawnableScrap does not already contain item
         //Plugin.logger.LogInfo($"Checking if {scrapItem.item.name} is already in {name}");
 
@@ -423,19 +417,11 @@ public class Items
 
             //Plugin.logger.LogInfo($"Item price: {buyNode1.itemCost}, Item index: {buyNode1.buyItemIndex}");
 
-            buyNode1.terminalOptions = new CompatibleNoun[2]
-            {
-                new CompatibleNoun()
-                {
-                    noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "confirm"),
-                    result = buyNode2
-                },
-                new CompatibleNoun()
-                {
-                    noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "deny"),
-                    result = cancelPurchaseNode
-                }
-            };
+            buyNode1.terminalOptions =
+            [
+                new CompatibleNoun(self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "confirm"), buyNode2),
+                new CompatibleNoun(self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "deny"), cancelPurchaseNode)
+            ];
 
             var keyword = TerminalUtils.CreateTerminalKeyword(itemName.ToLowerInvariant().Replace(" ", "-"), defaultVerb: buyKeyword);
 
@@ -447,11 +433,7 @@ public class Items
             self.terminalNodes.allKeywords = allKeywords.ToArray();
 
             var nouns = buyKeyword.compatibleNouns.ToList();
-            nouns.Add(new CompatibleNoun()
-            {
-                noun = keyword,
-                result = buyNode1
-            });
+            nouns.Add(new CompatibleNoun(keyword, buyNode1));
             buyKeyword.compatibleNouns = nouns.ToArray();
 
 
@@ -470,11 +452,7 @@ public class Items
             self.terminalNodes.allKeywords = allKeywords.ToArray();
 
             var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
-            itemInfoNouns.Add(new CompatibleNoun()
-            {
-                noun = keyword,
-                result = itemInfo
-            });
+            itemInfoNouns.Add(new CompatibleNoun(keyword, itemInfo));
             infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
 
             BuyableItemAssetInfo buyableItemAssetInfo = new BuyableItemAssetInfo()
@@ -530,74 +508,7 @@ public class Items
         public ScrapItem(Item item, int rarity, Levels.LevelTypes spawnLevels = Levels.LevelTypes.None, string[] spawnLevelOverrides = null)
         {
             origItem = item;
-            if (item.isScrap == false)
-            {
-    
-                item = item.Clone();
-                item.isScrap = true;
-                if(item.maxValue == 0 && item.minValue == 0)
-                {
-                    item.minValue = 40;
-                    item.maxValue = 100;
-                }
-                else if(item.maxValue == 0)
-                {
-                    item.maxValue = item.minValue * 2;
-                }
-                else if(item.minValue == 0)
-                {
-                    item.minValue = item.maxValue / 2;
-                }
-
-                var newPrefab = NetworkPrefabs.CloneNetworkPrefab(item.spawnPrefab);
-
-                if(newPrefab.GetComponent<GrabbableObject>() != null)
-                {
-                    newPrefab.GetComponent<GrabbableObject>().itemProperties = item;
-                }
-
-                if(newPrefab.GetComponentInChildren<ScanNodeProperties>() == null)
-                {
-                    // add scan node
-                    var scanNode = Object.Instantiate(scanNodePrefab, newPrefab.transform);
-                    scanNode.name = "ScanNode";
-                    scanNode.transform.localPosition = new Vector3(0, 0, 0);
-                    var properties = scanNode.GetComponent<ScanNodeProperties>();
-                    properties.headerText = item.itemName;
-                }
-
-                item.spawnPrefab = newPrefab;
-            }
-            this.item = item;
-            /*this.rarity = rarity;
-            this.spawnLevels = spawnLevels;
-            this.spawnLevelOverrides = spawnLevelOverrides;*/
-
-
-            if (spawnLevelOverrides != null)
-            {
-                foreach (var level in spawnLevelOverrides)
-                {
-                    customLevelRarities.Add(Levels.Compatibility.GetLLLNameOfLevel(level), rarity);
-                }
-            }
-
-            if (spawnLevels != Levels.LevelTypes.None)
-            {
-                foreach (Levels.LevelTypes level in Enum.GetValues(typeof(Levels.LevelTypes)))
-                {
-                    if (spawnLevels.HasFlag(level))
-                    {
-                        levelRarities.Add(level, rarity);
-                    }
-                }
-            }
-        }
-
-        public ScrapItem(Item item, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null)
-        {
-            origItem = item;
-            if (item.isScrap == false)
+            if (!item.isScrap)
             {
                 item = item.Clone();
                 item.isScrap = true;
@@ -634,6 +545,78 @@ public class Items
 
                 item.spawnPrefab = newPrefab;
             }
+            ReplaceInvalidReferences(item);
+            this.item = item;
+
+            /*this.rarity = rarity;
+            this.spawnLevels = spawnLevels;
+            this.spawnLevelOverrides = spawnLevelOverrides;*/
+
+
+            if (spawnLevelOverrides != null)
+            {
+                foreach (var level in spawnLevelOverrides)
+                {
+                    customLevelRarities.Add(Levels.Compatibility.GetLLLNameOfLevel(level), rarity);
+                }
+            }
+
+            if (spawnLevels == Levels.LevelTypes.None)
+            {
+                return;
+            }
+
+            foreach (Levels.LevelTypes level in Enum.GetValues(typeof(Levels.LevelTypes)))
+            {
+                if (!spawnLevels.HasFlag(level))
+                {
+                    continue;
+                }
+                levelRarities.Add(level, rarity);
+            }
+        }
+
+        public ScrapItem(Item item, Dictionary<Levels.LevelTypes, int>? levelRarities = null, Dictionary<string, int>? customLevelRarities = null)
+        {
+            origItem = item;
+            if (!item.isScrap)
+            {
+                item = item.Clone();
+                item.isScrap = true;
+                if (item.maxValue == 0 && item.minValue == 0)
+                {
+                    item.minValue = 40;
+                    item.maxValue = 100;
+                }
+                else if (item.maxValue == 0)
+                {
+                    item.maxValue = item.minValue * 2;
+                }
+                else if (item.minValue == 0)
+                {
+                    item.minValue = item.maxValue / 2;
+                }
+
+                var newPrefab = NetworkPrefabs.CloneNetworkPrefab(item.spawnPrefab);
+
+                if (newPrefab.GetComponent<GrabbableObject>() != null)
+                {
+                    newPrefab.GetComponent<GrabbableObject>().itemProperties = item;
+                }
+
+                if (newPrefab.GetComponentInChildren<ScanNodeProperties>() == null)
+                {
+                    // add scan node
+                    var scanNode = Object.Instantiate(scanNodePrefab, newPrefab.transform);
+                    scanNode.name = "ScanNode";
+                    scanNode.transform.localPosition = new Vector3(0, 0, 0);
+                    var properties = scanNode.GetComponent<ScanNodeProperties>();
+                    properties.headerText = item.itemName;
+                }
+
+                item.spawnPrefab = newPrefab;
+            }
+            ReplaceInvalidReferences(item);
             this.item = item;
 
             if (customLevelRarities != null)
@@ -864,11 +847,29 @@ public class Items
         if (item == null)
             return;
 
-        if (item.weight < 1 || item.weight > 4)
+        if (item.weight < 1 || item.weight > 3.75)
         {
             Plugin.logger.LogWarning($"Item {item.itemName} has an invalid weight of {item.weight}, resetting to weight of 1, please check the lethal.wiki for the weight calculation and give it a valid number, anything below 1 or above 4 gets forced to be 1 or 4.");
-            item.weight = Mathf.Clamp(item.weight, 1, 4);
+            item.weight = Mathf.Clamp(item.weight, 1, 3.75f);
         }
+    }
+
+    private static void ReplaceInvalidReferences(Item item)
+    {
+        List<ItemGroup> replacementGroups = new();
+        foreach (var itemGroup in item.spawnPositionTypes)
+        {
+            if (itemGroup == null)
+                continue;
+
+            var replacementVanillaItemGroup = vanillaItemGroups.Where(x => x != null && x.name == itemGroup.name).FirstOrDefault();
+            if (replacementVanillaItemGroup == null)
+                continue;
+
+            replacementGroups.Add(replacementVanillaItemGroup);
+        }
+
+        item.spawnPositionTypes = replacementGroups;
     }
     ///<summary>
     ///Removes a scrap from the given levels.
@@ -876,44 +877,49 @@ public class Items
     /// </summary>
     public static void RemoveScrapFromLevels(Item scrapItem, Levels.LevelTypes levelFlags = Levels.LevelTypes.None, string[] levelOverrides = null)
     {
-        if (StartOfRound.Instance != null)
+        if (StartOfRound.Instance == null)
         {
-            foreach (SelectableLevel level in StartOfRound.Instance.levels)
+            return;
+        }
+
+        foreach (SelectableLevel level in StartOfRound.Instance.levels)
+        {
+            var name = level.name;
+
+            if (!Enum.IsDefined(typeof(Levels.LevelTypes), name))
+                name = Levels.Compatibility.GetLLLNameOfLevel(name);
+
+            var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => Levels.Compatibility.GetLLLNameOfLevel(item).ToLowerInvariant() == name.ToLowerInvariant()));
+            var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
+
+            if (isModded)
             {
-                var name = level.name;
-
-                if(!Enum.IsDefined(typeof(Levels.LevelTypes), name))
-                    name = Levels.Compatibility.GetLLLNameOfLevel(name);
-
-                var alwaysValid = levelFlags.HasFlag(Levels.LevelTypes.All) || (levelOverrides != null && levelOverrides.Any(item => Levels.Compatibility.GetLLLNameOfLevel(item).ToLowerInvariant() == name.ToLowerInvariant()));
-                var isModded = levelFlags.HasFlag(Levels.LevelTypes.Modded) && !Enum.IsDefined(typeof(Levels.LevelTypes), name);
-
-                if (isModded)
-                {
-                    alwaysValid = true;
-                }
-
-                if (Enum.IsDefined(typeof(Levels.LevelTypes), name) || alwaysValid)
-                {
-                    var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
-                    if (alwaysValid || levelFlags.HasFlag(levelEnum))
-                    {
-                        // find item in scrapItems
-                        var actualItem = scrapItems.FirstOrDefault(x => x.origItem == scrapItem || x.item == scrapItem);
-
-                        var spawnableItemWithRarity = level.spawnableScrap.FirstOrDefault(x => x.spawnableItem == actualItem.item);
-
-                        if (spawnableItemWithRarity != null)
-                        {
-                            if (Plugin.extendedLogging.Value)
-                                Plugin.logger.LogInfo("Removed Item " + spawnableItemWithRarity.spawnableItem.name + " from Level " + name);
-
-                            level.spawnableScrap.Remove(spawnableItemWithRarity);
-                        }
-
-                    }
-                }
+                alwaysValid = true;
             }
+
+            if (!Enum.IsDefined(typeof(Levels.LevelTypes), name) && !alwaysValid)
+            {
+                continue;
+            }
+
+            var levelEnum = alwaysValid ? Levels.LevelTypes.All : (Levels.LevelTypes)Enum.Parse(typeof(Levels.LevelTypes), name);
+            if (!alwaysValid && !levelFlags.HasFlag(levelEnum))
+            {
+                continue;
+            }
+
+            // find item in scrapItems
+            var actualItem = scrapItems.FirstOrDefault(x => x.origItem == scrapItem || x.item == scrapItem);
+            var spawnableItemWithRarity = level.spawnableScrap.FirstOrDefault(x => x.spawnableItem == actualItem.item);
+            if (spawnableItemWithRarity == null)
+            {
+                continue;
+            }
+
+            if (Plugin.extendedLogging.Value)
+                Plugin.logger.LogInfo("Removed Item " + spawnableItemWithRarity.spawnableItem.name + " from Level " + name);
+
+            level.spawnableScrap.Remove(spawnableItemWithRarity);
         }
     }
 

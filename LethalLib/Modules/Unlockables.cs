@@ -213,19 +213,11 @@ public class Unlockables
             buyNode1.isConfirmationNode = true;
             buyNode1.overrideOptions = true;
             buyNode1.itemCost = item.price;
-            buyNode1.terminalOptions = new CompatibleNoun[2]
-            {
-                new CompatibleNoun()
-                {
-                    noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "confirm"),
-                    result = buyNode2
-                },
-                new CompatibleNoun()
-                {
-                    noun = self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "deny"),
-                    result = cancelPurchaseNode
-                }
-            };
+            buyNode1.terminalOptions =
+            [
+                new CompatibleNoun(self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "confirm"), buyNode2),
+                new CompatibleNoun(self.terminalNodes.allKeywords.First(keyword2 => keyword2.word == "deny"), cancelPurchaseNode)
+            ];
 
             if (item.StoreType == StoreType.Decor)
             {
@@ -242,11 +234,7 @@ public class Unlockables
             self.terminalNodes.allKeywords = allKeywords.ToArray();
 
             var nouns = buyKeyword.compatibleNouns.ToList();
-            nouns.Add(new CompatibleNoun()
-            {
-                noun = keyword,
-                result = buyNode1
-            });
+            nouns.Add(new CompatibleNoun(keyword, buyNode1));
             buyKeyword.compatibleNouns = nouns.ToArray();
 
 
@@ -263,11 +251,7 @@ public class Unlockables
             self.terminalNodes.allKeywords = allKeywords.ToArray();
 
             var itemInfoNouns = infoKeyword.compatibleNouns.ToList();
-            itemInfoNouns.Add(new CompatibleNoun()
-            {
-                noun = keyword,
-                result = itemInfo
-            });
+            itemInfoNouns.Add(new CompatibleNoun(keyword, itemInfo));
             infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
 
             var buyableItemAssetInfo = new BuyableUnlockableAssetInfo()

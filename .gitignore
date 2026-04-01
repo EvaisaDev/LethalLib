@@ -35,6 +35,7 @@
 
 ### LethalLib project
 !/LethalLib
+!deps
 LethalLib/[Bb]in
 LethalLib/[Oo]bj
 LethalLib/[Dd]ist

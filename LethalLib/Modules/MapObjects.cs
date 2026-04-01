@@ -12,7 +12,7 @@ namespace LethalLib.Modules;
 
 public class MapObjects
 {
-    public static void Init()
+    internal static void Init()
     {
         On.StartOfRound.Awake += StartOfRound_Awake;
         On.RoundManager.SpawnMapObjects += RoundManager_SpawnMapObjects;
@@ -26,11 +26,11 @@ public class MapObjects
         {
             foreach (RegisteredMapObject mapObject in mapObjects)
             {
-                if (mapObject.mapObject != null)
+                if (mapObject.indoorMapHazardType != null)
                 {
-                    if (!randomMapObject.spawnablePrefabs.Any((prefab) => prefab == mapObject.mapObject.prefabToSpawn))
+                    if (!randomMapObject.spawnablePrefabs.Any((prefab) => prefab == mapObject.indoorMapHazardType.prefabToSpawn))
                     {
-                        randomMapObject.spawnablePrefabs.Add(mapObject.mapObject.prefabToSpawn);
+                        randomMapObject.spawnablePrefabs.Add(mapObject.indoorMapHazardType.prefabToSpawn);
                     }
                 }
             }
@@ -125,9 +125,9 @@ public class MapObjects
             || (!isCurrentLevelFromVanilla && mapObject.spawnLevelOverrides != null && mapObject.spawnLevelOverrides.Contains(customName));
 
         string mapObjectName = "invalid!";
-        if (mapObject.mapObject != null)
+        if (mapObject.indoorMapHazardType != null)
         {
-            mapObjectName = mapObject.mapObject.prefabToSpawn.name;
+            mapObjectName = mapObject.indoorMapHazardType.prefabToSpawn.name;
         }
         else if (mapObject.outsideObject != null)
         {
@@ -137,39 +137,34 @@ public class MapObjects
             Plugin.logger.LogInfo($"{name} for mapObject: {mapObjectName}, isCurrentLevelFromVanilla: {isCurrentLevelFromVanilla}, Found valid: {mapObjectValidToAdd}");
 
         if (!mapObjectValidToAdd) return;
-        if (mapObject.mapObject != null)
+        if (mapObject.indoorMapHazardType != null)
         {
             // Remove existing object if it exists
-            if (level.spawnableMapObjects.Any(x => x.prefabToSpawn == mapObject.mapObject.prefabToSpawn))
+            if (level.indoorMapHazards.Any(x => x.hazardType.prefabToSpawn == mapObject.indoorMapHazardType.prefabToSpawn))
             {
-                var list = level.spawnableMapObjects.ToList();
-                list.RemoveAll(x => x.prefabToSpawn == mapObject.mapObject.prefabToSpawn);
-                level.spawnableMapObjects = list.ToArray();
+                var list = level.indoorMapHazards.ToList();
+                list.RemoveAll(x => x.hazardType.prefabToSpawn == mapObject.indoorMapHazardType.prefabToSpawn);
+                level.indoorMapHazards = list.ToArray();
             }
 
             // Create a new instance so it can have its own `numberToSpawn` value
-            SpawnableMapObject spawnableMapObject = new()
+            IndoorMapHazard indoorMapHazard = new()
             {
-                prefabToSpawn = mapObject.mapObject.prefabToSpawn,
-                spawnFacingAwayFromWall = mapObject.mapObject.spawnFacingAwayFromWall,
-                spawnFacingWall = mapObject.mapObject.spawnFacingWall,
-                spawnWithBackToWall = mapObject.mapObject.spawnWithBackToWall,
-                spawnWithBackFlushAgainstWall = mapObject.mapObject.spawnWithBackFlushAgainstWall,
-                requireDistanceBetweenSpawns = mapObject.mapObject.requireDistanceBetweenSpawns,
-                disallowSpawningNearEntrances = mapObject.mapObject.disallowSpawningNearEntrances,
+                hazardType = mapObject.indoorMapHazardType,
+                numberToSpawn = AnimationCurve.Constant(0f, 1f, 0f),
             };
 
             if (mapObject.spawnRateFunction != null)
             {
-                spawnableMapObject.numberToSpawn = mapObject.spawnRateFunction(level);
+                indoorMapHazard.numberToSpawn = mapObject.spawnRateFunction(level);
             }
 
-            var mapObjectsList = level.spawnableMapObjects.ToList();
-            mapObjectsList.Add(spawnableMapObject);
-            level.spawnableMapObjects = mapObjectsList.ToArray();
+            var indoorMapHazardsList = level.indoorMapHazards.ToList();
+            indoorMapHazardsList.Add(indoorMapHazard);
+            level.indoorMapHazards = indoorMapHazardsList.ToArray();
 
             if (Plugin.extendedLogging.Value)
-                Plugin.logger.LogInfo($"Added {spawnableMapObject.prefabToSpawn.name} to {name}");
+                Plugin.logger.LogInfo($"Added {indoorMapHazard.hazardType.prefabToSpawn.name} to {name}");
         }
         else if (mapObject.outsideObject != null)
         {
@@ -180,7 +175,7 @@ public class MapObjects
                 level.spawnableOutsideObjects = list.ToArray();
             }
 
-            SpawnableOutsideObjectWithRarity spawnableOutsideObject = new()
+            SpawnableOutsideObjectWithRarity spawnableOutsideObject = new(mapObject.outsideObject.spawnableObject, AnimationCurve.Constant(0f, 1f, 0f))
             {
                 spawnableObject = mapObject.outsideObject.spawnableObject
             };
@@ -201,7 +196,10 @@ public class MapObjects
 
     public class RegisteredMapObject
     {
+        [Obsolete("Use IndoorMapHazardType instead")]
         public SpawnableMapObject mapObject;
+
+        public IndoorMapHazardType indoorMapHazardType;
         public SpawnableOutsideObjectWithRarity outsideObject;
         public Levels.LevelTypes levels;
         public string[] spawnLevelOverrides;
@@ -235,6 +233,7 @@ public class MapObjects
         mapObjects.Add(new RegisteredMapObject
         {
             mapObject = mapObject,
+            indoorMapHazardType = TurnMapObjectIntoIndoorMapHazard(mapObject),
             levels = levels,
             spawnRateFunction = spawnRateFunction
         });
@@ -248,6 +247,7 @@ public class MapObjects
         mapObjects.Add(new RegisteredMapObject
         {
             mapObject = mapObject,
+            indoorMapHazardType = TurnMapObjectIntoIndoorMapHazard(mapObject),
             levels = levels,
             spawnRateFunction = spawnRateFunction,
             spawnLevelOverrides = levelOverrides
@@ -329,7 +329,7 @@ public class MapObjects
                     if (alwaysValid || levelFlags.HasFlag(levelEnum))
                     {
 
-                        level.spawnableMapObjects = level.spawnableMapObjects.Where(x => x.prefabToSpawn != mapObject.prefabToSpawn).ToArray();
+                        level.indoorMapHazards = level.indoorMapHazards.Where(x => x.hazardType.prefabToSpawn != mapObject.prefabToSpawn).ToArray();
                     }
                 }
             }
@@ -344,6 +344,19 @@ public class MapObjects
         RemoveOutsideObject(mapObject.spawnableMapObject, levelFlags, levelOverrides);
     }
 
+    internal static IndoorMapHazardType TurnMapObjectIntoIndoorMapHazard(SpawnableMapObject mapObject)
+    {
+        IndoorMapHazardType indoorMapHazardType = ScriptableObject.CreateInstance<IndoorMapHazardType>();
+        indoorMapHazardType.prefabToSpawn = mapObject.prefabToSpawn;
+        indoorMapHazardType.requireDistanceBetweenSpawns = mapObject.requireDistanceBetweenSpawns;
+        indoorMapHazardType.disallowSpawningNearEntrances = mapObject.disallowSpawningNearEntrances;
+        indoorMapHazardType.spawnFacingAwayFromWall = mapObject.spawnFacingAwayFromWall;
+        indoorMapHazardType.spawnWithBackToWall = mapObject.spawnWithBackToWall;
+        indoorMapHazardType.spawnWithBackFlushAgainstWall = mapObject.spawnWithBackFlushAgainstWall;
+        indoorMapHazardType.spawnFacingWall = mapObject.spawnFacingWall;
+
+        return indoorMapHazardType;
+    }
     /// <summary>
     /// Remove a outside map object from a level
     /// </summary>

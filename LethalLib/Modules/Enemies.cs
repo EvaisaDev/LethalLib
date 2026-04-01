@@ -35,11 +35,7 @@ public class Enemies
         foreach (SpawnableEnemy spawnableEnemy in spawnableEnemies)
         {
             if (inside.All(x => x.enemyType == spawnableEnemy.enemy)) continue;
-            SpawnableEnemyWithRarity spawnableEnemyWithRarity = new SpawnableEnemyWithRarity
-            {
-                enemyType = spawnableEnemy.enemy,
-                rarity = spawnableEnemy.rarity
-            };
+            SpawnableEnemyWithRarity spawnableEnemyWithRarity = new SpawnableEnemyWithRarity(spawnableEnemy.enemy, spawnableEnemy.rarity);
             switch (spawnableEnemy.spawnType)
             {
                 case SpawnType.Default:
@@ -118,11 +114,7 @@ public class Enemies
             // if doesn't contain noun, add it
             if (!itemInfoNouns.Any(x => x.noun.word == keyword.word))
             {
-                itemInfoNouns.Add(new CompatibleNoun()
-                {
-                    noun = keyword,
-                    result = spawnableEnemy.terminalNode
-                });
+                itemInfoNouns.Add(new CompatibleNoun(keyword, spawnableEnemy.terminalNode));
             }
             infoKeyword.compatibleNouns = itemInfoNouns.ToArray();
      
@@ -246,11 +238,7 @@ public class Enemies
             rarity = spawnableEnemy.levelRarities[Levels.LevelTypes.All];
         }
 
-        var spawnableEnemyWithRarity = new SpawnableEnemyWithRarity()
-        {
-            enemyType = spawnableEnemy.enemy,
-            rarity = rarity
-        };
+        var spawnableEnemyWithRarity = new SpawnableEnemyWithRarity(spawnableEnemy.enemy, rarity);
 
         // make sure spawnableScrap does not already contain item
         //Plugin.logger.LogInfo($"Checking if {spawnableEnemy.enemy.name} is already in {name}");

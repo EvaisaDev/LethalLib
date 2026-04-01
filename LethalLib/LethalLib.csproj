@@ -39,7 +39,8 @@
     <!-- Runtime dependencies -->
     <ItemGroup>
         <PackageReference Include="BepInEx.Core" Version="5.4.21" />
-        <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" PrivateAssets="all"/>
+        <PackageReference Include="UnityEngine.Modules" Version="2022.3.62" PrivateAssets="all"/>
+        <!-- 
         <Reference Include="Assembly-CSharp">
             <HintPath>$(LethalCompanyDir)Lethal Company_Data/Managed/Assembly-CSharp.dll</HintPath>
         </Reference>
@@ -52,13 +53,41 @@
         <Reference Include="Unity.Netcode.Runtime" Publicize="true">
             <HintPath>$(LethalCompanyDir)Lethal Company_Data/Managed/Unity.Netcode.Runtime.dll</HintPath>
         </Reference>
+        <Reference Include="DunGen" Publicize="true">
+            <HintPath>$(LethalCompanyDir)Lethal Company_Data/Managed/DunGen.dll</HintPath>
+        </Reference>
         <Reference Include="MMHOOK_Assembly-CSharp">
             <HintPath>$(TestProfileDir)BepInEx/plugins/MMHOOK/MMHOOK_Assembly-CSharp.dll</HintPath>
-        </Reference>
+        </Reference> -->
+
+      <Reference Include="Assembly-CSharp.dll">
+        <PrivateAssets>all</PrivateAssets>
+        <Publicize>true</Publicize>
+        <HintPath>..\deps\Assembly-CSharp.dll</HintPath>
+      </Reference>
+      <Reference Include="Unity.Netcode.Runtime.dll" Publicize="true">
+        <PrivateAssets>all</PrivateAssets>
+        <HintPath>..\deps\Unity.Netcode.Runtime.dll</HintPath>
+      </Reference>
+      <Reference Include="DunGen.dll" Publicize="true">
+        <PrivateAssets>all</PrivateAssets>
+        <HintPath>..\deps\DunGen.dll</HintPath>
+      </Reference>
+      <Reference Include="Unity.InputSystem.dll" Publicize="true">
+        <PrivateAssets>all</PrivateAssets>
+        <HintPath>..\deps\Unity.InputSystem.dll</HintPath>
+      </Reference>
+      <Reference Include="Assembly-CSharp-firstpass.dll" Publicize="true">
+        <PrivateAssets>all</PrivateAssets>
+        <HintPath>..\deps\Assembly-CSharp-firstpass.dll</HintPath>
+      </Reference>
+      <Reference Include="MMHOOK_Assembly-CSharp">
+        <PrivateAssets>all</PrivateAssets>
+        <HintPath>..\deps\MMHOOK_Assembly-CSharp.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
     <ItemGroup Condition="$(CI) == 'true'">
-        <PackageReference Include="LethalCompany.GameLibs.Steam" Version="70.0.0-ngd.0" Publicize="true" PrivateAssets="all" />
         <Reference Include="MMHOOK_Assembly-CSharp">
             <HintPath>$(ProjectDir)../lib/MMHOOK_Assembly-CSharp.dll</HintPath>
         </Reference>
